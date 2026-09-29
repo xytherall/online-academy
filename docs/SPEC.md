@@ -444,7 +444,7 @@ All fields are nullable.
 ### Architecture
 - One Next.js app with three areas: public, `/student`, `/admin`.
 - Reads happen in Server Components. Mutations happen in Server Actions, each re-checking the user's role on the server.
-- Middleware refreshes the session and redirects by login state and role. This is for convenience; real enforcement is the server checks plus RLS.
+- The proxy (`src/proxy.ts` — Next.js 16 renamed the `middleware.ts` convention to `proxy.ts`) refreshes the session and redirects by login state. Role-based redirects need the profile row, so they happen in server code (layouts and helpers). This is all for convenience; real enforcement is the server checks plus RLS.
 - The Supabase **secret key** is used only in server-only code, for admin operations such as creating auth users, and only after verifying the caller is an admin. It is never exposed to the browser.
 - All secrets live in `.env.local`, which is never committed. `.env.example` lists the variable names with no values.
 - Database schema changes are made through SQL migration files kept in the repo.
@@ -503,12 +503,12 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] Git repository initialized; `.gitignore` covers env files
 
 ### Stage 2 — Auth & roles
-- [ ] Database: `profiles` table, role enum, RLS helper functions (e.g. `is_admin()`)
-- [ ] Login / logout
-- [ ] Middleware: session refresh + role-based redirects
-- [ ] Forced password change (`must_change_password`)
-- [ ] Deactivated users blocked
-- [ ] First admin account created (documented one-time procedure)
+- [x] Database: `profiles` table, role enum, RLS helper functions (e.g. `is_admin()`)
+- [x] Login / logout
+- [x] Proxy (`src/proxy.ts`): session refresh + role-based redirects
+- [x] Forced password change (`must_change_password`)
+- [x] Deactivated users blocked
+- [ ] First admin account created (documented one-time procedure) — procedure written and verified in `docs/ADMIN-SETUP.md`; the owner's real admin account is still to be created
 
 ### Stage 3 — Settings & courses
 - [ ] `site_settings` + admin Settings page (including logo upload)
@@ -569,8 +569,15 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-29 | Hosting on Netlify free tier (Vercel free tier disallows commercial use) |
 | 2026-09-29 | No email in v1; admin sets temp passwords, forced change on first login |
 | 2026-09-29 | Students may replace a submission until it is marked *(default chosen during spec writing — owner to confirm)* |
+| 2026-09-29 | Next.js 16 deprecates `middleware.ts` in favour of `proxy.ts`; session refresh lives in `src/proxy.ts`, role checks in server code |
+| 2026-09-29 | Students have no UPDATE policy on `profiles` at all; `must_change_password` is cleared by the `complete_password_change()` SECURITY DEFINER function, not by the secret key |
+| 2026-09-29 | `profiles.full_name`, `phone` and `country` are nullable in the database (a dashboard-created user has no name yet); required-ness is enforced in the forms that collect them |
+| 2026-09-29 | Supabase CLI pinned as a devDependency; migrations live in `supabase/migrations`, applied with `npm run db:push`, types generated with `npm run db:types` |
 
 ## 16. Known issues / open items
 
 - Resubmission-until-marked rule to be confirmed by owner.
+- `complete_password_change()` is granted to `authenticated`, so a student could in principle call it directly to clear their own `must_change_password` flag without actually changing their password. This is self-inflicted only — it grants no access to anyone else's data and no privilege escalation — and an admin can set the flag again. Closing it completely would mean using the secret key for a non-admin operation, which SPEC §11 and CLAUDE.md currently forbid.
+- Test accounts (`testadmin@gmail.com`, `teststudent@gmail.com`, `teststudent2@gmail.com`) exist in the Supabase project and should be deleted before launch.
+- `next dev` appends a `nextjs-agent-rules` block to `CLAUDE.md` automatically (see `node_modules/next/dist/server/lib/generate-agent-files.js`). It is re-created if removed.
 - Video hosting approach for future recordings to be decided when recording starts. Unlisted YouTube links can be shared outside the portal.

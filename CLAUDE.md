@@ -85,4 +85,21 @@ npm run dev         # start dev server
 npm run lint        # lint
 npm run typecheck   # TypeScript check
 npm run build       # production build
+
+npm run db:push     # apply supabase/migrations to the linked project
+npm run db:types    # regenerate src/lib/supabase/database.types.ts
 ```
+
+`db:push` and `db:types` need the Supabase CLI to be logged in and linked
+(`npx supabase login`, `npx supabase link --project-ref <ref>`). Both need a real
+terminal, not a non-interactive shell. Run `db:types` after every migration.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
