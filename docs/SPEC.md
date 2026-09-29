@@ -445,7 +445,7 @@ All fields are nullable.
 - One Next.js app with three areas: public, `/student`, `/admin`.
 - Reads happen in Server Components. Mutations happen in Server Actions, each re-checking the user's role on the server.
 - Middleware refreshes the session and redirects by login state and role. This is for convenience; real enforcement is the server checks plus RLS.
-- The Supabase **service role key** is used only in server-only code, for admin operations such as creating auth users, and only after verifying the caller is an admin. It is never exposed to the browser.
+- The Supabase **secret key** is used only in server-only code, for admin operations such as creating auth users, and only after verifying the caller is an admin. It is never exposed to the browser.
 - All secrets live in `.env.local`, which is never committed. `.env.example` lists the variable names with no values.
 - Database schema changes are made through SQL migration files kept in the repo.
 
@@ -495,12 +495,12 @@ Future options, only if the academy asks:
 Each stage ends with the feature working and tested, and lint, type-check and build all passing. Tick items here as they are completed.
 
 ### Stage 1 — Project setup
-- [ ] Next.js + TypeScript + Tailwind + shadcn/ui initialized
-- [ ] ESLint and type-check scripts working
-- [ ] Theme tokens (neutral palette, one brand colour variable)
-- [ ] Base layouts: public, student, admin (shells only, no fake content)
-- [ ] Supabase project created and connected; `.env.example` added
-- [ ] Git repository initialized; `.gitignore` covers env files
+- [x] Next.js + TypeScript + Tailwind + shadcn/ui initialized
+- [x] ESLint and type-check scripts working
+- [x] Theme tokens (neutral palette, one brand colour variable)
+- [x] Base layouts: public, student, admin (shells only, no fake content)
+- [x] Supabase project created and connected; `.env.example` added
+- [x] Git repository initialized; `.gitignore` covers env files
 
 ### Stage 2 — Auth & roles
 - [ ] Database: `profiles` table, role enum, RLS helper functions (e.g. `is_admin()`)

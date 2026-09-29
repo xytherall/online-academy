@@ -54,7 +54,7 @@ Rules:
   - checks the role and active status;
   - validates input with Zod.
 - Values that must not be trusted from the client are computed on the server: `is_late`, `role`, `student_id` on submissions, marks, and `counts_toward_report` for students.
-- The Supabase **service role key** is used only in server-only modules (`import "server-only"`), only after confirming the caller is an admin, and is never sent to the browser.
+- The Supabase **secret key** is used only in server-only modules (`import "server-only"`), only after confirming the caller is an admin, and is never sent to the browser.
 - Secrets live only in `.env.local`, which is never committed. Keep `.env.example` updated with variable names only.
 - Private files are served only through short-lived signed URLs.
 - Never put personal data in URLs or query strings.
@@ -80,11 +80,9 @@ Rules:
 
 ## Commands
 
-The following commands are to be filled in once Stage 1 is set up. Keep them accurate.
-
 ```bash
-# npm run dev         # start dev server
-# npm run lint        # lint
-# npm run typecheck   # TypeScript check
-# npm run build       # production build
+npm run dev         # start dev server
+npm run lint        # lint
+npm run typecheck   # TypeScript check
+npm run build       # production build
 ```
