@@ -523,9 +523,9 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] Remarks per enrollment
 
 ### Stage 5 — Student portal basics
-- [ ] Student dashboard (real data + empty states)
-- [ ] My Courses and course page with resources
-- [ ] Account page + change password
+- [x] Student dashboard (real data + empty states)
+- [x] My Courses and course page with resources
+- [x] Account page + change password
 
 ### Stage 6 — Assessments & marking
 - [ ] `assessments` CRUD (assignment/test, optional batch target, attachment)
@@ -588,6 +588,10 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-29 | Every Server Action that mutates a profile by id (batch reassignment, deactivate/reactivate, password reset, enrollments, remarks) re-verifies server-side that the target row exists and has `role = 'student'` via a shared `getStudentProfile` helper (`src/lib/students.ts`), so none of them can be pointed at an admin account |
 | 2026-09-29 | `batches` and `enrollments` follow the same RLS/grant pattern as Stage 3's `courses`/`resources` (`revoke all` then explicit re-`grant` to `authenticated` before policies): admins get full CRUD, students get read-only access to their own batch and their own enrollment rows, with no write policies at all for students. Verified directly against the REST API using a real student session: reads are correctly scoped, and insert/update/delete on `batches`, `enrollments` and `profiles` all affect zero rows |
 | 2026-09-29 | `enrollments.course_id` uses `on delete restrict`, matching and extending the existing "course can only be deleted once empty" rule; `deleteCourse` in `src/app/admin/courses/actions.ts` now also pre-checks enrollments, not just resources (closes the gap noted in the former §16 item) |
+| 2026-09-29 | Stage 5: an enrolled student can see a course even if it is unpublished — `is_published` only controls visibility on the public site. This required an explicit enrollment check (query `enrollments`, not just `courses`) on the course detail page and the resource signed-URL route, because the existing "anyone can read a published course" policy would otherwise let a signed-in student read a *published* course's row (though not its resources or files) without being enrolled in it |
+| 2026-09-29 | Stage 5: enrolled-course/resource lists (`/student`, `/student/courses`) are fetched by querying the student's own `enrollments` joined to `courses`, not by querying `courses` directly — a direct `courses` query would also return every published course to a signed-in student via the public-site read policy, not just their enrolled ones |
+| 2026-09-29 | Stage 5: file resources are served through a route handler (`/student/resources/[id]`, `requireStudent()` + explicit enrollment check + 60s signed URL + 302 redirect) rather than a server action returning a URL for `window.open()` — mobile browsers block a popup opened after an `await`, so a plain `<a target="_blank">` to the route is used instead |
+| 2026-09-29 | Stage 5: the voluntary password change on `/student/account` verifies the current password by calling `signInWithPassword` on a separate, non-persisting `@supabase/supabase-js` client (immediately signed out afterward), so the check never disturbs the student's real cookie-based session; this is distinct from the forced `/change-password` flow from Stage 2, and does not touch `must_change_password` or call `complete_password_change()` |
 
 ## 16. Known issues / open items
 
@@ -598,3 +602,4 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - Test accounts `test-admin@example.com` and `test-student@example.com` (password shared with the owner separately) were created during Stage 3 verification and should be deleted, or have their passwords rotated, before launch. (The `testadmin@gmail.com` / `teststudent@gmail.com` / `teststudent2@gmail.com` accounts previously noted here do not actually exist in the Supabase project — this note is corrected to match what's really there.)
 - `next dev` appends a `nextjs-agent-rules` block to `CLAUDE.md` automatically (see `node_modules/next/dist/server/lib/generate-agent-files.js`). It is re-created if removed.
 - Video hosting approach for future recordings to be decided when recording starts. Unlisted YouTube links can be shared outside the portal.
+- `test-student@example.com`'s password was reset again during Stage 5 verification (needed to test the enrolled-course/resource/storage RLS paths and the account change-password flow end to end) and shared with the owner directly (not recorded here). It is no longer the password from earlier notes. The student was also enrolled in the existing "o lvl maths" course as part of this testing, so the owner has a real enrolled student to browse the portal with; remove that enrollment if it isn't wanted. This account still needs deleting or a final password rotation before launch, per the existing note above.

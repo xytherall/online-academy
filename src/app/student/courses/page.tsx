@@ -4,21 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/admin/empty-state";
 import { requireStudent } from "@/lib/auth";
-import { getBatchName, getEnrolledCourses } from "@/lib/student";
+import { getEnrolledCourses } from "@/lib/student";
 
-export default async function StudentDashboard() {
+export default async function StudentCoursesPage() {
   const profile = await requireStudent();
-  const [{ courses, error }, batchName] = await Promise.all([
-    getEnrolledCourses(profile.id),
-    getBatchName(profile.batch_id),
-  ]);
+  const { courses, error } = await getEnrolledCourses(profile.id);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Welcome, {profile.full_name ?? profile.email}</h1>
-        {batchName ? <p className="text-sm text-muted-foreground">Batch: {batchName}</p> : null}
-      </div>
+      <h1 className="text-xl font-semibold">My Courses</h1>
 
       {error ? (
         <Alert variant="destructive">

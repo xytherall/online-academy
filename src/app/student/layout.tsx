@@ -1,4 +1,6 @@
 import { LogoutButton } from "@/components/logout-button";
+import { StudentMobileNav } from "@/components/student/student-mobile-nav";
+import { StudentSidebar } from "@/components/student/student-sidebar";
 import { requireStudent } from "@/lib/auth";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
@@ -9,7 +11,10 @@ export default async function StudentLayout({ children }: { children: React.Reac
     <div className="flex flex-1 flex-col">
       <header className="border-b border-border px-6 py-4">
         <nav className="flex flex-wrap items-center justify-between gap-3">
-          <span className="font-semibold">Student portal</span>
+          <div className="flex items-center gap-3">
+            <StudentMobileNav />
+            <span className="font-semibold">Student portal</span>
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">
               {profile.full_name ?? profile.email}
@@ -18,7 +23,10 @@ export default async function StudentLayout({ children }: { children: React.Reac
           </div>
         </nav>
       </header>
-      <main className="flex flex-1 flex-col px-6 py-8">{children}</main>
+      <div className="flex flex-1">
+        <StudentSidebar />
+        <main className="flex flex-1 flex-col px-6 py-8">{children}</main>
+      </div>
     </div>
   );
 }
