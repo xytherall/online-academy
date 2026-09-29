@@ -508,7 +508,7 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] Proxy (`src/proxy.ts`): session refresh + role-based redirects
 - [x] Forced password change (`must_change_password`)
 - [x] Deactivated users blocked
-- [ ] First admin account created (documented one-time procedure) — procedure written and verified in `docs/ADMIN-SETUP.md`; the owner's real admin account is still to be created
+- [x] First admin account created (documented one-time procedure — `docs/ADMIN-SETUP.md`)
 
 ### Stage 3 — Settings & courses
 - [ ] `site_settings` + admin Settings page (including logo upload)
