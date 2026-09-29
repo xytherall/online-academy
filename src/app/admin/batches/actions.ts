@@ -12,6 +12,7 @@ type ActionResult = { error: string | null };
 
 const DUPLICATE_NAME_ERROR = "A batch with this name already exists. Choose a different name.";
 const NOT_A_STUDENT_ERROR = "That account is not a student.";
+const HAS_ASSESSMENTS_ERROR = "This batch has assessments. Move or delete them first.";
 
 function parseBatchForm(formData: FormData) {
   return batchSchema.safeParse({
@@ -89,9 +90,20 @@ export async function deleteBatch(batchId: string): Promise<ActionResult> {
   await requireAdmin();
 
   const supabase = await createClient();
+
+  const { count: assessmentCount } = await supabase
+    .from("assessments")
+    .select("id", { count: "exact", head: true })
+    .eq("batch_id", batchId);
+
+  if (assessmentCount && assessmentCount > 0) return { error: HAS_ASSESSMENTS_ERROR };
+
   const { error } = await supabase.from("batches").delete().eq("id", batchId);
 
-  if (error) return { error: "Could not delete the batch. Please try again." };
+  if (error) {
+    if (error.code === "23503") return { error: HAS_ASSESSMENTS_ERROR };
+    return { error: "Could not delete the batch. Please try again." };
+  }
 
   revalidatePath("/admin/batches");
   return { error: null };

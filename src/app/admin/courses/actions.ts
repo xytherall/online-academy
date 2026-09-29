@@ -13,6 +13,8 @@ const HAS_RESOURCES_ERROR =
   "This course has resources. Delete them first, or unpublish the course instead.";
 const HAS_ENROLLMENTS_ERROR =
   "This course has enrolled students. Remove their enrollments first, or unpublish the course instead.";
+const HAS_ASSESSMENTS_ERROR =
+  "This course has assessments. Delete them first, or unpublish the course instead.";
 
 function parseCourseForm(formData: FormData) {
   return courseSchema.safeParse({
@@ -107,6 +109,13 @@ export async function deleteCourse(courseId: string): Promise<{ error: string | 
     .eq("course_id", courseId);
 
   if (enrollmentCount && enrollmentCount > 0) return { error: HAS_ENROLLMENTS_ERROR };
+
+  const { count: assessmentCount } = await supabase
+    .from("assessments")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId);
+
+  if (assessmentCount && assessmentCount > 0) return { error: HAS_ASSESSMENTS_ERROR };
 
   const { error } = await supabase.from("courses").delete().eq("id", courseId);
 

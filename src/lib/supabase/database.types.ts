@@ -39,6 +39,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          attachment_path: string | null
+          batch_id: string | null
+          course_id: string
+          created_at: string
+          due_at: string
+          id: string
+          instructions: string
+          title: string
+          total_marks: number
+          type: Database["public"]["Enums"]["assessment_type"]
+          updated_at: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          batch_id?: string | null
+          course_id: string
+          created_at?: string
+          due_at: string
+          id?: string
+          instructions: string
+          title: string
+          total_marks: number
+          type: Database["public"]["Enums"]["assessment_type"]
+          updated_at?: string
+        }
+        Update: {
+          attachment_path?: string | null
+          batch_id?: string | null
+          course_id?: string
+          created_at?: string
+          due_at?: string
+          id?: string
+          instructions?: string
+          title?: string
+          total_marks?: number
+          type?: Database["public"]["Enums"]["assessment_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       batches: {
         Row: {
           created_at: string
@@ -292,6 +349,76 @@ export type Database = {
         }
         Relationships: []
       }
+      submissions: {
+        Row: {
+          assessment_id: string
+          counts_toward_report: boolean
+          created_at: string
+          feedback: string | null
+          file_paths: string[]
+          id: string
+          is_late: boolean
+          marked_at: string | null
+          marked_by: string | null
+          marks: number | null
+          student_id: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          counts_toward_report?: boolean
+          created_at?: string
+          feedback?: string | null
+          file_paths?: string[]
+          id?: string
+          is_late?: boolean
+          marked_at?: string | null
+          marked_by?: string | null
+          marks?: number | null
+          student_id: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          counts_toward_report?: boolean
+          created_at?: string
+          feedback?: string | null
+          file_paths?: string[]
+          id?: string
+          is_late?: boolean
+          marked_at?: string | null
+          marked_by?: string | null
+          marks?: number | null
+          student_id?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -302,6 +429,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      assessment_type: "assignment" | "test"
       course_level: "O" | "A"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
@@ -435,6 +563,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      assessment_type: ["assignment", "test"],
       course_level: ["O", "A"],
       resource_kind: ["file", "link"],
       user_role: ["admin", "teacher", "student"],
