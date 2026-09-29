@@ -38,7 +38,11 @@ export async function changeOwnPassword(
     email: profile.email,
     password: parsed.data.currentPassword,
   });
-  await verifier.auth.signOut();
+  // scope: "local" is required — signOut()'s default scope is "global",
+  // which revokes the refresh token for *every* session the user has, and
+  // would silently kill the student's real cookie-based session along with
+  // this throwaway one.
+  await verifier.auth.signOut({ scope: "local" });
 
   if (signInError) {
     return { error: "Current password is incorrect.", success: false };
