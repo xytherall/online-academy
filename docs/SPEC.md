@@ -516,11 +516,11 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] `resources` (file + link) with private storage and signed URLs
 
 ### Stage 4 — Students, batches, enrollments
-- [ ] `batches` CRUD
-- [ ] Add student (creates auth user + profile + enrollments + batch)
-- [ ] Students list with search and filters; student detail page
-- [ ] Admin password reset, deactivate/reactivate
-- [ ] Remarks per enrollment
+- [x] `batches` CRUD
+- [x] Add student (creates auth user + profile + enrollments + batch)
+- [x] Students list with search and filters; student detail page
+- [x] Admin password reset, deactivate/reactivate
+- [x] Remarks per enrollment
 
 ### Stage 5 — Student portal basics
 - [ ] Student dashboard (real data + empty states)
@@ -581,12 +581,20 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-29 | Signed URLs for `course-files` are issued with a 60-second expiry, generated with the regular authenticated server client (no service-role key needed, since RLS already allows the admin to read that bucket) |
 | 2026-09-29 | Logo uploads to `public-assets` are restricted to PNG/JPEG/WEBP; SVG is deliberately excluded even though the bucket is public, since SVG can carry executable script |
 | 2026-09-29 | Admin area gained a real sidebar (desktop) and drawer (mobile) in Stage 3, the first stage with more than one admin route — matches SPEC §12's requirement and avoids a bigger nav retrofit once Stages 4/6/8 add more routes |
+| 2026-09-29 | Batch student-assignment lives at a new `/admin/batches/[id]` detail route (not spelled out verbatim in §8's route table, but required by the same line — "assign and remove students" — and mirrors the existing `/admin/courses/[id]` sub-resource pattern) |
+| 2026-09-29 | A student's email is fixed once their account is created; the Stage 4 edit form does not allow changing it (changing it would also require an Auth Admin API call, out of scope for this stage) |
+| 2026-09-29 | "Add student" (SPEC §6/§8's "one server-side operation") is a plain sequential Server Action — create the auth user, then update the profile, then insert enrollments, deleting the auth user if a later step fails — not a Postgres RPC. True Auth+Postgres atomicity isn't achievable either way, and this matches the existing resource-upload cleanup-on-failure pattern from Stage 3 |
+| 2026-09-29 | The students list loads once server-side and all search/filtering (name, email, phone, batch, course, country, active) happens client-side over the already-fetched rows, so the URL never carries personal data as query parameters |
+| 2026-09-29 | Every Server Action that mutates a profile by id (batch reassignment, deactivate/reactivate, password reset, enrollments, remarks) re-verifies server-side that the target row exists and has `role = 'student'` via a shared `getStudentProfile` helper (`src/lib/students.ts`), so none of them can be pointed at an admin account |
+| 2026-09-29 | `batches` and `enrollments` follow the same RLS/grant pattern as Stage 3's `courses`/`resources` (`revoke all` then explicit re-`grant` to `authenticated` before policies): admins get full CRUD, students get read-only access to their own batch and their own enrollment rows, with no write policies at all for students. Verified directly against the REST API using a real student session: reads are correctly scoped, and insert/update/delete on `batches`, `enrollments` and `profiles` all affect zero rows |
+| 2026-09-29 | `enrollments.course_id` uses `on delete restrict`, matching and extending the existing "course can only be deleted once empty" rule; `deleteCourse` in `src/app/admin/courses/actions.ts` now also pre-checks enrollments, not just resources (closes the gap noted in the former §16 item) |
 
 ## 16. Known issues / open items
 
 - Resubmission-until-marked rule to be confirmed by owner.
 - `complete_password_change()` is granted to `authenticated`, so a student could in principle call it directly to clear their own `must_change_password` flag without actually changing their password. This is self-inflicted only — it grants no access to anyone else's data and no privilege escalation — and an admin can set the flag again. Closing it completely would mean using the secret key for a non-admin operation, which SPEC §11 and CLAUDE.md currently forbid.
-- Course delete is currently blocked only by checking `resources` (an app-level pre-check plus the `on delete restrict` FK from `resources.course_id`). When Stage 4 (enrollments) and Stage 6 (assessments) land, their FKs to `courses` should use the same `on delete restrict` pattern, and `deleteCourse`'s pre-check and error message should be extended to also count enrollments and assessments, not just resources.
+- Course delete is now blocked by checking both `resources` and `enrollments` (Stage 4). When Stage 6 (assessments) lands, its FK to `courses` should use the same `on delete restrict` pattern, and `deleteCourse`'s pre-check and error message should be extended to also count assessments.
+- `test-admin@example.com`'s password was changed during Stage 4 verification (to confirm login/deactivate/reactivate/reset-password flows end to end) and is no longer the password noted in earlier Stage 3 testing. The owner should treat it, along with `test-student@example.com`, per the existing note above about rotating or deleting test accounts before launch.
 - Test accounts `test-admin@example.com` and `test-student@example.com` (password shared with the owner separately) were created during Stage 3 verification and should be deleted, or have their passwords rotated, before launch. (The `testadmin@gmail.com` / `teststudent@gmail.com` / `teststudent2@gmail.com` accounts previously noted here do not actually exist in the Supabase project — this note is corrected to match what's really there.)
 - `next dev` appends a `nextjs-agent-rules` block to `CLAUDE.md` automatically (see `node_modules/next/dist/server/lib/generate-agent-files.js`). It is re-created if removed.
 - Video hosting approach for future recordings to be decided when recording starts. Unlisted YouTube links can be shared outside the portal.

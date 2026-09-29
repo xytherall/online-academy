@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils";
 
 export const ADMIN_NAV_ITEMS = [
   { href: "/admin", label: "Overview" },
-  { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/students", label: "Students" },
+  { href: "/admin/batches", label: "Batches" },
   { href: "/admin/courses", label: "Courses" },
+  { href: "/admin/settings", label: "Settings" },
 ] as const;
 
 export function AdminNavLinks({ onNavigate }: { onNavigate?: () => void }) {
