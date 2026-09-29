@@ -1,9 +1,14 @@
-export default function Home() {
+import { AcademyBrand } from "@/components/academy-brand";
+import { getSiteSettings } from "@/lib/get-site-settings";
+
+export default async function Home() {
+  const settings = await getSiteSettings();
+
   return (
     <div className="flex flex-1 flex-col">
       <header className="border-b border-border px-6 py-4">
         <nav className="flex items-center justify-between">
-          <span className="font-semibold">Academy</span>
+          <AcademyBrand settings={settings} />
           <a href="/login" className="text-sm text-muted-foreground hover:text-foreground">
             Login
           </a>

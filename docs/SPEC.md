@@ -511,9 +511,9 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] First admin account created (documented one-time procedure — `docs/ADMIN-SETUP.md`)
 
 ### Stage 3 — Settings & courses
-- [ ] `site_settings` + admin Settings page (including logo upload)
-- [ ] `courses` CRUD, publish/unpublish
-- [ ] `resources` (file + link) with private storage and signed URLs
+- [x] `site_settings` + admin Settings page (including logo upload)
+- [x] `courses` CRUD, publish/unpublish
+- [x] `resources` (file + link) with private storage and signed URLs
 
 ### Stage 4 — Students, batches, enrollments
 - [ ] `batches` CRUD
@@ -573,11 +573,20 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-29 | Students have no UPDATE policy on `profiles` at all; `must_change_password` is cleared by the `complete_password_change()` SECURITY DEFINER function, not by the secret key |
 | 2026-09-29 | `profiles.full_name`, `phone` and `country` are nullable in the database (a dashboard-created user has no name yet); required-ness is enforced in the forms that collect them |
 | 2026-09-29 | Supabase CLI pinned as a devDependency; migrations live in `supabase/migrations`, applied with `npm run db:push`, types generated with `npm run db:types` |
+| 2026-09-29 | `site_settings` is a singleton row (`id smallint primary key`, `check (id = 1)`), seeded empty by its migration; RLS lets anyone read it, only admins update it |
+| 2026-09-29 | Storage buckets (`public-assets`, `course-files`) and their RLS policies are created by migration (`insert into storage.buckets`, policies on `storage.objects`), not left to dashboard/config.toml, so they follow the same "schema changes go through migrations" rule as tables |
+| 2026-09-29 | Course/resource slugs: the browser suggests a slug from the title (`slugify()`) only until the admin edits it by hand; the server normalizes case/whitespace but never rewrites content, and rejects a non-conforming slug instead of silently fixing it. Uniqueness is pre-checked for a friendly error, backed by the DB's `unique` constraint |
+| 2026-09-29 | Course delete is blocked when it has resources via both an app-level pre-check (friendly message) and `resources.course_id references courses on delete restrict` (the actual backstop) — see §16 for extending this to enrollments/assessments |
+| 2026-09-29 | Deleting a file resource removes the storage object before the database row (storage delete is safe to retry; the row is only removed once the file is confirmed gone) |
+| 2026-09-29 | Signed URLs for `course-files` are issued with a 60-second expiry, generated with the regular authenticated server client (no service-role key needed, since RLS already allows the admin to read that bucket) |
+| 2026-09-29 | Logo uploads to `public-assets` are restricted to PNG/JPEG/WEBP; SVG is deliberately excluded even though the bucket is public, since SVG can carry executable script |
+| 2026-09-29 | Admin area gained a real sidebar (desktop) and drawer (mobile) in Stage 3, the first stage with more than one admin route — matches SPEC §12's requirement and avoids a bigger nav retrofit once Stages 4/6/8 add more routes |
 
 ## 16. Known issues / open items
 
 - Resubmission-until-marked rule to be confirmed by owner.
 - `complete_password_change()` is granted to `authenticated`, so a student could in principle call it directly to clear their own `must_change_password` flag without actually changing their password. This is self-inflicted only — it grants no access to anyone else's data and no privilege escalation — and an admin can set the flag again. Closing it completely would mean using the secret key for a non-admin operation, which SPEC §11 and CLAUDE.md currently forbid.
-- Test accounts (`testadmin@gmail.com`, `teststudent@gmail.com`, `teststudent2@gmail.com`) exist in the Supabase project and should be deleted before launch.
+- Course delete is currently blocked only by checking `resources` (an app-level pre-check plus the `on delete restrict` FK from `resources.course_id`). When Stage 4 (enrollments) and Stage 6 (assessments) land, their FKs to `courses` should use the same `on delete restrict` pattern, and `deleteCourse`'s pre-check and error message should be extended to also count enrollments and assessments, not just resources.
+- Test accounts `test-admin@example.com` and `test-student@example.com` (password shared with the owner separately) were created during Stage 3 verification and should be deleted, or have their passwords rotated, before launch. (The `testadmin@gmail.com` / `teststudent@gmail.com` / `teststudent2@gmail.com` accounts previously noted here do not actually exist in the Supabase project — this note is corrected to match what's really there.)
 - `next dev` appends a `nextjs-agent-rules` block to `CLAUDE.md` automatically (see `node_modules/next/dist/server/lib/generate-agent-files.js`). It is re-created if removed.
 - Video hosting approach for future recordings to be decided when recording starts. Unlisted YouTube links can be shared outside the portal.

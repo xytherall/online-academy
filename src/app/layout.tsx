@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { getSiteSettings } from "@/lib/get-site-settings";
+import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Academy Portal",
-  description: "Online O Level / A Level academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME,
+    description: settings?.tagline?.trim() || "Online O Level / A Level academy",
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

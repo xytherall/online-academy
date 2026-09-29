@@ -39,6 +39,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      courses: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          level: Database["public"]["Enums"]["course_level"]
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          level: Database["public"]["Enums"]["course_level"]
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          level?: Database["public"]["Enums"]["course_level"]
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           batch_id: string | null
@@ -96,6 +129,95 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          course_id: string
+          created_at: string
+          file_path: string | null
+          id: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          sort_order: number
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["resource_kind"]
+          sort_order?: number
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["resource_kind"]
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_settings: {
+        Row: {
+          about_text: string | null
+          academy_name: string | null
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          created_at: string
+          id: number
+          logo_path: string | null
+          social_links: Json
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          about_text?: string | null
+          academy_name?: string | null
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          id?: number
+          logo_path?: string | null
+          social_links?: Json
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          about_text?: string | null
+          academy_name?: string | null
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          id?: number
+          logo_path?: string | null
+          social_links?: Json
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -106,6 +228,8 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      course_level: "O" | "A"
+      resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
     }
     CompositeTypes: {
@@ -237,6 +361,8 @@ export const Constants = {
   },
   public: {
     Enums: {
+      course_level: ["O", "A"],
+      resource_kind: ["file", "link"],
       user_role: ["admin", "teacher", "student"],
     },
   },
