@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Eyebrow } from "@/components/eyebrow";
 import { issueApplyToken } from "@/lib/apply-token";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
@@ -31,7 +32,7 @@ export default async function ApplyPage({
   if (courses.length === 0) {
     return (
       <div className="mx-auto w-full max-w-2xl flex-1 space-y-4 px-4 py-16 text-center sm:px-6">
-        <h1 className="text-3xl font-semibold">Applications are not open yet</h1>
+        <h1 className="text-3xl">Applications are not open yet</h1>
         <p className="text-muted-foreground">
           There are no courses open for applications at the moment. Please check back soon, or get in
           touch using the details on our contact page.
@@ -52,9 +53,10 @@ export default async function ApplyPage({
 
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold">Apply</h1>
-        <p className="text-muted-foreground">
+      <div className="space-y-1">
+        <Eyebrow>Apply</Eyebrow>
+        <h1 className="text-3xl sm:text-4xl">Apply now</h1>
+        <p className="pt-1 text-muted-foreground">
           Tell us a little about yourself and which courses you would like to join. We review every
           application and get back to you with your login details.
         </p>

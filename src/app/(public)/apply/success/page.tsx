@@ -23,13 +23,13 @@ export default async function ApplySuccessPage() {
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-16 sm:px-6">
       <div className="space-y-3">
-        <h1 className="text-3xl font-semibold">Thank you — your application has been sent</h1>
+        <h1 className="text-3xl sm:text-4xl">Thank you — your application has been sent</h1>
         <p className="text-muted-foreground">
           We have it, and nothing more is needed from you right now.
         </p>
       </div>
 
-      <div className="space-y-3 rounded-lg border border-border p-5">
+      <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
         <h2 className="font-medium">What happens next</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
           <li>Someone from the academy reviews your application.</li>

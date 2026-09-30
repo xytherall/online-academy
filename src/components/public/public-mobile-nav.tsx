@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { PublicNavLinks } from "@/components/public/public-nav-links";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -41,6 +42,10 @@ export function PublicMobileNav() {
             >
               Student login
             </Button>
+          </div>
+          <div className="flex items-center justify-between border-t border-border pt-4">
+            <span className="text-sm text-muted-foreground">Theme</span>
+            <ThemeToggle />
           </div>
         </div>
       </SheetContent>

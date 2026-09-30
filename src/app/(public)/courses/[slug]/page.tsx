@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Eyebrow } from "@/components/eyebrow";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
@@ -32,9 +33,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">{COURSE_LEVEL_LABELS[course.level]}</p>
-        <h1 className="text-3xl font-semibold">{course.title}</h1>
+      <div className="space-y-1">
+        <Eyebrow>{COURSE_LEVEL_LABELS[course.level]}</Eyebrow>
+        <h1 className="text-3xl sm:text-4xl">{course.title}</h1>
       </div>
 
       {course.description ? (

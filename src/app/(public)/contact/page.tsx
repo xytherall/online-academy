@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MailIcon, MessageCircleIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import { EmptyState } from "@/components/admin/empty-state";
+import { Eyebrow } from "@/components/eyebrow";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { getSocialLinkEntries } from "@/lib/social-links";
 import { buildWhatsAppUrl, FALLBACK_ACADEMY_NAME } from "@/lib/settings";
@@ -26,7 +27,10 @@ export default async function ContactPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-semibold">Contact</h1>
+      <div className="space-y-1">
+        <Eyebrow>Contact</Eyebrow>
+        <h1 className="text-3xl sm:text-4xl">Get in touch</h1>
+      </div>
 
       {hasAnyContactInfo ? (
         <div className="space-y-4">

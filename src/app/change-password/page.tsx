@@ -1,3 +1,4 @@
+import { AuthShell } from "@/components/auth-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MIN_PASSWORD_LENGTH } from "@/lib/validation/auth";
 import { requirePasswordChangeUser } from "@/lib/auth";
@@ -7,8 +8,8 @@ export default async function ChangePasswordPage() {
   const profile = await requirePasswordChangeUser();
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-sm">
+    <AuthShell>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>{profile.must_change_password ? "Set a new password" : "Change password"}</CardTitle>
           <CardDescription>
@@ -21,6 +22,6 @@ export default async function ChangePasswordPage() {
           <ChangePasswordForm />
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   );
 }

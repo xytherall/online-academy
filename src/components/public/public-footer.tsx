@@ -9,11 +9,11 @@ export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
   const socialLinks = getSocialLinkEntries(settings?.social_links ?? null);
 
   return (
-    <footer className="border-t border-border px-4 py-8 sm:px-6">
+    <footer className="border-t border-border bg-background-cream px-4 py-10 sm:px-6">
       <div className="mx-auto flex max-w-5xl flex-col gap-6 text-muted-foreground">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <AcademyBrand settings={settings} className="text-foreground" />
+            <AcademyBrand settings={settings} className="font-heading text-lg text-foreground" />
             {address ? <p className="max-w-xs text-sm">{address}</p> : null}
           </div>
           <PublicNavLinks className="flex flex-wrap gap-x-5 gap-y-2" />

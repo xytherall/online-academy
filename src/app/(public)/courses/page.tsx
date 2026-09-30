@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/admin/empty-state";
+import { Eyebrow } from "@/components/eyebrow";
 import { CourseGrid } from "@/components/public/course-grid";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
@@ -19,8 +20,9 @@ export default async function CoursesPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold">Courses</h1>
+      <div className="space-y-1">
+        <Eyebrow>Courses</Eyebrow>
+        <h1 className="text-3xl sm:text-4xl">Courses</h1>
       </div>
 
       {courses.length > 0 ? (

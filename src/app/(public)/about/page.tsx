@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/admin/empty-state";
+import { Eyebrow } from "@/components/eyebrow";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
 
@@ -18,7 +19,10 @@ export default async function AboutPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-semibold">About</h1>
+      <div className="space-y-1">
+        <Eyebrow>About</Eyebrow>
+        <h1 className="text-3xl sm:text-4xl">About us</h1>
+      </div>
 
       {aboutText ? (
         <p className="whitespace-pre-line text-muted-foreground">{aboutText}</p>

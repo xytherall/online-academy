@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/admin/empty-state";
+import { Eyebrow } from "@/components/eyebrow";
 import { CourseGrid } from "@/components/public/course-grid";
 import { ContactStrip } from "@/components/public/contact-strip";
+import { HeroBackground } from "@/components/public/hero-background";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
@@ -33,9 +35,10 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <section className="px-4 py-16 sm:px-6 sm:py-24">
+      <section className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-28">
+        <HeroBackground />
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{academyName}</h1>
+          <h1 className="text-4xl sm:text-6xl">{academyName}</h1>
           {tagline ? <p className="text-lg text-muted-foreground sm:text-xl">{tagline}</p> : null}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" render={<Link href="/apply" />} nativeButton={false}>
@@ -48,9 +51,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-border px-4 py-16 sm:px-6">
+      <section className="border-t border-border bg-background-cream px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-5xl space-y-6">
-          <h2 className="text-2xl font-semibold">Our courses</h2>
+          <div className="space-y-1">
+            <Eyebrow>Courses</Eyebrow>
+            <h2 className="text-2xl">Our courses</h2>
+          </div>
           {courses.length > 0 ? (
             <CourseGrid courses={courses} />
           ) : (
@@ -64,11 +70,14 @@ export default async function HomePage() {
 
       <section className="border-t border-border px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-5xl space-y-6">
-          <h2 className="text-2xl font-semibold">How to join</h2>
+          <div className="space-y-1">
+            <Eyebrow>How it works</Eyebrow>
+            <h2 className="text-2xl">How to join</h2>
+          </div>
           <ol className="grid gap-6 sm:grid-cols-3">
             {HOW_TO_JOIN_STEPS.map((step, index) => (
               <li key={step.title} className="space-y-2">
-                <span className="flex size-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-foreground">
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                   {index + 1}
                 </span>
                 <p className="font-medium">{step.title}</p>
@@ -80,11 +89,14 @@ export default async function HomePage() {
       </section>
 
       {aboutExcerpt ? (
-        <section className="border-t border-border px-4 py-16 sm:px-6">
+        <section className="border-t border-border bg-background-cream px-4 py-16 sm:px-6">
           <div className="mx-auto max-w-3xl space-y-4">
-            <h2 className="text-2xl font-semibold">About</h2>
+            <div className="space-y-1">
+              <Eyebrow>About</Eyebrow>
+              <h2 className="text-2xl">About us</h2>
+            </div>
             <p className="line-clamp-4 whitespace-pre-line text-muted-foreground">{aboutExcerpt}</p>
-            <Link href="/about" className="inline-block font-medium text-brand hover:underline">
+            <Link href="/about" className="inline-block font-medium text-primary hover:underline">
               Read more &rarr;
             </Link>
           </div>
@@ -94,7 +106,10 @@ export default async function HomePage() {
       {hasContactInfo ? (
         <section className="border-t border-border px-4 py-16 sm:px-6">
           <div className="mx-auto max-w-5xl space-y-4">
-            <h2 className="text-2xl font-semibold">Get in touch</h2>
+            <div className="space-y-1">
+              <Eyebrow>Contact</Eyebrow>
+              <h2 className="text-2xl">Get in touch</h2>
+            </div>
             <ContactStrip settings={settings} />
           </div>
         </section>
