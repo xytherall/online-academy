@@ -4,11 +4,11 @@ import { EmptyState } from "@/components/admin/empty-state";
 import { Eyebrow } from "@/components/eyebrow";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { getSocialLinkEntries } from "@/lib/social-links";
-import { buildWhatsAppUrl, FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { buildWhatsAppUrl, FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   return {
     title: `Contact | ${academyName}`,
     description: `Get in touch with ${academyName}.`,

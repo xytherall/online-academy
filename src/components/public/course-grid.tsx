@@ -7,22 +7,20 @@ export function CourseGrid({ courses }: { courses: PublicCourse[] }) {
   const grouped = groupCoursesByLevel(courses);
 
   return (
-    <div className="space-y-10">
+    <div className="grid gap-10 lg:grid-cols-2 lg:gap-x-12">
       {grouped.map(([level, levelCourses]) => (
         <section key={level} className="space-y-3">
           <h3 className="font-heading text-lg">{COURSE_LEVEL_LABELS[level]}</h3>
-          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+          <ul className="divide-y divide-border border-t border-border">
             {levelCourses.map((course) => (
               <li key={course.id}>
                 <Link
                   href={`/courses/${course.slug}`}
-                  className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-primary-soft"
+                  className="group flex items-center justify-between gap-4 py-4 transition-colors hover:text-primary"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate font-medium">{course.title}</span>
-                    {course.description ? (
-                      <span className="block truncate text-sm text-muted-foreground">{course.description}</span>
-                    ) : null}
+                    <span className="block truncate font-heading text-lg">{course.title}</span>
+                    <span className="block text-sm text-muted-foreground">{COURSE_LEVEL_LABELS[level]}</span>
                   </span>
                   <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
                     <ArrowRightIcon className="size-4" aria-hidden />

@@ -7,7 +7,7 @@ import { ContactStrip } from "@/components/public/contact-strip";
 import { HeroBackground } from "@/components/public/hero-background";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { COURSE_LEVEL_LABELS, groupCoursesByLevel } from "@/lib/group-courses";
 
 const HOW_TO_JOIN_STEPS = [
   {
@@ -26,19 +26,25 @@ const HOW_TO_JOIN_STEPS = [
 
 export default async function HomePage() {
   const [settings, courses] = await Promise.all([getSiteSettings(), getPublishedCourses()]);
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  // No invented academy name (SPEC §2/§12): a neutral greeting, never a fake name, when unset.
+  const academyName = settings?.academy_name?.trim();
   const tagline = settings?.tagline?.trim();
   const aboutExcerpt = settings?.about_text?.trim();
   const hasContactInfo = Boolean(
     settings?.contact_email?.trim() || settings?.contact_phone?.trim() || settings?.contact_whatsapp?.trim(),
   );
+  // Real, database-derived levels — never invented (SPEC §2/§12).
+  const offeredLevels = groupCoursesByLevel(courses)
+    .map(([level]) => COURSE_LEVEL_LABELS[level])
+    .join(" · ");
 
   return (
     <div className="flex flex-1 flex-col">
       <section className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-28">
         <HeroBackground />
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <h1 className="text-4xl sm:text-6xl">{academyName}</h1>
+          {offeredLevels ? <Eyebrow>{offeredLevels}</Eyebrow> : null}
+          <h1 className="text-4xl sm:text-6xl">{academyName || "Welcome"}</h1>
           {tagline ? <p className="text-lg text-muted-foreground sm:text-xl">{tagline}</p> : null}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" render={<Link href="/apply" />} nativeButton={false}>

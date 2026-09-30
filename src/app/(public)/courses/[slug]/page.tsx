@@ -6,7 +6,7 @@ import { Eyebrow } from "@/components/eyebrow";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata({
   params,
@@ -15,7 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const [course, settings] = await Promise.all([getPublishedCourseBySlug(slug), getSiteSettings()]);
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
 
   if (!course) return { title: `Course not found | ${academyName}` };
 

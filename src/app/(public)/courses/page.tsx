@@ -4,11 +4,11 @@ import { Eyebrow } from "@/components/eyebrow";
 import { CourseGrid } from "@/components/public/course-grid";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   return {
     title: `Courses | ${academyName}`,
     description: settings?.tagline?.trim() || `Courses offered by ${academyName}.`,

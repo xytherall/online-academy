@@ -544,10 +544,10 @@ No orange is used as a brand or accent colour anywhere; `warning` above is the o
 ### Public site
 
 - Normal top bar (not a sidebar).
-- Hero: soft glow (the two glow colours above) + a fading graph-paper grid background + a decorative parabola/sine-wave SVG motif.
+- Hero: centred layout (Mindly-style) — headline, subtext and CTAs stacked in the middle, no side illustration. Soft glow (the two glow colours above) + a fading graph-paper grid background, slightly more visible near the centre + a decorative soft wave line (parabola/sine-wave SVG motif).
 - Sections alternate `background` (white) and `background-cream` down the page.
 - Section headers: uppercase eyebrow label (small, tracked-out) above a serif (Fraunces) title.
-- Course list rows: a round pill-shaped arrow button to open/link through, not a plain text link or chevron-in-box.
+- Course list rows: plain list rows (no boxed card), course title in the display font with a small muted level caption underneath, a thin border line between rows, and a round pill-shaped arrow button on the right to open/link through — not a plain text link or chevron-in-box. On wide screens the O Level and A Level lists sit side by side in two columns.
 
 ### Portal (student + admin)
 
@@ -764,6 +764,8 @@ Applies SPEC §12 ("Design system") across the app. Visual/styling only — no b
 | 2026-10-01 | Stage 10A: dark mode has no flash — a `next/script` `strategy="beforeInteractive"` inline script (`src/lib/theme-script.ts`) sets the `.dark` class before first paint (stored choice, else the OS preference). At runtime, `src/lib/theme-store.ts` is a `useSyncExternalStore`-backed module store (not an effect + `setState`, matching the existing `useIsClient()` convention from Stage 6A) that live-reacts to OS changes only while no explicit choice is stored, and `ThemeToggle` (`src/components/theme-toggle.tsx`) sets an explicit, persisted choice that then wins |
 | 2026-10-01 | Stage 10A: the semantic status pair naming in `globals.css` is `--success`/`--success-bg` (and the `warning`/`late` equivalents), not `-foreground` — unlike `primary`/`primary-foreground`, SPEC §12's pairs are "text colour on its own soft background", the reverse of "text colour to put on top of this background", so reusing `-foreground` would have inverted the existing convention |
 | 2026-10-01 | Stage 10A: the placeholder `--brand`/`--brand-foreground` tokens from Stage 1 (SPEC §2's "no branding yet" placeholder) were retired in favour of `--primary`/`--primary-foreground` from §12's token set — the only two usages were in the home page and `CourseGrid`, both rewritten in this stage anyway, so there are no longer two names for "the brand colour" |
+| 2026-10-01 | Stage 10A polish: `FALLBACK_ACADEMY_NAME = "Academy Portal"` read as an invented academy name rather than a neutral placeholder, contradicting SPEC §2/§12. Renamed to `FALLBACK_SITE_LABEL = "Student Portal"`, used only in `<title>`/metadata and site chrome (header/footer/login brand mark) — never as the home hero's headline. The hero headline now shows the real academy name or, when unset, the neutral greeting "Welcome" instead of any stand-in name. A second, undocumented copy of the same literal fallback in `PublicFooter`'s copyright line was found and pointed at the same constant |
+| 2026-10-01 | Stage 10A polish: the home hero gained a small eyebrow listing the levels with at least one published course (e.g. "O Level · A Level"), derived live from the same published-courses query as the courses section — not invented, and hidden when no courses are published. Headline stays the academy name and subtext stays the tagline, both already settings-driven |
 | 2026-10-01 | Former Stage 10 ("Polish & launch") split in two: Stage 10 "Design & polish" (10A public site/auth-adjacent pages, 10B portal/admin) applies SPEC §12's design system, visual changes only; a new Stage 11 "Launch" keeps the original launch checklist (responsive pass, RLS/security review, error pages, backup procedure, Netlify deploy with env vars) plus two items added at the owner's request: a keep-alive check for the free Supabase project's inactivity pause, and setting up the production Supabase project |
 
 ## 16. Known issues / open items

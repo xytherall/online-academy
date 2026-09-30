@@ -2,7 +2,7 @@ import { AcademyBrand } from "@/components/academy-brand";
 import { ContactStrip } from "@/components/public/contact-strip";
 import { PublicNavLinks } from "@/components/public/public-nav-links";
 import { getSocialLinkEntries } from "@/lib/social-links";
-import type { SiteSettings } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL, type SiteSettings } from "@/lib/settings";
 
 export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
   const address = settings?.address?.trim();
@@ -38,7 +38,7 @@ export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
         ) : null}
 
         <p className="text-xs">
-          &copy; {new Date().getFullYear()} {settings?.academy_name?.trim() || "Academy Portal"}
+          &copy; {new Date().getFullYear()} {settings?.academy_name?.trim() || FALLBACK_SITE_LABEL}
         </p>
       </div>
     </footer>

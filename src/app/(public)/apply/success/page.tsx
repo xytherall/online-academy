@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   return {
     title: `Application sent | ${academyName}`,
     description: "We have received your application.",

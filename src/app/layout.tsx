@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { figtree, fraunces } from "@/lib/fonts";
 import { THEME_INIT_SCRIPT } from "@/lib/theme-script";
 import "./globals.css";
@@ -9,7 +9,7 @@ import "./globals.css";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   return {
-    title: settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME,
+    title: settings?.academy_name?.trim() || FALLBACK_SITE_LABEL,
     description: settings?.tagline?.trim() || "Online O Level / A Level academy",
   };
 }

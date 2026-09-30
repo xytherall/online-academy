@@ -7,7 +7,7 @@ export function HeroBackground() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       <div
-        className="absolute inset-0 [mask-image:radial-gradient(ellipse_65%_55%_at_50%_0%,black,transparent)]"
+        className="absolute inset-0 [mask-image:radial-gradient(ellipse_70%_65%_at_50%_45%,black,black_35%,transparent_90%)]"
         style={{
           backgroundImage:
             "linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",

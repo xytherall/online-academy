@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/admin/empty-state";
 import { Eyebrow } from "@/components/eyebrow";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   return {
     title: `About | ${academyName}`,
     description: settings?.about_text?.trim()?.slice(0, 160) || `About ${academyName}.`,

@@ -5,12 +5,12 @@ import { Eyebrow } from "@/components/eyebrow";
 import { issueApplyToken } from "@/lib/apply-token";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_ACADEMY_NAME } from "@/lib/settings";
+import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { ApplyForm } from "./apply-form";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  const academyName = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   return {
     title: `Apply | ${academyName}`,
     description: `Apply to ${academyName}.`,

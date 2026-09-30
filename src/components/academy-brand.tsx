@@ -1,4 +1,4 @@
-import { buildPublicAssetUrl, FALLBACK_ACADEMY_NAME, type SiteSettings } from "@/lib/settings";
+import { buildPublicAssetUrl, FALLBACK_SITE_LABEL, type SiteSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 export function AcademyBrand({
@@ -8,7 +8,7 @@ export function AcademyBrand({
   settings: SiteSettings | null;
   className?: string;
 }) {
-  const name = settings?.academy_name?.trim() || FALLBACK_ACADEMY_NAME;
+  const name = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
 
   return (
     <span className={cn("flex items-center gap-2 font-semibold", className)}>
