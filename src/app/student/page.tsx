@@ -1,27 +1,65 @@
 import Link from "next/link";
+import { AnnouncementBody } from "@/components/announcement-body";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/admin/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
+import { getAnnouncementsForStudent } from "@/lib/announcements";
 import { requireStudent } from "@/lib/auth";
 import { getBatchName, getDueSoonAssessments, getEnrolledCourses, getRecentlyMarked } from "@/lib/student";
 
 export default async function StudentDashboard() {
   const profile = await requireStudent();
-  const [{ courses, error }, batchName, { assessments: dueSoon, error: dueSoonError }, { submissions: recentlyMarked, error: recentlyMarkedError }] =
-    await Promise.all([
-      getEnrolledCourses(profile.id),
-      getBatchName(profile.batch_id),
-      getDueSoonAssessments(profile.id, profile.batch_id),
-      getRecentlyMarked(profile.id),
-    ]);
+  const [
+    { courses, error },
+    batchName,
+    { assessments: dueSoon, error: dueSoonError },
+    { submissions: recentlyMarked, error: recentlyMarkedError },
+    { announcements, error: announcementsError },
+  ] = await Promise.all([
+    getEnrolledCourses(profile.id),
+    getBatchName(profile.batch_id),
+    getDueSoonAssessments(profile.id, profile.batch_id),
+    getRecentlyMarked(profile.id),
+    getAnnouncementsForStudent(3),
+  ]);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-semibold">Welcome, {profile.full_name ?? profile.email}</h1>
         {batchName ? <p className="text-sm text-muted-foreground">Batch: {batchName}</p> : null}
+      </div>
+
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-medium">Announcements</h2>
+          <Link href="/student/announcements" className="text-sm text-muted-foreground hover:underline">
+            View all
+          </Link>
+        </div>
+        {announcementsError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Could not load announcements. Please refresh the page.</AlertDescription>
+          </Alert>
+        ) : announcements && announcements.length > 0 ? (
+          <ul className="space-y-2">
+            {announcements.map((announcement) => (
+              <li key={announcement.id} className="rounded-lg border border-border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium">{announcement.title}</span>
+                  <span className="text-sm text-muted-foreground">
+                    <LocalDateTime iso={announcement.created_at} />
+                  </span>
+                </div>
+                <AnnouncementBody body={announcement.body} className="mt-1 text-sm text-muted-foreground" />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState title="No announcements yet" description="Announcements from the academy will show up here." />
+        )}
       </div>
 
       <div>

@@ -51,9 +51,9 @@ export function DeleteBatchButton({ batchId, batchName }: { batchId: string; bat
         <DialogHeader>
           <DialogTitle>Delete &ldquo;{batchName}&rdquo;?</DialogTitle>
           <DialogDescription>
-            Students in this batch will become unassigned. Nothing else is deleted. This cannot be undone.
-            A batch with assessments targeted at it can&apos;t be deleted until those assessments are moved
-            or deleted.
+            Students in this batch will become unassigned. Its announcements are deleted too. This cannot
+            be undone. A batch with assessments targeted at it can&apos;t be deleted until those assessments
+            are moved or deleted.
           </DialogDescription>
         </DialogHeader>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
