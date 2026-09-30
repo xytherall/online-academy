@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/admin/empty-state";
 import { Separator } from "@/components/ui/separator";
 import { computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
+import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function StudentCoursePage({ params }: { params: Promise<{ id: string }> }) {
@@ -72,7 +73,7 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
         ) : resources && resources.length > 0 ? (
           <ul className="space-y-2">
             {resources.map((resource) => (
-              <li key={resource.id} className="rounded-lg border border-border p-3">
+              <li key={resource.id} className="rounded-lg border border-border bg-card p-3">
                 <a
                   href={
                     resource.kind === "file" ? `/student/resources/${resource.id}` : (resource.url ?? "#")
@@ -111,7 +112,7 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
               const submission = submissions?.find((s) => s.assessment_id === assessment.id) ?? null;
               const status = computeAssessmentStatus(assessment, submission);
               return (
-                <li key={assessment.id} className="rounded-lg border border-border p-3">
+                <li key={assessment.id} className="rounded-lg border border-border bg-card p-3">
                   <Link
                     href={`/student/assessments/${assessment.id}`}
                     className="flex flex-wrap items-center justify-between gap-2"
@@ -127,7 +128,7 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
                         Due <LocalDateTime iso={assessment.due_at} /> · {assessment.total_marks} marks
                       </p>
                     </div>
-                    <Badge variant={status === "Missing" ? "destructive" : "outline"}>{status}</Badge>
+                    <Badge variant={assessmentStatusBadgeVariant(status)}>{status}</Badge>
                   </Link>
                 </li>
               );

@@ -120,7 +120,7 @@ export function SubmissionUploadForm({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3">
+    <div className="space-y-3 rounded-lg border border-border bg-card p-3">
       <div className="space-y-2">
         <input
           ref={fileInputRef}

@@ -21,7 +21,7 @@ export default async function StudentAnnouncementsPage() {
       ) : announcements && announcements.length > 0 ? (
         <ul className="space-y-3">
           {announcements.map((announcement) => (
-            <li key={announcement.id} className="rounded-lg border border-border p-4">
+            <li key={announcement.id} className="rounded-lg border border-border bg-card p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium">{announcement.title}</p>
                 <Badge variant="outline">{announcementTargetLabel(announcement)}</Badge>

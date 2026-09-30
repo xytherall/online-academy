@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { FileTextIcon } from "lucide-react";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getVisibleAssessmentForStudent, computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
+import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { SubmissionUploadForm } from "./submission-upload-form";
 
@@ -39,7 +41,7 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold">{assessment.title}</h1>
           <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
-          <Badge variant={status === "Missing" ? "destructive" : "outline"}>{status}</Badge>
+          <Badge variant={assessmentStatusBadgeVariant(status)}>{status}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
           Due <LocalDateTime iso={assessment.due_at} /> · {assessment.total_marks} marks
@@ -74,42 +76,50 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
       ) : null}
 
       {assessment.type === "assignment" && submission?.submitted_at ? (
-        <div className="space-y-2 rounded-lg border border-border p-3">
-          <h2 className="font-medium">Your submission</h2>
-          <p className="text-sm">
-            Submitted <LocalDateTime iso={submission.submitted_at} />
-            {submission.is_late ? " · Late" : ""}
-          </p>
-          {submission.file_paths.length > 0 ? (
-            <ul className="space-y-1 text-sm">
-              {submission.file_paths.map((_, index) => (
-                <li key={index}>
-                  <a
-                    href={`/student/submissions/${submission.id}/files/${index}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 font-medium hover:underline"
-                  >
-                    <FileTextIcon className="size-4 shrink-0" />
-                    File {index + 1}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Your submission</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="flex flex-wrap items-center gap-2 text-sm">
+              Submitted <LocalDateTime iso={submission.submitted_at} />
+              {submission.is_late ? <Badge variant="late">Late</Badge> : null}
+            </p>
+            {submission.file_paths.length > 0 ? (
+              <ul className="space-y-1 text-sm">
+                {submission.file_paths.map((_, index) => (
+                  <li key={index}>
+                    <a
+                      href={`/student/submissions/${submission.id}/files/${index}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 font-medium hover:underline"
+                    >
+                      <FileTextIcon className="size-4 shrink-0" />
+                      File {index + 1}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </CardContent>
+        </Card>
       ) : null}
 
       {submission?.marks != null ? (
-        <div className="space-y-2 rounded-lg border border-border p-3">
-          <h2 className="font-medium">Marks</h2>
-          <p className="text-sm">
-            {submission.marks} / {assessment.total_marks}
-          </p>
-          {submission.feedback ? (
-            <p className="whitespace-pre-line text-sm text-muted-foreground">{submission.feedback}</p>
-          ) : null}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Marks</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm font-medium">
+              {submission.marks} / {assessment.total_marks}
+            </p>
+            {submission.feedback ? (
+              <p className="whitespace-pre-line text-sm text-muted-foreground">{submission.feedback}</p>
+            ) : null}
+          </CardContent>
+        </Card>
       ) : null}
     </div>
   );

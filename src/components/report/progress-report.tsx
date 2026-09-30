@@ -1,6 +1,9 @@
 import { LocalDateTime } from "@/components/local-date-time";
+import { Badge } from "@/components/ui/badge";
+import { ProgressRing } from "@/components/progress-ring";
 import type { AssessmentStatus } from "@/lib/assessments";
 import type { CourseReport, TeacherAssessment } from "@/lib/progress-report";
+import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 
 export type ProgressReportData = {
   academyName: string | null;
@@ -133,9 +136,12 @@ function CourseSection({
 
   return (
     <section className={`space-y-4 ${breakBefore ? "print:break-before-page" : ""}`}>
-      <div>
-        <h2 className="text-lg font-semibold">{report.course.title}</h2>
-        <p className="text-sm text-muted-foreground">{report.course.level} Level</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">{report.course.title}</h2>
+          <p className="text-sm text-muted-foreground">{report.course.level} Level</p>
+        </div>
+        <ProgressRing pct={report.overallPct} size={56} />
       </div>
 
       <dl className="grid gap-2 text-sm sm:grid-cols-3">
@@ -198,7 +204,9 @@ function CourseSection({
                 <td className="py-2 pr-3">
                   {row.submission?.marks != null ? `${row.submission.marks} / ${row.assessment.total_marks}` : "—"}
                 </td>
-                <td className="py-2 pr-3">{STATUS_LABEL[row.status]}</td>
+                <td className="py-2 pr-3">
+                  <Badge variant={assessmentStatusBadgeVariant(row.status)}>{STATUS_LABEL[row.status]}</Badge>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -211,7 +219,7 @@ function CourseSection({
       </div>
 
       {hasAnyTeacherAssessment(teacherAssessment) ? (
-        <div className="space-y-2 rounded-lg border border-border p-4 print:border-black">
+        <div className="space-y-2 rounded-lg border border-border bg-card p-4 print:border-black">
           <h3 className="font-medium">Teacher assessment</h3>
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             {teacherAssessment.effort_rating ? (

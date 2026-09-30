@@ -22,6 +22,8 @@ const badgeVariants = cva(
         success: "bg-success-bg text-success",
         warning: "bg-warning-bg text-warning",
         late: "bg-late-bg text-late",
+        // Neutral "in progress" pill, built from existing primary tokens (SPEC §15).
+        info: "bg-primary-soft text-primary",
       },
     },
     defaultVariants: {

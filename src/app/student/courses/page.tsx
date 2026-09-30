@@ -1,14 +1,14 @@
-import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { EmptyState } from "@/components/admin/empty-state";
 import { requireStudent } from "@/lib/auth";
-import { getEnrolledCourses } from "@/lib/student";
+import { getStudentCourseReports } from "@/lib/progress-report";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function StudentCoursesPage() {
   const profile = await requireStudent();
-  const { courses, error } = await getEnrolledCourses(profile.id);
+  const supabase = await createClient();
+  const { courses, error } = await getStudentCourseReports(supabase, profile.id, profile.batch_id);
 
   return (
     <div className="space-y-6">
@@ -18,19 +18,10 @@ export default async function StudentCoursesPage() {
         <Alert variant="destructive">
           <AlertDescription>Could not load your courses. Please refresh the page.</AlertDescription>
         </Alert>
-      ) : courses && courses.length > 0 ? (
+      ) : courses.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
-            <Link key={course.id} href={`/student/courses/${course.id}`}>
-              <Card className="h-full transition-colors hover:bg-accent/50">
-                <CardHeader>
-                  <CardTitle>{course.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="secondary">{course.level} Level</Badge>
-                </CardContent>
-              </Card>
-            </Link>
+          {courses.map(({ report }) => (
+            <CourseProgressCard key={report.course.id} report={report} />
           ))}
         </div>
       ) : (
