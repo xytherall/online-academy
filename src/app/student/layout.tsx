@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { LogoutButton } from "@/components/logout-button";
 import { StudentMobileNav } from "@/components/student/student-mobile-nav";
 import { StudentSidebar } from "@/components/student/student-sidebar";
 import { requireStudent } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   // Enforced here in server code, not only in the proxy.

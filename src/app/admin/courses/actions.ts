@@ -16,6 +16,15 @@ const HAS_ENROLLMENTS_ERROR =
 const HAS_ASSESSMENTS_ERROR =
   "This course has assessments. Delete them first, or unpublish the course instead.";
 
+/** Publishing, unpublishing, editing or deleting a course all change what the public site shows. */
+function revalidatePublicCoursePaths(...slugs: (string | null | undefined)[]) {
+  revalidatePath("/");
+  revalidatePath("/courses");
+  for (const slug of slugs) {
+    if (slug) revalidatePath(`/courses/${slug}`);
+  }
+}
+
 function parseCourseForm(formData: FormData) {
   return courseSchema.safeParse({
     title: formData.get("title"),
@@ -54,6 +63,7 @@ export async function createCourse(
   }
 
   revalidatePath("/admin/courses");
+  revalidatePublicCoursePaths(parsed.data.slug);
   redirect(`/admin/courses/${data.id}`);
 }
 
@@ -70,6 +80,12 @@ export async function updateCourse(
   }
 
   const supabase = await createClient();
+
+  const { data: current } = await supabase
+    .from("courses")
+    .select("slug")
+    .eq("id", courseId)
+    .maybeSingle();
 
   const { data: existing } = await supabase
     .from("courses")
@@ -88,6 +104,7 @@ export async function updateCourse(
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePublicCoursePaths(current?.slug, parsed.data.slug);
   return { error: null };
 }
 
@@ -95,6 +112,12 @@ export async function deleteCourse(courseId: string): Promise<{ error: string | 
   await requireAdmin();
 
   const supabase = await createClient();
+
+  const { data: current } = await supabase
+    .from("courses")
+    .select("slug")
+    .eq("id", courseId)
+    .maybeSingle();
 
   const { count: resourceCount } = await supabase
     .from("resources")
@@ -125,5 +148,6 @@ export async function deleteCourse(courseId: string): Promise<{ error: string | 
   }
 
   revalidatePath("/admin/courses");
+  revalidatePublicCoursePaths(current?.slug);
   return { error: null };
 }
