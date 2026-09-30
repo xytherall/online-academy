@@ -8,9 +8,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   adminResetPasswordSchema,
-  remarksSchema,
   studentProfileUpdateSchema,
   studentSchema,
+  teacherAssessmentSchema,
+  type TeacherAssessmentInput,
 } from "@/lib/validation/students";
 
 export type StudentFormState = { error: string | null };
@@ -231,10 +232,10 @@ export async function removeEnrollment(studentId: string, enrollmentId: string):
   return { error: null };
 }
 
-export async function updateEnrollmentRemarks(
+export async function updateTeacherAssessment(
   studentId: string,
   enrollmentId: string,
-  remarks: string,
+  input: TeacherAssessmentInput,
 ): Promise<ActionResult> {
   await requireAdmin();
 
@@ -242,18 +243,19 @@ export async function updateEnrollmentRemarks(
   const student = await getStudentProfile(supabase, studentId);
   if (!student) return { error: NOT_A_STUDENT_ERROR };
 
-  const parsed = remarksSchema.safeParse({ remarks });
+  const parsed = teacherAssessmentSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Please check the remarks and try again." };
+    return { error: parsed.error.issues[0]?.message ?? "Please check the fields and try again." };
   }
 
   const { error } = await supabase
     .from("enrollments")
-    .update({ remarks: parsed.data.remarks })
+    .update(parsed.data)
     .eq("id", enrollmentId)
     .eq("student_id", studentId);
-  if (error) return { error: "Could not save the remarks. Please try again." };
+  if (error) return { error: "Could not save the teacher assessment. Please try again." };
 
   revalidatePath(`/admin/students/${studentId}`);
+  revalidatePath(`/admin/students/${studentId}/report`);
   return { error: null };
 }

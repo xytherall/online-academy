@@ -260,25 +260,25 @@ All dates and times are shown in the **viewer's local time**.
 
 ## 9. Progress report
 
-Shown per course that the student is enrolled in.
+Covers all of a student's work so far (no date filter). Shown per course the student is enrolled in, plus a summary box at the top. Subjects are never averaged together.
 
-**For each assessment**
-- title and type
-- due date
-- status
-- marks / total
-- whether the marks count
+**Header**: academy name + logo from `site_settings` (no invented fallback — hidden if unset), "Student Progress Report", student name, batch, country, date generated (viewer's local time, client-side).
 
-**Per course summary**
-- **Percentage** = sum of counted marks ÷ sum of totals of counted assessments.
-- **Missing count** = assignments past due with no submission.
-- Admin **remarks** for that course.
+**Summary box**: one line per enrolled course, side by side — overall %, assignments %, tests %, missing count.
+
+**Per course**
+- Title + level.
+- **Overall %, Assignments %, Tests %** — each is sum of counted marks ÷ sum of total marks of counted assessments (marks not null AND `counts_toward_report` true), rounded to 1 decimal. Shows "No marked work yet" instead of 0% when nothing is counted in that category.
+- "X of Y marked", and **missing count** = assignments past due with no submission.
+- **Strongest / weakest result**: the counted assessment with the highest / lowest percentage (ties → most recently due). Only shown with at least 2 counted assessments; weakest is hidden if it ties the strongest.
+- **Assessment table**: title, type, due date (local time), marks/total, status. Late-and-not-counted rows carry a footnote. Upcoming (not yet due) work is listed but affects nothing.
+- **Teacher assessment** (only filled-in fields shown; the whole block is hidden if all are empty): Effort (Excellent/Good/Satisfactory/Needs improvement), Class participation (same scale), Strengths, Areas to improve, Other comments (the `enrollments.remarks` field, relabelled). No per-assessment feedback is shown here — students see that on the assessment page.
+
+Explicitly excluded from v1: letter grades, cross-subject average, rank/comparison, charts, attendance, guardian name, signature line.
 
 **Where it appears**
 - The student sees it at `/student/report`.
-- The admin sees the same report at `/admin/students/[id]/report`. That page has a clean print layout so it can be saved as PDF and shared with guardians.
-
-If there is no marked work yet, the report shows a clear empty state, not a 0%.
+- The admin sees the same report at `/admin/students/[id]/report`, with a "Print / Save as PDF" button (browser print). Both pages render the same shared component from the same calculation module, so the numbers can never differ.
 
 ---
 
@@ -341,6 +341,10 @@ One row per auth user; `id` equals the auth user id.
 | `student_id` | FK → `profiles` |
 | `course_id` | FK → `courses` |
 | `remarks` | nullable |
+| `effort_rating` | nullable; enum `enrollment_rating`: `excellent` / `good` / `satisfactory` / `needs_improvement` |
+| `participation_rating` | nullable; same enum as `effort_rating` |
+| `strengths` | nullable |
+| `areas_to_improve` | nullable |
 
 Unique on (`student_id`, `course_id`).
 
@@ -534,8 +538,8 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] Counts-toward-report override
 
 ### Stage 7 — Progress report
-- [ ] Student report page
-- [ ] Admin printable report
+- [x] Student report page
+- [x] Admin printable report
 
 ### Stage 8 — Announcements
 - [ ] CRUD with target everyone / course / batch
@@ -600,6 +604,11 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-30 | Stage 6B: the `submissions` storage bucket, its RLS, and the `submit_assignment()` RPC were added by `supabase/migrations/20260930100000_stage6b_submissions.sql`. The RPC follows the `complete_password_change()` template (`security definer`, `set search_path = ''`, `revoke`/`grant` to `authenticated` only) and is the *only* student write path onto `submissions` — no direct student INSERT/UPDATE policy was added to the table itself, matching the Stage 6A note that this was deliberately left open for 6B |
 | 2026-09-30 | Stage 6B: images are compressed with a canvas-based helper (`src/lib/compress-image.ts`, no new dependency) rather than a library — decodes via `createImageBitmap(file, { imageOrientation: "from-image" })` specifically so a portrait phone photo's EXIF rotation is baked into the pixels before the canvas resize, instead of being lost (verified live with a crafted EXIF-orientation-6 JPEG: an 800×400 stored buffer correctly rendered/uploaded as 400×800 portrait). A decode failure (corrupt/unsupported image) falls back to the original file rather than throwing, and the whole upload flow in `submission-upload-form.tsx` is wrapped in try/catch/finally so a crash never leaves the dialog stuck on "Uploading…" |
 | 2026-09-30 | Stage 6A: Server Components render in UTC, so `due_at` is never formatted server-side. A client component `<LocalDateTime iso={...} />` (`src/components/local-date-time.tsx`) formats it in the viewer's time zone after hydration, using a `useSyncExternalStore`-based `useIsClient()` hook (`src/lib/use-is-client.ts`) rather than an effect + `setState`, since the project's lint rules flag the latter for one-time client-only initialization. The same hook backs the assessment edit form's due-date field, which is blank until the client mounts and then fills in from the stored UTC value via a new `toDatetimeLocalValue()` helper |
+| 2026-09-30 | Stage 7 owner decisions: report covers all work so far (no date filter, no per-stage window); no letter grades, cross-subject average, rank/comparison, charts, attendance, guardian name or signature line; per-assessment feedback is not shown on the report (students see it on the assessment page itself) |
+| 2026-09-30 | Stage 7: added a Vitest devDependency (pinned to the `^2` major, since the latest major's `@types/node` peer range doesn't overlap this project's `@types/node@^20`) to unit-test the pure calculation module (`src/lib/progress-report.ts`) — the project had no test runner before this. `vitest.config.ts` aliases both the `@/*` path (to match `tsconfig.json`) and the bare specifier `server-only` to a local no-op stub (`src/lib/test/server-only-stub.ts`), since `server-only` is a virtual module Next.js injects at build time with no real npm package, so it doesn't resolve under Vitest's plain Node/Vite resolution otherwise |
+| 2026-09-30 | Stage 7: `computeCourseReport()` in `src/lib/progress-report.ts` is the single source of truth for every number on the report, called by both `/student/report` and `/admin/students/[id]/report` via the shared `getStudentCourseReports()` fetch helper and `<ProgressReport>` component (`src/components/report/progress-report.tsx`), so the two pages can never disagree. For the admin page — whose Supabase client sees every assessment regardless of batch (RLS grants admins full `assessments` SELECT) — `getStudentCourseReports()` re-applies the same batch-visibility rule a student's own RLS-scoped client already gets for free, using the same "or already has a submission" override as `getVisibleAssessmentForStudent()` in `src/lib/assessments.ts`, but as a bulk in-memory filter rather than a per-row query |
+| 2026-09-30 | Stage 7: strongest/weakest tie-breaks use the assessment's `due_at` (most recent wins), not `submitted_at`, since a test has no submission date but still needs a deterministic tie-break; verified live with two assessments tied at 80% where the tie-break correctly picked the one due later |
+| 2026-09-30 | Stage 7: the enrollments manager's old single "remarks" edit-in-place control (`updateEnrollmentRemarks`) was replaced outright with `updateTeacherAssessment`, covering all five teacher-assessment fields (including the renamed-on-screen `remarks` → "Other comments") in one form/action, since nothing else called the old action and CLAUDE.md's "no duplicated logic" / "no backwards-compatibility shims" rules rule out keeping both |
 
 ## 16. Known issues / open items
 
@@ -613,3 +622,6 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - The admin batch-detail page's "Assign a student" control (`src/app/admin/batches/[id]/batch-students-manager.tsx`, Stage 4) did not reliably commit a selection to `selectedStudentId` when driven via simulated clicks during Stage 6A browser testing — the "Assign" button stayed a no-op until the underlying base-ui `Select` was driven through `form_input` instead of coordinate clicks. This may be purely a browser-automation quirk rather than a real user-facing bug (manual verification in Stage 4 presumably used real clicks), but it has not been re-confirmed with a human clicking through the UI; worth a quick manual check before relying on it.
 - Course delete is blocked by checking `resources`, `enrollments` and, as of Stage 6A, `assessments` (`deleteCourse` in `src/app/admin/courses/actions.ts`). Only the `resources`/`enrollments` branch was exercised live during Stage 6A verification (the test course already had a resource); the `assessments` branch is covered by code review and the identical pattern already proven live in the `deleteBatch` equivalent, but has not itself been exercised against a real "course with only assessments" case.
 - Stage 6B verification: the pre-existing "o lvl maths" course noted in earlier Stage 5/6A entries was gone by the start of this pass (Active students showed 1 but Courses was empty) — the owner deleted it themselves, unrelated to this stage. A scratch course ("QA Stage6B Course", with the student enrolled, no batch), four scratch assessments (two assignments — one on-time, one pre-dated to be late — one test, one mobile-upload test) and their submissions/marks were created to exercise the full submit → mark → dashboard flow live. Since the admin UI has no way to delete a submission or an assessment that has one (by design, SPEC §8), cleanup needed a direct, owner-authorized database operation (storage objects, submissions, assessments, the enrollment, then the course — run and removed after use, not committed) rather than the normal delete flow; nothing else was touched. `test-admin@example.com` and `test-student@example.com` also had their passwords reset for this verification pass (owner-authorized), to a value shared with the owner directly and not recorded here; rotate before launch per the existing notes above.
+- Stage 7 verification: a scratch course ("QA Stage7 Course", O Level) with the test student enrolled (no batch) and six scratch assessments (a past-due unsubmitted assignment, a marked test, an unmarked test, a late-and-admin-counted assignment, a late-and-uncounted assignment, and an on-time assignment) were created to exercise every branch of `computeCourseReport()` live — every number shown on both `/student/report` and `/admin/students/[id]/report` was checked by hand against the scratch data and matched. A teacher assessment (all five fields) was filled in, confirmed to render identically on both pages, and confirmed to vanish per-field when unset. Confirmed live: a student session redirects away from `/admin/students/[id]/report` to `/student`, and a direct Supabase client update from a student session against their own `enrollments` row (setting `effort_rating`/`strengths`) affects 0 rows (RLS: no student write policy exists on `enrollments`, unchanged from Stage 4). The scratch course, its assessments/submissions/storage objects and enrollment were deleted afterward, and the student's `phone`/`country` (temporarily set to exercise the report header) were reverted to empty. `test-admin@example.com`/`test-student@example.com` passwords were reset for this pass and rotated again afterward to a fresh value not recorded anywhere, per the existing notes above.
+- During Stage 7 browser verification, editing the teacher-assessment fields triggered a one-time Next.js dev-overlay console warning ("A component is changing the default value state of an uncontrolled FieldControl after being initialized") from a base-ui internal frame, with no attached component name. It did not reproduce as a rendering/functional bug (the saved values, report display, and a page reload all behaved correctly), and the same warning did not appear on a plain page load. Not confirmed as a real bug — possibly a benign artifact of hot-reload/dev-mode state during automated interaction — but not root-caused either; worth a quick manual click-through with the browser console open before relying on this being clean, similar to the unconfirmed Stage 6A batch-assign automation quirk noted above.
+- Print CSS (`print:hidden` on nav/sidebar/print button, `print:break-before-page` per course section) was implemented and the relevant classes verified present, but the actual OS print-preview dialog can't be captured by browser automation — the owner should do one manual Ctrl+P check on `/admin/students/[id]/report` before relying on it for guardians.

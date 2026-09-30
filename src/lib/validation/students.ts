@@ -59,8 +59,23 @@ export const adminResetPasswordSchema = z.object({
 
 export type AdminResetPasswordInput = z.infer<typeof adminResetPasswordSchema>;
 
-export const remarksSchema = z.object({
-  remarks: optionalTrimmed(2000, "Remarks must be 2,000 characters or fewer"),
+const ratingLevels = ["excellent", "good", "satisfactory", "needs_improvement"] as const;
+
+function optionalRating() {
+  return z.preprocess(
+    (value) => (value === "" || value == null ? null : value),
+    z.enum(ratingLevels).nullable(),
+  );
+}
+
+// SPEC §9 progress-report "Teacher assessment" block. Same length limit as
+// `remarks` — these are the same kind of short free-text admin note.
+export const teacherAssessmentSchema = z.object({
+  effort_rating: optionalRating(),
+  participation_rating: optionalRating(),
+  strengths: optionalTrimmed(2000, "Strengths must be 2,000 characters or fewer"),
+  areas_to_improve: optionalTrimmed(2000, "Areas to improve must be 2,000 characters or fewer"),
+  remarks: optionalTrimmed(2000, "Other comments must be 2,000 characters or fewer"),
 });
 
-export type RemarksInput = z.infer<typeof remarksSchema>;
+export type TeacherAssessmentInput = z.infer<typeof teacherAssessmentSchema>;

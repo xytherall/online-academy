@@ -21,7 +21,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     supabase.from("batches").select("id, name").order("name"),
     supabase
       .from("enrollments")
-      .select("id, remarks, courses(id, title, level)")
+      .select(
+        "id, remarks, effort_rating, participation_rating, strengths, areas_to_improve, courses(id, title, level)",
+      )
       .eq("student_id", id)
       .order("created_at"),
     supabase.from("courses").select("id, title, level").order("level").order("title"),
@@ -72,7 +74,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           studentId={student.id}
           enrollments={(enrollments ?? [])
             .filter((e) => e.courses)
-            .map((e) => ({ id: e.id, remarks: e.remarks, course: e.courses! }))}
+            .map((e) => ({
+              id: e.id,
+              remarks: e.remarks,
+              effort_rating: e.effort_rating,
+              participation_rating: e.participation_rating,
+              strengths: e.strengths,
+              areas_to_improve: e.areas_to_improve,
+              course: e.courses!,
+            }))}
           availableCourses={availableCourses}
         />
       )}

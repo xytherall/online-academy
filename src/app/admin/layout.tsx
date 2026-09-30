@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-border px-6 py-4">
+      <header className="border-b border-border px-6 py-4 print:hidden">
         <nav className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <AdminMobileNav />
@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </header>
       <div className="flex flex-1">
         <AdminSidebar />
-        <main className="flex flex-1 flex-col px-6 py-8">{children}</main>
+        <main className="flex flex-1 flex-col px-6 py-8 print:p-0">{children}</main>
       </div>
     </div>
   );

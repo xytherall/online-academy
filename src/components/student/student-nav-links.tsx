@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 export const STUDENT_NAV_ITEMS = [
   { href: "/student", label: "Dashboard" },
   { href: "/student/courses", label: "My Courses" },
+  { href: "/student/report", label: "Progress report" },
   { href: "/student/account", label: "Account" },
 ] as const;
 

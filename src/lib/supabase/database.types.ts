@@ -155,26 +155,48 @@ export type Database = {
       }
       enrollments: {
         Row: {
+          areas_to_improve: string | null
           course_id: string
           created_at: string
+          effort_rating: Database["public"]["Enums"]["enrollment_rating"] | null
           id: string
+          participation_rating:
+            | Database["public"]["Enums"]["enrollment_rating"]
+            | null
           remarks: string | null
+          strengths: string | null
           student_id: string
           updated_at: string
         }
         Insert: {
+          areas_to_improve?: string | null
           course_id: string
           created_at?: string
+          effort_rating?:
+            | Database["public"]["Enums"]["enrollment_rating"]
+            | null
           id?: string
+          participation_rating?:
+            | Database["public"]["Enums"]["enrollment_rating"]
+            | null
           remarks?: string | null
+          strengths?: string | null
           student_id: string
           updated_at?: string
         }
         Update: {
+          areas_to_improve?: string | null
           course_id?: string
           created_at?: string
+          effort_rating?:
+            | Database["public"]["Enums"]["enrollment_rating"]
+            | null
           id?: string
+          participation_rating?:
+            | Database["public"]["Enums"]["enrollment_rating"]
+            | null
           remarks?: string | null
+          strengths?: string | null
           student_id?: string
           updated_at?: string
         }
@@ -455,6 +477,11 @@ export type Database = {
     Enums: {
       assessment_type: "assignment" | "test"
       course_level: "O" | "A"
+      enrollment_rating:
+        | "excellent"
+        | "good"
+        | "satisfactory"
+        | "needs_improvement"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
     }
@@ -589,6 +616,12 @@ export const Constants = {
     Enums: {
       assessment_type: ["assignment", "test"],
       course_level: ["O", "A"],
+      enrollment_rating: [
+        "excellent",
+        "good",
+        "satisfactory",
+        "needs_improvement",
+      ],
       resource_kind: ["file", "link"],
       user_role: ["admin", "teacher", "student"],
     },
