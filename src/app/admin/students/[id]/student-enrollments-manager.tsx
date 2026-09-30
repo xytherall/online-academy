@@ -102,7 +102,7 @@ export function StudentEnrollmentsManager({
       ) : null}
 
       {availableCourses.length > 0 ? (
-        <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border p-4">
+        <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border bg-card p-4">
           <div className="min-w-[220px] space-y-2">
             <p className="text-sm font-medium">Add a course</p>
             <Select
@@ -213,7 +213,7 @@ function EnrollmentRow({ studentId, enrollment }: { studentId: string; enrollmen
   }
 
   return (
-    <li className="rounded-lg border border-border p-3">
+    <li className="rounded-lg border border-border bg-card p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="font-medium">{enrollment.course.title}</p>

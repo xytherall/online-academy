@@ -120,7 +120,7 @@ function ResourceRow({
   }
 
   return (
-    <li className="rounded-lg border border-border p-3">
+    <li className="rounded-lg border border-border bg-card p-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex flex-col">
           <Button

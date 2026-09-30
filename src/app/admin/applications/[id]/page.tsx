@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getApplication } from "@/lib/applications";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
+import { applicationStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicationReview } from "./application-review";
 
@@ -36,7 +37,7 @@ export default async function ApplicationDetailPage({
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold">{application.full_name}</h1>
-          <Badge variant={application.status === "pending" ? "default" : "secondary"}>
+          <Badge variant={applicationStatusBadgeVariant(application.status)}>
             {STATUS_LABELS[application.status]}
           </Badge>
         </div>

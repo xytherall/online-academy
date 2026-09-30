@@ -1,9 +1,18 @@
 import Link from "next/link";
+import { CheckSquareIcon, InboxIcon, UsersIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getPendingApplicationCount } from "@/lib/applications";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { createClient } from "@/lib/supabase/server";
+
+function StatIcon({ icon: Icon }: { icon: typeof InboxIcon }) {
+  return (
+    <div className="flex size-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
+      <Icon className="size-5" aria-hidden="true" />
+    </div>
+  );
+}
 
 export default async function AdminOverview() {
   const settings = await getSiteSettings();
@@ -36,7 +45,8 @@ export default async function AdminOverview() {
 
       <div className="grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center gap-3 space-y-0">
+            <StatIcon icon={InboxIcon} />
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending applications
             </CardTitle>
@@ -49,7 +59,8 @@ export default async function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center gap-3 space-y-0">
+            <StatIcon icon={UsersIcon} />
             <CardTitle className="text-sm font-medium text-muted-foreground">Active students</CardTitle>
           </CardHeader>
           <CardContent>
@@ -58,7 +69,8 @@ export default async function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center gap-3 space-y-0">
+            <StatIcon icon={CheckSquareIcon} />
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Submissions waiting to be marked
             </CardTitle>

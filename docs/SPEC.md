@@ -665,12 +665,14 @@ Applies SPEC §12 ("Design system") across the app. Visual/styling only — no b
 - [x] Restyle: 404 / error pages
 
 #### 10B — Portal & admin
-- [ ] Sidebar/mobile drawer restyle with lucide icon per nav item
-- [ ] Student dashboard navy header band (gradient + grid texture, batch chip, overlapping course cards)
-- [ ] Progress ring on course cards/report; "No marked work yet" state (never a 0% ring)
-- [ ] Status pills (Due soon / Overdue / Not submitted / Marked) using semantic tokens
-- [ ] Admin: table restyle, number cards with icon tiles, no charts
-- [ ] Dark mode pass across portal + admin (fix anything that doesn't use tokens)
+- [x] Sidebar/mobile drawer restyle with lucide icon per nav item
+- [x] Student dashboard navy header band (gradient + grid texture, batch chip, overlapping course cards)
+- [x] Progress ring on course cards/report; "No marked work yet" state (never a 0% ring)
+- [x] Status pills (Due soon / Overdue / Not submitted / Marked) using semantic tokens
+- [x] Admin: table restyle, number cards with icon tiles, no charts
+- [x] Dark mode pass across portal + admin (fix anything that doesn't use tokens)
+
+Not verified in-browser this session (no test Supabase login available to the agent) — owner should run the §12 light/dark/375px pass below before treating 10B as fully signed off.
 
 ### Stage 11 — Launch
 - [ ] Mobile/responsive pass on every page
@@ -767,8 +769,11 @@ Applies SPEC §12 ("Design system") across the app. Visual/styling only — no b
 | 2026-10-01 | Stage 10A polish: `FALLBACK_ACADEMY_NAME = "Academy Portal"` read as an invented academy name rather than a neutral placeholder, contradicting SPEC §2/§12. Renamed to `FALLBACK_SITE_LABEL = "Student Portal"`, used only in `<title>`/metadata and site chrome (header/footer/login brand mark) — never as the home hero's headline. The hero headline now shows the real academy name or, when unset, the neutral greeting "Welcome" instead of any stand-in name. A second, undocumented copy of the same literal fallback in `PublicFooter`'s copyright line was found and pointed at the same constant |
 | 2026-10-01 | Stage 10A polish: the home hero gained a small eyebrow listing the levels with at least one published course (e.g. "O Level · A Level"), derived live from the same published-courses query as the courses section — not invented, and hidden when no courses are published. Headline stays the academy name and subtext stays the tagline, both already settings-driven |
 | 2026-10-01 | Former Stage 10 ("Polish & launch") split in two: Stage 10 "Design & polish" (10A public site/auth-adjacent pages, 10B portal/admin) applies SPEC §12's design system, visual changes only; a new Stage 11 "Launch" keeps the original launch checklist (responsive pass, RLS/security review, error pages, backup procedure, Netlify deploy with env vars) plus two items added at the owner's request: a keep-alive check for the free Supabase project's inactivity pause, and setting up the production Supabase project |
-
-## 16. Known issues / open items
+| 2026-10-01 | Stage 10B owner decision: `Badge` gained an `info` variant built from the existing `primary`/`primary-soft` tokens rather than a new colour — §12 defines only success/warning/late, so "in progress" statuses (e.g. a submitted-but-unmarked assessment) reuse the brand colour instead of inventing a fourth status hue |
+| 2026-10-01 | Stage 10B: one status→pill mapping (`src/lib/status-badge.ts`), used by both the student and admin sides so a given status always renders the same pill everywhere: Marked → success; Missing / Submitted late / Overdue → late; Submitted → info; Not submitted / Not yet marked → secondary (neutral). "Due soon"/"Overdue" are computed for display only from the existing `due_at` (never stored, never fed back into `computeAssessmentStatus`). The same module also gives Active/Deactivated, Published/Unpublished and Pending/Accepted/Rejected a consistent success/secondary/late/warning mapping for visual consistency, even though §12's "Status pills" section only names assessment/submission statuses explicitly |
+| 2026-10-01 | Stage 10B: added `--dashboard-band-foreground` (`#ffffff` in both themes) alongside the existing `--dashboard-band-from/to` pair — the band is dark navy in both light and dark mode, so its text needs one colour that never flips with the theme toggle; kept as a proper token (mapped into `@theme inline`) rather than a hardcoded `text-white`, per CLAUDE.md's "nothing hardcoded outside tokens" |
+| 2026-10-01 | Stage 10B: student dashboard/`/student/courses` now fetch course cards via `getStudentCourseReports()` (the same calculation the progress report already uses) instead of a separate `getEnrolledCourses()` query, so the progress ring and "X of Y marked / N missing" line on a course card can never disagree with the report page. `getEnrolledCourses()` was deleted as dead code |
+| 2026-10-01 | Stage 10B: the per-assessment marking table and the all-courses marking queue were converted from `<li>` row-cards to real `<table>`s per §12 ("clean tables, not cards-as-tables"); the resource/assessment/announcement/enrollment dialog-driven CRUD lists were left as bordered row-cards, since each row holds a full inline edit form or dialog trigger rather than tabular columns, and forcing those into `<table>` markup would risk the existing dialog/form behaviour for a "record list" widget those SPEC lines aren't clearly describing |
 
 - **`APPLY_FORM_SECRET` must be set in Netlify at Stage 10.** `/apply` throws if it is missing, rather than silently running with the timing check disabled — so forgetting it breaks the apply page loudly instead of quietly. A local value is in `.env.local`; `.env.example` lists the name.
 - **The application flood limit is global, by decision, and is therefore a self-DoS lever.** `check_application_flood_limit()` rejects an insert once 20 applications exist in the previous 10 minutes, counted across all applicants. Anyone willing to POST 20 rows at the REST API can lock out every genuine applicant for the rest of that window; they cannot read, alter or accept anything, so the damage is availability only, and it clears itself 10 minutes later. Accepted deliberately over a per-email or per-IP variant. Both constants live in that one trigger function if the ceiling needs raising.

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/admin/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,27 +33,43 @@ export default async function AdminMarkingQueue() {
       ) : !submissions || submissions.length === 0 ? (
         <EmptyState title="Nothing to mark" description="All submitted work has been marked." />
       ) : (
-        <ul className="space-y-2">
-          {submissions.map((submission) =>
-            submission.assessment ? (
-              <li key={submission.id} className="rounded-lg border border-border p-3">
-                <Link href={`/admin/assessments/${submission.assessment.id}`} className="font-medium hover:underline">
-                  {submission.assessment.title}
-                </Link>
-                <p className="text-sm text-muted-foreground">
-                  {submission.assessment.course?.title ?? "Unknown course"} ·{" "}
-                  {submission.student?.full_name ?? submission.student?.email ?? "Unknown student"}
-                  {submission.submitted_at ? (
-                    <>
-                      {" "}
-                      · Submitted <LocalDateTime iso={submission.submitted_at} />
-                    </>
-                  ) : null}
-                </p>
-              </li>
-            ) : null,
-          )}
-        </ul>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Assessment</TableHead>
+                <TableHead className="hidden sm:table-cell">Course</TableHead>
+                <TableHead>Student</TableHead>
+                <TableHead className="hidden sm:table-cell">Submitted</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {submissions.map((submission) =>
+                submission.assessment ? (
+                  <TableRow key={submission.id}>
+                    <TableCell>
+                      <Link
+                        href={`/admin/assessments/${submission.assessment.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {submission.assessment.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {submission.assessment.course?.title ?? "Unknown course"}
+                    </TableCell>
+                    <TableCell>
+                      {submission.student?.full_name ?? submission.student?.email ?? "Unknown student"}
+                    </TableCell>
+                    <TableCell className="hidden text-muted-foreground sm:table-cell">
+                      {submission.submitted_at ? <LocalDateTime iso={submission.submitted_at} /> : "—"}
+                    </TableCell>
+                  </TableRow>
+                ) : null,
+              )}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );

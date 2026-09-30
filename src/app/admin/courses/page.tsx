@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { publishedStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteCourseButton } from "./course-row-actions";
 
@@ -42,7 +43,7 @@ export default async function AdminCoursesPage() {
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{course.level} Level</TableCell>
                 <TableCell>
-                  <Badge variant={course.is_published ? "default" : "secondary"}>
+                  <Badge variant={publishedStatusBadgeVariant(course.is_published)}>
                     {course.is_published ? "Published" : "Unpublished"}
                   </Badge>
                 </TableCell>

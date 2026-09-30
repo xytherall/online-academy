@@ -68,7 +68,7 @@ export function BatchStudentsManager({
           {assignedStudents.map((student) => (
             <li
               key={student.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border p-3"
+              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card p-3"
             >
               <div className="min-w-0">
                 <p className="truncate font-medium">{studentLabel(student)}</p>
@@ -95,7 +95,7 @@ export function BatchStudentsManager({
       ) : null}
 
       {unassignedStudents.length > 0 ? (
-        <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border p-4">
+        <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border bg-card p-4">
           <div className="min-w-[220px] space-y-2">
             <p className="text-sm font-medium">Assign a student</p>
             <Select

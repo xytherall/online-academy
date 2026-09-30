@@ -16,7 +16,7 @@ export function ResourceForm({ courseId }: { courseId: string }) {
   const [kind, setKind] = useState<"link" | "file">("link");
 
   return (
-    <div className="max-w-xl space-y-4 rounded-lg border border-border p-4">
+    <div className="max-w-xl space-y-4 rounded-lg border border-border bg-card p-4">
       <h3 className="font-medium">Add resource</h3>
       <div className="flex gap-2">
         <Button

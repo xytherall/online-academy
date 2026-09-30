@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { activeStatusBadgeVariant } from "@/lib/status-badge";
 
 export type StudentRow = {
   id: string;
@@ -170,7 +171,7 @@ export function StudentsTable({
                 <TableCell className="hidden md:table-cell">{student.batch?.name ?? "—"}</TableCell>
                 <TableCell className="hidden md:table-cell">{student.country ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant={student.is_active ? "default" : "secondary"}>
+                  <Badge variant={activeStatusBadgeVariant(student.is_active)}>
                     {student.is_active ? "Active" : "Deactivated"}
                   </Badge>
                 </TableCell>

@@ -78,7 +78,7 @@ export function ApplicationsTable({ applications }: { applications: ApplicationR
               className={cn(
                 "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-accent text-accent-foreground"
+                  ? "bg-primary-soft text-primary"
                   : "text-muted-foreground hover:bg-accent/50",
               )}
             >

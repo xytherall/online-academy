@@ -121,7 +121,7 @@ function AssessmentRow({
   }
 
   return (
-    <li className="rounded-lg border border-border p-3">
+    <li className="rounded-lg border border-border bg-card p-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

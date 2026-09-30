@@ -88,7 +88,7 @@ export function ApplicationReview({
 
   if (status === "accepted") {
     return (
-      <div className="space-y-3 rounded-lg border border-border p-5">
+      <div className="space-y-3 rounded-lg border border-border bg-card p-5">
         <h2 className="font-medium">Accepted</h2>
         <p className="text-sm text-muted-foreground">
           This applicant has a student account. Reset their password from their student page if they
@@ -109,7 +109,7 @@ export function ApplicationReview({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-5">
+    <div className="space-y-3 rounded-lg border border-border bg-card p-5">
       <h2 className="font-medium">Rejected</h2>
       <p className="text-sm text-muted-foreground">
         No account was created. You can delete this application to remove the applicant&apos;s
@@ -187,7 +187,7 @@ function AcceptApplicationForm({
     .filter(([, list]) => list.length > 0);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border border-border p-5" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border border-border bg-card p-5" noValidate>
       <div className="space-y-1">
         <h2 className="font-medium">Accept this application</h2>
         <p className="text-sm text-muted-foreground">
@@ -305,7 +305,7 @@ function LoginDetailsPanel({ accepted }: { accepted: Accepted }) {
   ].join("\n");
 
   return (
-    <div className="space-y-4 rounded-lg border border-border p-5">
+    <div className="space-y-4 rounded-lg border border-border bg-card p-5">
       <div className="space-y-1">
         <h2 className="font-medium">Account created</h2>
         <p className="text-sm text-muted-foreground">
