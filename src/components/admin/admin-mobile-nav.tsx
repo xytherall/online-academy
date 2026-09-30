@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AdminNavLinks } from "@/components/admin/admin-nav-links";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export function AdminMobileNav() {
+export function AdminMobileNav({ pendingApplicationCount }: { pendingApplicationCount: number }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,7 +24,10 @@ export function AdminMobileNav() {
           <SheetTitle>Admin</SheetTitle>
         </SheetHeader>
         <div className="px-4 pb-4">
-          <AdminNavLinks onNavigate={() => setOpen(false)} />
+          <AdminNavLinks
+            onNavigate={() => setOpen(false)}
+            pendingApplicationCount={pendingApplicationCount}
+          />
         </div>
       </SheetContent>
     </Sheet>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { CountrySelect } from "@/components/country-select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { generatePassword } from "@/lib/generate-password";
 import { studentSchema } from "@/lib/validation/students";
 import { createStudent, type StudentFormState } from "./actions";
 
@@ -13,13 +15,6 @@ const initialState: StudentFormState = { error: null };
 
 type Course = { id: string; title: string; level: "O" | "A" };
 type Batch = { id: string; name: string };
-
-function generatePassword() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-  let result = "";
-  for (let i = 0; i < 10; i++) result += chars[Math.floor(Math.random() * chars.length)];
-  return result;
-}
 
 export function StudentForm({ courses, batches }: { courses: Course[]; batches: Batch[] }) {
   const [state, formAction, isPending] = useActionState(createStudent, initialState);
@@ -131,7 +126,7 @@ export function StudentForm({ courses, batches }: { courses: Course[]; batches: 
 
         <div className="space-y-2">
           <Label htmlFor="country">Country</Label>
-          <Input id="country" name="country" aria-invalid={Boolean(fieldErrors.country)} />
+          <CountrySelect id="country" invalid={Boolean(fieldErrors.country)} />
           {fieldErrors.country ? <FieldError>{fieldErrors.country}</FieldError> : null}
         </div>
 

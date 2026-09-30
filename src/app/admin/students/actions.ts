@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
+import { createStudentAccount } from "@/lib/create-student-account";
 import { getStudentProfile } from "@/lib/students";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -18,7 +19,6 @@ export type StudentFormState = { error: string | null };
 type ActionResult = { error: string | null };
 
 const NOT_A_STUDENT_ERROR = "That account is not a student.";
-const EMAIL_IN_USE_ERROR = "An account with this email already exists.";
 const DUPLICATE_ENROLLMENT_ERROR = "This student is already enrolled in that course.";
 
 function profileFieldsFromForm(formData: FormData) {
@@ -53,61 +53,11 @@ export async function createStudent(
   const data = parsed.data;
 
   const supabase = await createClient();
-
-  const { data: existing } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", data.email)
-    .maybeSingle();
-  if (existing) return { error: EMAIL_IN_USE_ERROR };
-
-  const adminClient = createAdminClient();
-
-  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-    email: data.email,
-    password: data.password,
-    email_confirm: true,
-    user_metadata: { full_name: data.full_name },
-  });
-  if (authError || !authData.user) {
-    if (authError?.code === "email_exists") return { error: EMAIL_IN_USE_ERROR };
-    return { error: "Could not create the student account. Please try again." };
-  }
-
-  const studentId = authData.user.id;
-
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .update({
-      full_name: data.full_name,
-      phone: data.phone,
-      whatsapp: data.whatsapp,
-      country: data.country,
-      school: data.school,
-      guardian_name: data.guardian_name,
-      guardian_phone: data.guardian_phone,
-      guardian_email: data.guardian_email,
-      batch_id: data.batch_id,
-      must_change_password: true,
-    })
-    .eq("id", studentId);
-
-  if (profileError) {
-    await adminClient.auth.admin.deleteUser(studentId);
-    return { error: "Could not save the student's details. Please try again." };
-  }
-
-  const { error: enrollmentsError } = await supabase
-    .from("enrollments")
-    .insert(data.course_ids.map((courseId) => ({ student_id: studentId, course_id: courseId })));
-
-  if (enrollmentsError) {
-    await adminClient.auth.admin.deleteUser(studentId);
-    return { error: "Could not enroll the student in the chosen courses. Please try again." };
-  }
+  const result = await createStudentAccount(supabase, data);
+  if (!result.ok) return { error: result.error };
 
   revalidatePath("/admin/students");
-  redirect(`/admin/students/${studentId}`);
+  redirect(`/admin/students/${result.studentId}`);
 }
 
 export async function updateStudentProfile(

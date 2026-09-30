@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { generatePassword } from "@/lib/generate-password";
 import { adminResetPasswordSchema } from "@/lib/validation/students";
 import { resetStudentPassword, setStudentActive } from "../actions";
 
@@ -86,13 +87,6 @@ function ToggleActiveButton({ studentId, isActive }: { studentId: string; isActi
       </DialogContent>
     </Dialog>
   );
-}
-
-function generatePassword() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-  let result = "";
-  for (let i = 0; i < 10; i++) result += chars[Math.floor(Math.random() * chars.length)];
-  return result;
 }
 
 function ResetPasswordButton({ studentId }: { studentId: string }) {

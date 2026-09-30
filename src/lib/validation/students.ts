@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { isKnownCountry } from "@/lib/countries";
 import { MIN_PASSWORD_LENGTH } from "./auth";
 
-function optionalTrimmed(maxLength: number, message: string) {
+export function optionalTrimmed(maxLength: number, message: string) {
   return z
     .preprocess(
       (value) => (typeof value === "string" ? value.trim() : ""),
@@ -10,7 +11,7 @@ function optionalTrimmed(maxLength: number, message: string) {
     .transform((value) => ((value as string).length > 0 ? (value as string) : null));
 }
 
-function optionalTrimmedEmail() {
+export function optionalTrimmedEmail() {
   return z.preprocess(
     (value) => (typeof value === "string" && value.trim().length > 0 ? value.trim() : null),
     z
@@ -22,11 +23,22 @@ function optionalTrimmedEmail() {
   );
 }
 
-const profileFields = {
+/** Chosen from the shared list (src/lib/countries.ts), not typed freehand. */
+export const countrySchema = z
+  .string()
+  .trim()
+  .min(1, "Country is required")
+  .refine(isKnownCountry, "Choose a country from the list");
+
+/**
+ * Shared by the student forms and the application form, so an accepted
+ * application's details copy straight across (SPEC §6).
+ */
+export const profileFields = {
   full_name: z.string().trim().min(1, "Full name is required").max(200, "Full name must be 200 characters or fewer"),
   phone: z.string().trim().min(1, "Phone number is required").max(40, "Phone number must be 40 characters or fewer"),
   whatsapp: optionalTrimmed(40, "WhatsApp number must be 40 characters or fewer"),
-  country: z.string().trim().min(1, "Country is required").max(100, "Country must be 100 characters or fewer"),
+  country: countrySchema,
   school: optionalTrimmed(200, "Current school must be 200 characters or fewer"),
   guardian_name: optionalTrimmed(200, "Guardian name must be 200 characters or fewer"),
   guardian_phone: optionalTrimmed(40, "Guardian phone must be 40 characters or fewer"),
@@ -47,7 +59,22 @@ export type StudentInput = z.infer<typeof studentSchema>;
 
 // Email, password, courses and batch are handled by their own dedicated
 // actions/UI, not the profile-details edit form.
-export const studentProfileUpdateSchema = z.object(profileFields);
+//
+// Country is deliberately laxer here than on create: it was a free-text field
+// before src/lib/countries.ts existed, so an existing student's row may hold
+// something that is not in the list ("UK", a city, a typo). The edit form keeps
+// such a value selectable so it is never silently blanked, which means the
+// schema has to accept it back. Anything the form *offers* is a real country;
+// this bound only stops an unrelated field's save from failing on a legacy
+// value the admin hasn't got round to fixing.
+export const studentProfileUpdateSchema = z.object({
+  ...profileFields,
+  country: z
+    .string()
+    .trim()
+    .min(1, "Country is required")
+    .max(100, "Country must be 100 characters or fewer"),
+});
 
 export type StudentProfileUpdateInput = z.infer<typeof studentProfileUpdateSchema>;
 

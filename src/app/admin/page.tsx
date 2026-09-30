@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getPendingApplicationCount } from "@/lib/applications";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,14 +10,16 @@ export default async function AdminOverview() {
   const needsSettings = !settings?.academy_name?.trim();
 
   const supabase = await createClient();
-  const [{ count: activeStudentCount }, { count: waitingToBeMarkedCount }] = await Promise.all([
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student").eq("is_active", true),
-    supabase
-      .from("submissions")
-      .select("id", { count: "exact", head: true })
-      .not("file_paths", "eq", "{}")
-      .is("marks", null),
-  ]);
+  const [{ count: activeStudentCount }, { count: waitingToBeMarkedCount }, pendingApplicationCount] =
+    await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student").eq("is_active", true),
+      supabase
+        .from("submissions")
+        .select("id", { count: "exact", head: true })
+        .not("file_paths", "eq", "{}")
+        .is("marks", null),
+      getPendingApplicationCount(supabase),
+    ]);
 
   return (
     <div className="space-y-6">
@@ -31,7 +34,20 @@ export default async function AdminOverview() {
         </Alert>
       ) : null}
 
-      <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
+      <div className="grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Pending applications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/applications" className="text-3xl font-semibold hover:underline">
+              {pendingApplicationCount}
+            </Link>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium text-muted-foreground">Active students</CardTitle>

@@ -94,6 +94,87 @@ export type Database = {
           },
         ]
       }
+      applications: {
+        Row: {
+          country: string
+          course_ids: string[]
+          created_at: string
+          email: string
+          full_name: string
+          guardian_email: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          heard_about: string | null
+          id: string
+          level: Database["public"]["Enums"]["course_level"]
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          school: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          student_id: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          country: string
+          course_ids: string[]
+          created_at?: string
+          email: string
+          full_name: string
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          heard_about?: string | null
+          id?: string
+          level: Database["public"]["Enums"]["course_level"]
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          country?: string
+          course_ids?: string[]
+          created_at?: string
+          email?: string
+          full_name?: string
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          heard_about?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["course_level"]
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           attachment_path: string | null
@@ -530,6 +611,7 @@ export type Database = {
       }
     }
     Enums: {
+      application_status: "pending" | "accepted" | "rejected"
       assessment_type: "assignment" | "test"
       course_level: "O" | "A"
       enrollment_rating:
@@ -669,6 +751,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      application_status: ["pending", "accepted", "rejected"],
       assessment_type: ["assignment", "test"],
       course_level: ["O", "A"],
       enrollment_rating: [

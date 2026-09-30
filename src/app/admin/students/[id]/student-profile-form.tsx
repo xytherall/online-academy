@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { CountrySelect } from "@/components/country-select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,11 +83,10 @@ export function StudentProfileForm({ student }: { student: Profile }) {
 
       <div className="space-y-2">
         <Label htmlFor="country">Country</Label>
-        <Input
+        <CountrySelect
           id="country"
-          name="country"
-          defaultValue={student.country ?? ""}
-          aria-invalid={Boolean(fieldErrors.country)}
+          defaultValue={student.country}
+          invalid={Boolean(fieldErrors.country)}
         />
         {fieldErrors.country ? <FieldError>{fieldErrors.country}</FieldError> : null}
       </div>
