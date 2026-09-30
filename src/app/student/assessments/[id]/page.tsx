@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { getVisibleAssessmentForStudent, computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { SubmissionUploadForm } from "./submission-upload-form";
 
 export default async function StudentAssessmentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -65,11 +66,45 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         </div>
       ) : null}
 
-      {submission?.marked_at ? (
+      {assessment.type === "assignment" && !submission ? (
+        <div className="space-y-2">
+          <h2 className="font-medium">Submit your work</h2>
+          <SubmissionUploadForm assessmentId={assessment.id} studentId={profile.id} dueAt={assessment.due_at} />
+        </div>
+      ) : null}
+
+      {assessment.type === "assignment" && submission?.submitted_at ? (
+        <div className="space-y-2 rounded-lg border border-border p-3">
+          <h2 className="font-medium">Your submission</h2>
+          <p className="text-sm">
+            Submitted <LocalDateTime iso={submission.submitted_at} />
+            {submission.is_late ? " · Late" : ""}
+          </p>
+          {submission.file_paths.length > 0 ? (
+            <ul className="space-y-1 text-sm">
+              {submission.file_paths.map((_, index) => (
+                <li key={index}>
+                  <a
+                    href={`/student/submissions/${submission.id}/files/${index}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 font-medium hover:underline"
+                  >
+                    <FileTextIcon className="size-4 shrink-0" />
+                    File {index + 1}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+
+      {submission?.marks != null ? (
         <div className="space-y-2 rounded-lg border border-border p-3">
           <h2 className="font-medium">Marks</h2>
           <p className="text-sm">
-            {submission.marks ?? "—"} / {assessment.total_marks}
+            {submission.marks} / {assessment.total_marks}
           </p>
           {submission.feedback ? (
             <p className="whitespace-pre-line text-sm text-muted-foreground">{submission.feedback}</p>

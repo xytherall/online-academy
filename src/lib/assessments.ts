@@ -13,10 +13,14 @@ export type AssessmentStatus =
   | "Missing"
   | "Not yet marked";
 
-/** SPEC §7 assessment statuses shown to students. */
+/**
+ * SPEC §7 assessment statuses shown to students. "Marked" is decided by
+ * `marks` being non-null (not `marked_at`), consistently everywhere marking
+ * state is shown — a saved mark is what makes something "marked".
+ */
 export function computeAssessmentStatus(
   assessment: Pick<Assessment, "type" | "due_at">,
-  submission: Pick<Submission, "submitted_at" | "is_late" | "marks" | "marked_at"> | null,
+  submission: Pick<Submission, "submitted_at" | "is_late" | "marks"> | null,
   now: Date = new Date(),
 ): AssessmentStatus {
   if (assessment.type === "test") {
@@ -27,7 +31,7 @@ export function computeAssessmentStatus(
     return new Date(assessment.due_at) < now ? "Missing" : "Not submitted";
   }
 
-  if (submission.marked_at) return "Marked";
+  if (submission.marks != null) return "Marked";
   return submission.is_late ? "Submitted late" : "Submitted";
 }
 

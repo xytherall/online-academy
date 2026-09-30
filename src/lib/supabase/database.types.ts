@@ -427,6 +427,30 @@ export type Database = {
       complete_password_change: { Args: never; Returns: undefined }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      submit_assignment: {
+        Args: { p_assessment_id: string; p_file_paths: string[] }
+        Returns: {
+          assessment_id: string
+          counts_toward_report: boolean
+          created_at: string
+          feedback: string | null
+          file_paths: string[]
+          id: string
+          is_late: boolean
+          marked_at: string | null
+          marked_by: string | null
+          marks: number | null
+          student_id: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "submissions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       assessment_type: "assignment" | "test"

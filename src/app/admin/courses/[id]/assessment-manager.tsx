@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2Icon } from "lucide-react";
 import { EmptyState } from "@/components/admin/empty-state";
@@ -134,6 +135,15 @@ function AssessmentRow({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            render={<Link href={`/admin/assessments/${assessment.id}`} />}
+            nativeButton={false}
+          >
+            Marking
+          </Button>
+
           {assessment.attachment_path ? (
             <Button type="button" variant="outline" size="sm" onClick={handleViewAttachment}>
               View attachment

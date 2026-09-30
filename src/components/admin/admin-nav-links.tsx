@@ -9,6 +9,7 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/students", label: "Students" },
   { href: "/admin/batches", label: "Batches" },
   { href: "/admin/courses", label: "Courses" },
+  { href: "/admin/marking", label: "Marking" },
   { href: "/admin/settings", label: "Settings" },
 ] as const;
 
