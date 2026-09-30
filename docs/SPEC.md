@@ -464,13 +464,113 @@ All fields are nullable.
 
 ---
 
-## 12. Design direction
+## 12. Design system
 
-- Clean, modern, minimal, professional. Fully responsive; most students will use phones.
-- Neutral design so the future name, logo and brand colour can be applied easily. Brand colour is defined in one place (theme tokens).
-- Simple navigation: a sidebar on desktop and a compact menu on mobile for the portal.
-- Every data view handles **loading, empty, error and success** states.
-- No excessive animation, no decorative charts, no fake stats or testimonials, no stock "AI-looking" layouts.
+**Style: "Quiet Ink"** — minimal, elegant, calm, modern. Built for teens and their parents: not childish, not corporate-generic. No orange, no photos, no mascots, no heavy animation, no decorative charts, no fake stats or testimonials, no stock "AI-looking" layouts.
+
+Fully responsive, mobile first (most students use phones). Every data view handles **loading, empty, error and success** states. All colours, fonts, radius and spacing below are theme tokens — nothing in this section is ever hardcoded per-component, and nothing outside this section is ever hardcoded either (brand colour and academy name still come from theme tokens and `site_settings`, per CLAUDE.md).
+
+### Fonts
+
+Loaded via `next/font/google`.
+
+| Role | Font | Notes |
+|---|---|---|
+| Display / headings | **Fraunces** | weight 400, `letter-spacing: -0.02em`, `text-wrap: balance` |
+| Body / UI | **Figtree** | weights 400 / 500 / 600 |
+
+Do **not** use Inter anywhere in this project.
+
+### Colour tokens
+
+**Light theme**
+
+| Token | Value |
+|---|---|
+| `background` | `#ffffff` |
+| `background-portal` (page background behind portal cards) | `hsl(216 25% 97%)` |
+| `background-cream` (alternating public-site section) | `hsl(40 45% 96%)` |
+| `card` / surface | `#ffffff` |
+| `foreground` (ink) | `hsl(216 52% 14%)` |
+| `muted-foreground` | `hsl(216 14% 42%)` |
+| `border` | `hsl(216 22% 89%)` |
+| `primary` | `hsl(216 52% 48%)` |
+| `primary-foreground` | `#ffffff` |
+| `primary-soft` | `hsl(216 90% 95%)` |
+| dashboard band gradient | `hsl(216 55% 16%)` → `hsl(216 60% 30%)` |
+| hero glow | `hsl(216 95% 80% / 0.55)` and `hsl(246 80% 85% / 0.45)` |
+| graph-paper grid lines | `hsl(216 40% 50% / 0.07)`, 40px squares |
+
+**Dark theme**
+
+| Token | Value |
+|---|---|
+| `background` | `hsl(216 45% 7%)` |
+| `background-portal` | `hsl(216 40% 8%)` |
+| `background-cream` equivalent | `hsl(216 35% 10%)` |
+| `card` / surface | `hsl(216 38% 11%)` |
+| `foreground` | `hsl(216 30% 93%)` |
+| `muted-foreground` | `hsl(216 15% 68%)` |
+| `border` | `hsl(216 25% 20%)` |
+| `primary` | `hsl(216 90% 70%)` |
+| `primary-foreground` | `hsl(216 55% 10%)` |
+| `primary-soft` | `hsl(216 45% 18%)` |
+| dashboard band gradient | `hsl(216 55% 12%)` → `hsl(216 55% 24%)` |
+| hero glow | `hsl(216 90% 45% / 0.30)` and `hsl(246 70% 40% / 0.22)` |
+| graph-paper grid lines | `hsl(216 60% 70% / 0.06)` |
+
+**Semantic status colours** (foreground on background, light / dark) — used only for small status pills, never as a brand/accent colour:
+
+| Status | Light | Dark |
+|---|---|---|
+| success | `hsl(152 55% 34%)` on `hsl(152 50% 94%)` | `hsl(152 50% 62%)` on `hsl(152 35% 15%)` |
+| warning | `hsl(28 80% 40%)` on `hsl(35 90% 94%)` | `hsl(35 85% 65%)` on `hsl(30 40% 15%)` |
+| late / error | `hsl(0 60% 45%)` on `hsl(0 80% 96%)` | `hsl(0 75% 70%)` on `hsl(0 35% 16%)` |
+
+No orange is used as a brand or accent colour anywhere; `warning` above is the only orange-family hue in the system, reserved strictly for status pills.
+
+### Shape
+
+- Cards: **24px** radius.
+- Small elements (inputs, list rows, small cards): **16px** radius.
+- Buttons, chips, badges: fully rounded pill (**9999px**).
+- Borders: 1px using the `border` token. Shadows only where something must visibly stand out (e.g. an open dialog), not as decoration.
+
+### Dark mode
+
+- Full light/dark theming using the token tables above, plus a toggle available to every user (public site and portal).
+- **Print is always light**, regardless of the active theme — the printable progress report (§9) never prints dark-mode colours.
+
+### Public site
+
+- Normal top bar (not a sidebar).
+- Hero: soft glow (the two glow colours above) + a fading graph-paper grid background + a decorative parabola/sine-wave SVG motif.
+- Sections alternate `background` (white) and `background-cream` down the page.
+- Section headers: uppercase eyebrow label (small, tracked-out) above a serif (Fraunces) title.
+- Course list rows: a round pill-shaped arrow button to open/link through, not a plain text link or chevron-in-box.
+
+### Portal (student + admin)
+
+- White/`card` cards sitting on the `background-portal` (light grey) page background.
+- Sidebar on desktop with a **lucide icon per nav item** (lucide-react is already available via shadcn/ui — no new dependency); compact mobile drawer, as already built.
+
+### Student dashboard
+
+- A navy header band at the top: gradient between the two dashboard-band blues above, with a faint graph-paper grid texture, showing "Welcome back" + the student's name + a batch chip.
+- Course cards sit slightly overlapping the bottom of the band.
+
+### Progress indicators
+
+- Course cards and the progress report show a **progress ring** with the overall % — but **only when there is counted marked work** for that course.
+- When there is no counted marked work, show the text **"No marked work yet"** instead of a ring. Never show a 0% ring — 0% and "nothing marked yet" are different states and must never look the same.
+
+### Status pills
+
+- Assessment/submission status (Due soon / Overdue / Not submitted / Marked — with marks shown) renders as a small coloured pill, using the semantic status tokens above, never raw/inline colours.
+
+### Admin area
+
+- Same tokens and components as the rest of the portal, but calmer and denser: clean tables (not cards-as-tables), number/stat cards built from a value + label + a small icon tile (lucide icon in a soft-background square), never a chart.
 
 ---
 
@@ -550,12 +650,36 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 - [x] Apply form with validation and honeypot
 - [x] Admin applications list + accept/reject flow
 
-### Stage 10 — Polish & launch
+### Stage 10 — Design & polish
+
+Applies SPEC §12 ("Design system") across the app. Visual/styling only — no behaviour changes.
+
+#### 10A — Public site & auth-adjacent pages
+- [ ] Fonts + tokens: Fraunces/Figtree loaded, full light + dark colour tokens, radius scale, pill buttons wired up (theme-level, not per-component)
+- [ ] Dark mode: toggle available, no flash of wrong theme on load
+- [ ] Print is always light, regardless of active theme
+- [ ] Restyle: public header + footer
+- [ ] Restyle: all public pages (`/`, `/courses`, `/courses/[slug]`, `/about`, `/contact`, `/apply`, `/apply/success`)
+- [ ] Restyle: `/login`
+- [ ] Restyle: `/change-password`
+- [ ] Restyle: 404 / error pages
+
+#### 10B — Portal & admin
+- [ ] Sidebar/mobile drawer restyle with lucide icon per nav item
+- [ ] Student dashboard navy header band (gradient + grid texture, batch chip, overlapping course cards)
+- [ ] Progress ring on course cards/report; "No marked work yet" state (never a 0% ring)
+- [ ] Status pills (Due soon / Overdue / Not submitted / Marked) using semantic tokens
+- [ ] Admin: table restyle, number cards with icon tiles, no charts
+- [ ] Dark mode pass across portal + admin (fix anything that doesn't use tokens)
+
+### Stage 11 — Launch
 - [ ] Mobile/responsive pass on every page
 - [ ] RLS and permissions review (try to access other students' data and admin routes as a student)
 - [ ] Error pages (404, error boundary)
 - [ ] Database backup procedure
-- [ ] Deploy to Netlify with environment variables
+- [ ] Keep-alive check (free Supabase projects pause after ~1 week with no activity)
+- [ ] Production Supabase project set up
+- [ ] Deploy to Netlify with environment variables (including `APPLY_FORM_SECRET`)
 - [ ] Add the ~10 existing students
 
 ---
@@ -605,6 +729,7 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-30 | Stage 6B: images are compressed with a canvas-based helper (`src/lib/compress-image.ts`, no new dependency) rather than a library — decodes via `createImageBitmap(file, { imageOrientation: "from-image" })` specifically so a portrait phone photo's EXIF rotation is baked into the pixels before the canvas resize, instead of being lost (verified live with a crafted EXIF-orientation-6 JPEG: an 800×400 stored buffer correctly rendered/uploaded as 400×800 portrait). A decode failure (corrupt/unsupported image) falls back to the original file rather than throwing, and the whole upload flow in `submission-upload-form.tsx` is wrapped in try/catch/finally so a crash never leaves the dialog stuck on "Uploading…" |
 | 2026-09-30 | Stage 6A: Server Components render in UTC, so `due_at` is never formatted server-side. A client component `<LocalDateTime iso={...} />` (`src/components/local-date-time.tsx`) formats it in the viewer's time zone after hydration, using a `useSyncExternalStore`-based `useIsClient()` hook (`src/lib/use-is-client.ts`) rather than an effect + `setState`, since the project's lint rules flag the latter for one-time client-only initialization. The same hook backs the assessment edit form's due-date field, which is blank until the client mounts and then fills in from the stored UTC value via a new `toDatetimeLocalValue()` helper |
 | 2026-09-30 | Stage 7 owner decisions: report covers all work so far (no date filter, no per-stage window); no letter grades, cross-subject average, rank/comparison, charts, attendance, guardian name or signature line; per-assessment feedback is not shown on the report (students see it on the assessment page itself) |
+| 2026-09-30 | Stage 7 owner decisions, report contents: a summary box at the top (one line per course: overall %, assignments %, tests %, missing count); per course, Overall/Assignments/Tests % each computed from counted marks only; strongest/weakest result shown (only with ≥2 counted assessments); a teacher-assessment block (effort, participation, strengths, areas to improve, other comments) shown only for fields that are filled in — see §9 for the full, authoritative spec of these rules |
 | 2026-09-30 | Stage 7: added a Vitest devDependency (pinned to the `^2` major, since the latest major's `@types/node` peer range doesn't overlap this project's `@types/node@^20`) to unit-test the pure calculation module (`src/lib/progress-report.ts`) — the project had no test runner before this. `vitest.config.ts` aliases both the `@/*` path (to match `tsconfig.json`) and the bare specifier `server-only` to a local no-op stub (`src/lib/test/server-only-stub.ts`), since `server-only` is a virtual module Next.js injects at build time with no real npm package, so it doesn't resolve under Vitest's plain Node/Vite resolution otherwise |
 | 2026-09-30 | Stage 7: `computeCourseReport()` in `src/lib/progress-report.ts` is the single source of truth for every number on the report, called by both `/student/report` and `/admin/students/[id]/report` via the shared `getStudentCourseReports()` fetch helper and `<ProgressReport>` component (`src/components/report/progress-report.tsx`), so the two pages can never disagree. For the admin page — whose Supabase client sees every assessment regardless of batch (RLS grants admins full `assessments` SELECT) — `getStudentCourseReports()` re-applies the same batch-visibility rule a student's own RLS-scoped client already gets for free, using the same "or already has a submission" override as `getVisibleAssessmentForStudent()` in `src/lib/assessments.ts`, but as a bulk in-memory filter rather than a per-row query |
 | 2026-09-30 | Stage 7: strongest/weakest tie-breaks use the assessment's `due_at` (most recent wins), not `submitted_at`, since a test has no submission date but still needs a deterministic tie-break; verified live with two assessments tied at 80% where the tie-break correctly picked the one due later |
@@ -633,6 +758,8 @@ Each stage ends with the feature working and tested, and lint, type-check and bu
 | 2026-09-30 | Stage 9B: the country picker (`src/components/country-select.tsx`) is a **native `<select>`**, deliberately unlike the base-ui `Select` used everywhere else — that one has no search box, and scrolling ~195 options in a custom popup is worst on a phone, which is how most applicants will apply (§12). A native select opens the OS picker on mobile and gives type-to-jump on desktop for free; it is styled to match `Input`. The Pending/Accepted/Rejected tabs are likewise a plain segmented `<button>` group with `role="tablist"`, since this project has no `Tabs` primitive (base-ui, not Radix) and adding one for three buttons is not worth it. Tab state is client-side only, so no applicant name or id reaches the URL, matching the students list |
 | 2026-09-30 | Stage 9B verification (live, `next dev` + a real browser): submitted the form end to end and confirmed every field stored correctly with `status = 'pending'` and all review fields null; `?course=<slug>` pre-selects both the course *and* its level; choosing a different level swaps the course list and clears the previous selection; "same as phone" mirrors the number; client-side validation blocks an empty submit with all six required-field messages and inserts nothing; a second application for the same email (typed in a different case) shows "You already have an application being reviewed"; a filled honeypot and a back-dated (signature-breaking) token each land on `/apply/success` with **zero** rows written, confirmed in the database; the flood limit blocks the 21st insert in the window and shows the friendly message. Admin side: nav badge and overview card counts, the three tabs with per-tab empty states, the detail page, accept (account + profile copied from the application + enrollments + batch + `must_change_password`), the one-time password panel and working "Copy login message", reject with reviewer attribution, and delete (rejected only). Then signed in as the new student with the temporary password, was forced through `/change-password`, and landed on `/student` enrolled in the applied-for course. A separate script exercised 24 RLS/trigger assertions directly against the REST API as `anon` and as a real student session — all passed. Every scratch row (24 applications, 3 courses, 1 batch, 2 students and a scratch admin) was deleted afterwards and the database confirmed back to its prior state |
 | 2026-09-30 | Stage 9A verification: browser-automation form interaction was unreliable for base-ui `Select`/`Switch` controls and for buttons immediately after one (plain coordinate clicks on "Create course" and "Save changes" silently no-opped at least once each, and a `Switch` toggle click wasn't reflected in the submitted `FormData` on the first attempt) — same category of quirk already noted in Stage 6A's batch-assign issue, not a new app bug; confirmed by re-reading the hidden form input's value via JS before resubmitting, which matched the intended state each time. Mobile-width (~390px) layout was **not** verified live: `resize_window` reports success but `window.innerWidth` stays unchanged in this session's environment, confirmed by checking `window.innerWidth` immediately after a resize call. The responsive markup reuses the exact `Sheet`-based mobile-nav pattern already proven for the student/admin nav, but a manual phone-width check is still worth doing before relying on it |
+
+| 2026-10-01 | Former Stage 10 ("Polish & launch") split in two: Stage 10 "Design & polish" (10A public site/auth-adjacent pages, 10B portal/admin) applies SPEC §12's design system, visual changes only; a new Stage 11 "Launch" keeps the original launch checklist (responsive pass, RLS/security review, error pages, backup procedure, Netlify deploy with env vars) plus two items added at the owner's request: a keep-alive check for the free Supabase project's inactivity pause, and setting up the production Supabase project |
 
 ## 16. Known issues / open items
 

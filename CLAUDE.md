@@ -73,8 +73,9 @@ Rules:
 
 ## UI rules
 
+- Follow `docs/SPEC.md` §12 ("Design system") exactly: fonts, colours (light + dark), radius, pill buttons, dark mode, and the public/portal/admin layout rules it defines. Never hardcode a colour or font outside the theme tokens it describes.
 - Clean, minimal, professional, responsive (mobile first; most students use phones).
-- Neutral design; brand colour and academy name come from theme tokens and `site_settings`, never hardcoded.
+- Academy name comes from `site_settings`, never hardcoded.
 - **No fake data anywhere.** No invented academy name, courses, teachers, statistics, testimonials or lorem ipsum presented as real. Empty content means a hidden section or a proper empty state.
 - No excessive animation, clutter or decorative charts.
 
