@@ -10,9 +10,14 @@ import type { PublicCourse } from "@/lib/courses";
  */
 export function SubjectCard({ course }: { course: PublicCourse }) {
   const excerpt = course.description?.trim().slice(0, 140) ?? "";
+  // Without a description the card has much less content — a 300px min-height
+  // would look emptier than the mockup intends, so it shrinks to 220px instead.
+  const minHeight = excerpt ? "min-h-[260px] sm:min-h-[300px]" : "min-h-[220px]";
 
   return (
-    <article className="relative flex min-h-[280px] flex-col overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-9">
+    <article
+      className={`relative flex ${minHeight} flex-col overflow-hidden rounded-3xl border border-border bg-card p-7 sm:p-9`}
+    >
       <SubjectSymbol title={course.title} />
       <h3 className="relative font-heading text-3xl sm:text-4xl">{course.title}</h3>
       {excerpt ? <p className="relative mt-2.5 max-w-[34ch] text-muted-foreground">{excerpt}</p> : null}
@@ -36,7 +41,7 @@ function SubjectSymbol({ title }: { title: string }) {
     return (
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-2 -bottom-16 font-heading text-[260px] leading-none text-primary/[0.08] italic select-none"
+        className="pointer-events-none absolute right-[60px] bottom-[-60px] font-heading text-[300px] leading-[1] text-primary/[0.08] italic select-none"
       >
         &int;
       </span>
@@ -48,7 +53,7 @@ function SubjectSymbol({ title }: { title: string }) {
       <svg
         aria-hidden
         viewBox="0 0 360 160"
-        className="pointer-events-none absolute right-[-20px] bottom-6 h-32 w-72 sm:h-40 sm:w-90"
+        className="pointer-events-none absolute right-[-20px] bottom-[30px] h-[160px] w-[360px]"
       >
         <path
           d="M0 80 C 30 10, 60 10, 90 80 S 150 150, 180 80 S 240 10, 270 80 S 330 150, 360 80"

@@ -10,7 +10,7 @@ export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
   const hasContact = Boolean(email || whatsappUrl);
 
   return (
-    <footer className="border-t border-border bg-background-alt px-4 py-16 sm:px-6">
+    <footer className="border-t border-border bg-background px-4 py-16 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-8">
           <div className="space-y-2.5">

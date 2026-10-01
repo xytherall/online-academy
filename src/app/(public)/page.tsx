@@ -29,13 +29,13 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <section className="relative overflow-hidden px-4 py-20 text-center sm:px-6 sm:py-28">
+      <section className="relative overflow-hidden px-4 pt-[56px] pb-[72px] text-center sm:px-6 sm:pt-[88px] sm:pb-[120px]">
         <HeroBackground />
         <HeroCurves />
         <div className="relative mx-auto max-w-3xl">
           {offeredLevels ? <Eyebrow>{offeredLevels}</Eyebrow> : null}
           {headline ? (
-            <h1 className="mx-auto mt-4 max-w-[15ch] text-4xl sm:text-6xl lg:text-7xl">
+            <h1 className="mx-auto mt-[18px] max-w-[15ch] text-[length:clamp(42px,6.6vw,80px)] leading-[1.02]">
               {parseEmphasis(headline).map((part, index) =>
                 part.type === "emphasis" ? (
                   <em key={index} className="text-primary italic">
@@ -48,26 +48,28 @@ export default async function HomePage() {
             </h1>
           ) : null}
           {subtext ? (
-            <p className="mx-auto mt-5 max-w-[52ch] text-lg text-muted-foreground sm:text-xl">{subtext}</p>
+            <p className="mx-auto mt-[22px] max-w-[52ch] text-[18px] text-muted-foreground">{subtext}</p>
           ) : null}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" render={<Link href="/apply" />} nativeButton={false}>
+            <Button size="marketing" render={<Link href="/apply" />} nativeButton={false}>
               Apply now
             </Button>
-            <Button size="lg" variant="outline" render={<Link href="/courses" />} nativeButton={false}>
+            <Button size="marketing" variant="outline" render={<Link href="/courses" />} nativeButton={false}>
               View courses
             </Button>
           </div>
-
-          <PortalPreview />
         </div>
+
+        <PortalPreview />
       </section>
 
-      <section className="border-t border-border bg-background-alt px-4 py-20 sm:px-6 sm:py-26">
+      <section className="border-t border-border bg-background-alt px-4 py-[72px] sm:px-6 sm:py-[104px]">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 max-w-xl space-y-3">
             <Eyebrow>What you get</Eyebrow>
-            <h2 className="text-3xl sm:text-5xl">Everything for your course, in one calm place.</h2>
+            <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">
+              Everything for your course, in one calm place.
+            </h2>
             <p className="text-muted-foreground">
               Classes happen live. Everything around them lives in your portal, so nothing gets lost in a chat
               group.
@@ -77,11 +79,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-border px-4 py-20 sm:px-6 sm:py-26">
+      <section className="border-t border-border px-4 py-[72px] sm:px-6 sm:py-[104px]">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 max-w-xl space-y-3">
             <Eyebrow>Subjects</Eyebrow>
-            <h2 className="text-3xl sm:text-5xl">What we teach</h2>
+            <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">What we teach</h2>
           </div>
           {courses.length > 0 ? (
             <div className="grid gap-5 lg:grid-cols-2">
@@ -100,15 +102,15 @@ export default async function HomePage() {
 
       <HowToJoin />
 
-      <section className="border-t border-border bg-background-alt px-4 py-20 text-center sm:px-6 sm:py-26">
+      <section className="border-t border-border bg-background-alt px-4 py-[72px] text-center sm:px-6 sm:py-[104px]">
         <div className="mx-auto max-w-2xl">
-          <h2 className="text-4xl sm:text-6xl">Ready to start?</h2>
+          <h2 className="text-[length:clamp(40px,6vw,72px)] leading-[1.02]">Ready to start?</h2>
           <p className="mt-4 text-lg text-muted-foreground">Applications take a few minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" render={<Link href="/apply" />} nativeButton={false}>
+            <Button size="marketing" render={<Link href="/apply" />} nativeButton={false}>
               Apply now
             </Button>
-            <Button size="lg" variant="outline" render={<Link href="/contact" />} nativeButton={false}>
+            <Button size="marketing" variant="outline" render={<Link href="/contact" />} nativeButton={false}>
               Contact us
             </Button>
           </div>

@@ -17,10 +17,10 @@ export function PublicHeader({ settings }: { settings: SiteSettings | null }) {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <div className="hidden items-center gap-2 md:flex">
-            <Button variant="outline" render={<Link href="/login" />} nativeButton={false}>
+            <Button size="marketing" variant="outline" render={<Link href="/login" />} nativeButton={false}>
               Student login
             </Button>
-            <Button variant="dark" render={<Link href="/apply" />} nativeButton={false}>
+            <Button size="marketing" variant="dark" render={<Link href="/apply" />} nativeButton={false}>
               Apply now
             </Button>
           </div>

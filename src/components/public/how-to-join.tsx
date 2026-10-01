@@ -22,7 +22,7 @@ const STEPS = [
 export function HowToJoin() {
   return (
     <section
-      className="relative overflow-hidden px-4 py-20 text-dashboard-band-foreground sm:px-6 sm:py-26"
+      className="relative overflow-hidden px-4 py-[72px] text-dashboard-band-foreground sm:px-6 sm:py-[104px]"
       style={{ backgroundImage: "linear-gradient(135deg, var(--dashboard-band-from), var(--dashboard-band-to))" }}
     >
       <div
@@ -37,7 +37,7 @@ export function HowToJoin() {
       <div className="relative mx-auto max-w-5xl">
         <div className="mb-12 max-w-xl space-y-3">
           <Eyebrow>How to join</Eyebrow>
-          <h2 className="text-3xl sm:text-5xl">Three steps to your first class.</h2>
+          <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">Three steps to your first class.</h2>
           <p className="text-dashboard-band-foreground/70">No account to create yourself. We set everything up for you.</p>
         </div>
 
