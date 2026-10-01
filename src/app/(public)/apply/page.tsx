@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/eyebrow";
+import { PageHeader } from "@/components/public/page-header";
 import { issueApplyToken } from "@/lib/apply-token";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
@@ -31,15 +31,22 @@ export default async function ApplyPage({
   // to fill the form would be fake data (SPEC §2).
   if (courses.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-2xl flex-1 space-y-4 px-4 py-16 text-center sm:px-6">
-        <h1 className="text-3xl">Applications are not open yet</h1>
-        <p className="text-muted-foreground">
-          There are no courses open for applications at the moment. Please check back soon, or get in
-          touch using the details on our contact page.
-        </p>
-        <Button variant="outline" render={<Link href="/contact" />} nativeButton={false}>
-          Contact us
-        </Button>
+      <div className="flex flex-1 flex-col">
+        <PageHeader
+          eyebrow="Apply"
+          title="Applications are not open yet"
+          description="There are no courses open for applications at the moment. Please check back soon, or get in touch using the details on our contact page."
+        />
+        <div className="mx-auto w-full max-w-2xl px-4 pb-[72px] text-center sm:px-6 sm:pb-[104px]">
+          <Button
+            size="marketing"
+            variant="outline"
+            render={<Link href="/contact" />}
+            nativeButton={false}
+          >
+            Contact us
+          </Button>
+        </div>
       </div>
     );
   }
@@ -52,26 +59,24 @@ export default async function ApplyPage({
     : null;
 
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-1">
-        <Eyebrow>Apply</Eyebrow>
-        <h1 className="text-3xl sm:text-4xl">Apply now</h1>
-        <p className="pt-1 text-muted-foreground">
-          Tell us a little about yourself and which courses you would like to join. We review every
-          application and get back to you with your login details.
-        </p>
-      </div>
-
-      <ApplyForm
-        courses={courses.map((course) => ({
-          id: course.id,
-          title: course.title,
-          level: course.level,
-        }))}
-        preselectedCourseId={preselected?.id ?? null}
-        preselectedLevel={preselected?.level ?? null}
-        applyToken={issueApplyToken()}
+    <div className="flex flex-1 flex-col">
+      <PageHeader
+        eyebrow="Apply"
+        title="Apply now"
+        description="Tell us a little about yourself and which courses you would like to join. We review every application and get back to you with your login details."
       />
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
+        <ApplyForm
+          courses={courses.map((course) => ({
+            id: course.id,
+            title: course.title,
+            level: course.level,
+          }))}
+          preselectedCourseId={preselected?.id ?? null}
+          preselectedLevel={preselected?.level ?? null}
+          applyToken={issueApplyToken()}
+        />
+      </div>
     </div>
   );
 }

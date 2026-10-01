@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { MailIcon, MessageCircleIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import { EmptyState } from "@/components/admin/empty-state";
-import { Eyebrow } from "@/components/eyebrow";
+import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { getSocialLinkEntries } from "@/lib/social-links";
 import { buildWhatsAppUrl, FALLBACK_SITE_LABEL } from "@/lib/settings";
@@ -26,12 +26,9 @@ export default async function ContactPage() {
   const hasAnyContactInfo = Boolean(email || phone || whatsappUrl || address || socialLinks.length > 0);
 
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-1">
-        <Eyebrow>Contact</Eyebrow>
-        <h1 className="text-3xl sm:text-4xl">Get in touch</h1>
-      </div>
-
+    <div className="flex flex-1 flex-col">
+      <PageHeader eyebrow="Contact" title="Get in touch" />
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
       {hasAnyContactInfo ? (
         <div className="space-y-4">
           {email ? (
@@ -85,6 +82,7 @@ export default async function ContactPage() {
           description="The academy hasn't added contact details yet."
         />
       )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
@@ -21,14 +22,13 @@ export default async function ApplySuccessPage() {
   const hasContact = Boolean(contactEmail || contactPhone);
 
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-16 sm:px-6">
-      <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl">Thank you — your application has been sent</h1>
-        <p className="text-muted-foreground">
-          We have it, and nothing more is needed from you right now.
-        </p>
-      </div>
-
+    <div className="flex flex-1 flex-col">
+      <PageHeader
+        eyebrow="Application sent"
+        title="Thank you — your application has been sent"
+        description="We have it, and nothing more is needed from you right now."
+      />
+      <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
       <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
         <h2 className="font-medium">What happens next</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
@@ -57,12 +57,18 @@ export default async function ApplySuccessPage() {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <Button render={<Link href="/" />} nativeButton={false}>
+        <Button size="marketing" render={<Link href="/" />} nativeButton={false}>
           Back to home
         </Button>
-        <Button variant="outline" render={<Link href="/courses" />} nativeButton={false}>
+        <Button
+          size="marketing"
+          variant="outline"
+          render={<Link href="/courses" />}
+          nativeButton={false}
+        >
           Browse courses
         </Button>
+      </div>
       </div>
     </div>
   );

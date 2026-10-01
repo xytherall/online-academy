@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/admin/empty-state";
-import { Eyebrow } from "@/components/eyebrow";
+import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
@@ -18,20 +18,18 @@ export default async function AboutPage() {
   const aboutText = settings?.about_text?.trim();
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-1">
-        <Eyebrow>About</Eyebrow>
-        <h1 className="text-3xl sm:text-4xl">About us</h1>
+    <div className="flex flex-1 flex-col">
+      <PageHeader eyebrow="About" title="About us" />
+      <div className="mx-auto w-full max-w-3xl flex-1 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
+        {aboutText ? (
+          <p className="whitespace-pre-line text-muted-foreground">{aboutText}</p>
+        ) : (
+          <EmptyState
+            title="Nothing here yet"
+            description="The academy hasn't added an About page yet. Check back soon."
+          />
+        )}
       </div>
-
-      {aboutText ? (
-        <p className="whitespace-pre-line text-muted-foreground">{aboutText}</p>
-      ) : (
-        <EmptyState
-          title="Nothing here yet"
-          description="The academy hasn't added an About page yet. Check back soon."
-        />
-      )}
     </div>
   );
 }

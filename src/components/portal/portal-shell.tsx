@@ -44,7 +44,7 @@ export async function PortalShell({
       </header>
       <div className="flex flex-1">
         {sidebar}
-        <main className="flex flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 print:p-0">{children}</main>
+        <main className="flex min-w-0 flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 print:p-0">{children}</main>
       </div>
     </div>
   );

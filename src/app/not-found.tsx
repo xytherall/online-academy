@@ -1,27 +1,29 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/eyebrow";
+import { PageHeader } from "@/components/public/page-header";
+import { PublicFooter } from "@/components/public/public-footer";
+import { PublicHeader } from "@/components/public/public-header";
+import { getSiteSettings } from "@/lib/get-site-settings";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const settings = await getSiteSettings();
+
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center gap-4 overflow-hidden px-6 py-24 text-center">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,black,transparent)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-      <Eyebrow>404</Eyebrow>
-      <h1 className="text-3xl sm:text-4xl">Page not found</h1>
-      <p className="max-w-md text-muted-foreground">
-        The page you&apos;re looking for doesn&apos;t exist or may have been moved.
-      </p>
-      <Button render={<Link href="/" />} nativeButton={false}>
-        Back to home
-      </Button>
+    <div className="flex flex-1 flex-col">
+      <PublicHeader settings={settings} />
+      <main className="flex flex-1 flex-col">
+        <PageHeader
+          eyebrow="404"
+          title="Page not found"
+          description="The page you're looking for doesn't exist or may have been moved."
+        />
+        <div className="mx-auto w-full max-w-2xl px-4 pb-[72px] text-center sm:px-6 sm:pb-[104px]">
+          <Button size="marketing" render={<Link href="/" />} nativeButton={false}>
+            Back to home
+          </Button>
+        </div>
+      </main>
+      <PublicFooter settings={settings} />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/eyebrow";
+import { PageHeader } from "@/components/public/page-header";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
@@ -32,19 +32,21 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   if (!course) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-12 sm:px-6">
-      <div className="space-y-1">
-        <Eyebrow>{COURSE_LEVEL_LABELS[course.level]}</Eyebrow>
-        <h1 className="text-3xl sm:text-4xl">{course.title}</h1>
+    <div className="flex flex-1 flex-col">
+      <PageHeader eyebrow={COURSE_LEVEL_LABELS[course.level]} title={course.title} />
+      <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
+        {course.description ? (
+          <p className="whitespace-pre-line text-muted-foreground">{course.description}</p>
+        ) : null}
+
+        <Button
+          size="marketing"
+          render={<Link href={`/apply?course=${course.slug}`} />}
+          nativeButton={false}
+        >
+          Apply for this course
+        </Button>
       </div>
-
-      {course.description ? (
-        <p className="whitespace-pre-line text-muted-foreground">{course.description}</p>
-      ) : null}
-
-      <Button size="lg" render={<Link href={`/apply?course=${course.slug}`} />} nativeButton={false}>
-        Apply for this course
-      </Button>
     </div>
   );
 }
