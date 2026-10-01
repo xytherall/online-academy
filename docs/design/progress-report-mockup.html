@@ -1,0 +1,353 @@
+<title>Progress Report Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: a single A4-width "document" card on the portal grey: letterhead → at-a-glance (subject rings + submission donut) → one section per subject (scores, trend, highlights, table, teacher's assessment) → plain-English note */
+:root{
+  --display:"Fraunces", Georgia, serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --page:hsl(216 25% 97%);
+  --paper:#ffffff;
+  --ink:hsl(216 52% 14%);
+  --muted:hsl(216 14% 42%);
+  --faint:hsl(216 14% 60%);
+  --line:hsl(216 22% 89%);
+  --soft:hsl(216 30% 97%);
+  --primary:hsl(216 52% 48%);
+  --primary-soft:hsl(216 90% 95%);
+  --track:hsl(216 25% 91%);
+  --navy-a:hsl(216 55% 15%); --navy-b:hsl(216 58% 26%);
+  --ok:hsl(152 55% 34%); --ok-bg:hsl(152 50% 94%);
+  --warn:hsl(28 80% 40%); --warn-bg:hsl(35 90% 94%);
+  --late:hsl(0 60% 45%); --late-bg:hsl(0 80% 96%);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:hsl(216 40% 8%); --paper:hsl(216 38% 11%); --ink:hsl(216 30% 93%); --muted:hsl(216 15% 68%); --faint:hsl(216 12% 52%);
+    --line:hsl(216 25% 20%); --soft:hsl(216 35% 13%); --primary:hsl(216 90% 70%); --primary-soft:hsl(216 45% 18%); --track:hsl(216 25% 22%);
+    --navy-a:hsl(216 55% 12%); --navy-b:hsl(216 55% 22%);
+    --ok:hsl(152 50% 62%); --ok-bg:hsl(152 35% 15%); --warn:hsl(35 85% 65%); --warn-bg:hsl(30 40% 15%); --late:hsl(0 75% 70%); --late-bg:hsl(0 35% 16%);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:hsl(216 40% 8%); --paper:hsl(216 38% 11%); --ink:hsl(216 30% 93%); --muted:hsl(216 15% 68%); --faint:hsl(216 12% 52%);
+  --line:hsl(216 25% 20%); --soft:hsl(216 35% 13%); --primary:hsl(216 90% 70%); --primary-soft:hsl(216 45% 18%); --track:hsl(216 25% 22%);
+  --navy-a:hsl(216 55% 12%); --navy-b:hsl(216 55% 22%);
+  --ok:hsl(152 50% 62%); --ok-bg:hsl(152 35% 15%); --warn:hsl(35 85% 65%); --warn-bg:hsl(30 40% 15%); --late:hsl(0 75% 70%); --late-bg:hsl(0 35% 16%);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:24px 64px}
+h1,h2,h3,h4{font-family:var(--display);font-weight:400;letter-spacing:-0.02em;margin:0;text-wrap:balance}
+p{margin:0}
+.flag{max-width:880px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.flag button{font:inherit;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.doc{max-width:880px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:24px;overflow:hidden}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--primary)}
+
+/* letterhead */
+.letter{background:linear-gradient(120deg,var(--navy-a),var(--navy-b));color:#fff;padding:32px 40px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+.letter .acad{font-family:var(--display);font-size:18px;opacity:.85}
+.letter h1{font-size:clamp(30px,4vw,40px);margin-top:6px;color:#fff}
+.letter .when{text-align:right;font-size:13px;color:hsl(216 30% 80%)}
+.letter .when b{display:block;font-weight:500;color:#fff;font-size:15px}
+.student{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.student div{padding:18px 24px;border-right:1px solid var(--line);min-width:0}
+.student div:last-child{border-right:0}
+.student small{display:block;font-size:12px;color:var(--muted)}
+.student b{font-weight:500;font-size:16px}
+
+.sec{padding:36px 40px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.sec-head h2{font-size:26px}
+
+/* at a glance */
+.glance{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);gap:16px}
+.gcard{border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px;align-content:start;min-width:0}
+.gtop{display:flex;align-items:center;gap:14px}
+.ring{position:relative;width:72px;height:72px;flex:none}
+.ring svg{width:72px;height:72px;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;font-weight:600}
+.gtop h3{font-size:21px;line-height:1.15}
+.gtop small{font-size:12px;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{background:var(--soft);border-radius:10px;padding:8px 10px}
+.fact small{display:block;font-size:11px;color:var(--muted)}
+.fact b{font-weight:600}
+.donut-wrap{display:flex;align-items:center;gap:18px}
+.donut{width:104px;height:104px;flex:none}
+.legend{display:grid;gap:8px;font-size:14px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend span{margin-left:auto;padding-left:12px;font-weight:600}
+.gcard .cap{font-size:12px;color:var(--muted)}
+
+/* subject */
+.subj-head{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+.subj-head h2{font-size:30px}
+.subj-head small{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.scores{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.score{border:1px solid var(--line);border-radius:12px;padding:8px 14px;min-width:110px}
+.score small{display:block;font-size:11px;color:var(--muted)}
+.score b{font-size:20px;font-weight:600}
+.grid2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-bottom:22px}
+.panel{border:1px solid var(--line);border-radius:16px;padding:16px 18px;min-width:0}
+.panel h4{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:0;margin-bottom:10px;display:flex;justify-content:space-between;gap:8px}
+.panel h4 span{font-weight:500;color:var(--muted)}
+.trend svg{width:100%;height:auto;display:block}
+.trend text{font-family:var(--body);font-size:11px;fill:var(--muted)}
+.trend .grid{stroke:var(--line);stroke-width:1}
+.trend .avg{stroke:var(--faint);stroke-width:1;stroke-dasharray:4 4}
+.trend .ln{fill:none;stroke:var(--primary);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.trend .pt{fill:var(--primary);stroke:var(--paper);stroke-width:2}
+.trend .pt.hollow{fill:var(--paper);stroke:var(--primary);stroke-width:2}
+.hl{display:grid;gap:10px}
+.hl div{border-radius:12px;padding:12px 14px}
+.hl .best{background:var(--ok-bg)}
+.hl .work{background:var(--warn-bg)}
+.hl small{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.hl .best small{color:var(--ok)} .hl .work small{color:var(--warn)}
+.hl b{font-weight:500;display:block}
+.hl span{font-size:13px;color:var(--muted)}
+
+.tbl-wrap{overflow-x:auto;margin-bottom:22px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th{font-size:12px;font-weight:600;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.type{font-size:12px;color:var(--muted)}
+.bar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.bar i{display:block;width:70px;height:6px;border-radius:999px;background:var(--track);overflow:hidden}
+.bar i em{display:block;height:100%;background:var(--primary);border-radius:999px}
+.bar span{width:44px;text-align:right}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;display:inline-block}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.late{background:var(--late-bg);color:var(--late)}
+.pill.info{background:var(--primary-soft);color:var(--primary)}
+.foot-note{font-size:12px;color:var(--muted);margin-top:-12px;margin-bottom:22px}
+
+.teacher{background:var(--soft);border-radius:16px;padding:20px 22px;display:grid;gap:16px}
+.teacher h4{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:0}
+.meters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.meter small{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.meter .dots{display:flex;align-items:center;gap:5px}
+.meter .dots i{width:22px;height:6px;border-radius:999px;background:var(--track)}
+.meter .dots i.on{background:var(--primary)}
+.meter .dots b{margin-left:8px;font-weight:600;font-size:14px}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.notes small{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+.quote{font-family:var(--display);font-style:italic;font-size:17px;line-height:1.5;border-left:2px solid var(--primary);padding-left:14px}
+
+.explain{font-size:13px;color:var(--muted);display:grid;gap:6px}
+.explain b{color:var(--ink);font-weight:600}
+
+@media (max-width:760px){
+  .letter{grid-template-columns:minmax(0,1fr);padding:26px 22px}
+  .letter .when{text-align:left}
+  .student{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .student div:nth-child(2){border-right:0}
+  .student div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .sec{padding:28px 20px}
+  .glance,.grid2,.notes,.meters{grid-template-columns:minmax(0,1fr)}
+  .subj-head{flex-wrap:wrap}
+  .scores{margin-left:0;width:100%}
+  .score{flex:1;min-width:0}
+}
+</style>
+
+<div class="flag">
+  <span>Mockup · sample student and marks</span>
+  <button id="tt" type="button">Switch light / dark</button>
+</div>
+
+<article class="doc">
+  <header class="letter">
+    <div>
+      <div class="acad">Your Academy</div>
+      <h1>Student Progress Report</h1>
+    </div>
+    <div class="when">Generated<b class="num">1 October 2026</b></div>
+  </header>
+  <div class="student">
+    <div><small>Student</small><b>Ayesha Khan</b></div>
+    <div><small>Level</small><b>O Level</b></div>
+    <div><small>Batch</small><b>UAE</b></div>
+    <div><small>Subjects</small><b>Mathematics, Physics</b></div>
+  </div>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">At a glance</div><h2>Overall picture</h2></div></div>
+    <div class="glance">
+      <div class="gcard">
+        <div class="gtop">
+          <div class="ring"><svg viewBox="0 0 72 72" role="img" aria-label="Mathematics 79.2 percent"><circle cx="36" cy="36" r="29" fill="none" stroke="var(--track)" stroke-width="7"/><circle cx="36" cy="36" r="29" fill="none" stroke="var(--primary)" stroke-width="7" stroke-linecap="round" stroke-dasharray="182.21" stroke-dashoffset="37.90"/></svg><b class="num">79%</b></div>
+          <div><h3>Mathematics</h3><small>Overall score</small></div>
+        </div>
+        <div class="facts"><div class="fact"><small>Marked</small><b class="num">5 of 6</b></div><div class="fact"><small>Missing</small><b class="num">1</b></div></div>
+      </div>
+      <div class="gcard">
+        <div class="gtop">
+          <div class="ring"><svg viewBox="0 0 72 72" role="img" aria-label="Physics 72.5 percent"><circle cx="36" cy="36" r="29" fill="none" stroke="var(--track)" stroke-width="7"/><circle cx="36" cy="36" r="29" fill="none" stroke="var(--primary)" stroke-width="7" stroke-linecap="round" stroke-dasharray="182.21" stroke-dashoffset="50.11"/></svg><b class="num">73%</b></div>
+          <div><h3>Physics</h3><small>Overall score</small></div>
+        </div>
+        <div class="facts"><div class="fact"><small>Marked</small><b class="num">4 of 4</b></div><div class="fact"><small>Missing</small><b class="num">0</b></div></div>
+      </div>
+      <div class="gcard">
+        <h3 style="font-size:19px">Homework handed in</h3>
+        <div class="donut-wrap">
+          <svg class="donut" viewBox="0 0 104 104" role="img" aria-label="6 assignments: 4 on time, 1 late, 1 missing">
+            <g transform="rotate(-90 52 52)" fill="none" stroke-width="14">
+              <circle cx="52" cy="52" r="40" stroke="var(--ok)" stroke-dasharray="165.55 251.33" stroke-dashoffset="0"><title>On time: 4</title></circle>
+              <circle cx="52" cy="52" r="40" stroke="var(--warn)" stroke-dasharray="39.89 251.33" stroke-dashoffset="-167.55"><title>Late: 1</title></circle>
+              <circle cx="52" cy="52" r="40" stroke="var(--late)" stroke-dasharray="39.89 251.33" stroke-dashoffset="-209.44"><title>Missing: 1</title></circle>
+            </g>
+            <text x="52" y="50" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="24" fill="var(--ink)">6</text>
+            <text x="52" y="66" text-anchor="middle" font-family="Figtree, system-ui, sans-serif" font-size="10" fill="var(--muted)">assignments</text>
+          </svg>
+          <div class="legend">
+            <div><i style="background:var(--ok)"></i>On time<span class="num">4</span></div>
+            <div><i style="background:var(--warn)"></i>Late<span class="num">1</span></div>
+            <div><i style="background:var(--late)"></i>Missing<span class="num">1</span></div>
+          </div>
+        </div>
+        <p class="cap">All subjects, assignments past their due date.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="subj-head">
+      <div><small>O Level</small><h2>Mathematics</h2></div>
+      <div class="scores">
+        <div class="score"><small>Overall</small><b class="num">79.2%</b></div>
+        <div class="score"><small>Assignments</small><b class="num">87.5%</b></div>
+        <div class="score"><small>Tests</small><b class="num">75.0%</b></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel trend">
+        <h4>Marks over time <span>average 79%</span></h4>
+        <svg viewBox="0 0 520 160" role="img" aria-label="Marks over time for Mathematics: 90, 70, 75 late, 80, 85 percent">
+          <line class="grid" x1="32" x2="508" y1="10" y2="10"/><line class="grid" x1="32" x2="508" y1="51.33" y2="51.33"/><line class="grid" x1="32" x2="508" y1="92.67" y2="92.67"/><line class="grid" x1="32" x2="508" y1="134" y2="134"/>
+          <text x="24" y="14" text-anchor="end">100</text><text x="24" y="55" text-anchor="end">80</text><text x="24" y="96" text-anchor="end">60</text><text x="24" y="138" text-anchor="end">40</text>
+          <line class="avg" x1="32" x2="508" y1="52.99" y2="52.99"/>
+          <polyline class="ln" points="32,30.67 151,72 270,61.67 389,51.33 508,41"/>
+          <circle class="pt" cx="32" cy="30.67" r="5"><title>Algebra homework: 90%</title></circle>
+          <circle class="pt" cx="151" cy="72" r="5"><title>Chapter 2 test: 70%</title></circle>
+          <circle class="pt hollow" cx="270" cy="61.67" r="5"><title>Geometry worksheet: 75% (late, not counted)</title></circle>
+          <circle class="pt" cx="389" cy="51.33" r="5"><title>Chapter 3 test: 80%</title></circle>
+          <circle class="pt" cx="508" cy="41" r="5"><title>Trigonometry worksheet: 85%</title></circle>
+          <text x="32" y="154" text-anchor="start">2 Sep</text><text x="270" y="154" text-anchor="middle">16 Sep</text><text x="508" y="154" text-anchor="end">29 Sep</text>
+        </svg>
+      </div>
+      <div class="hl">
+        <div class="best"><small>Strongest</small><b>Algebra homework</b><span class="num">18 / 20 · 90%</span></div>
+        <div class="work"><small>Needs work</small><b>Chapter 2 test</b><span class="num">28 / 40 · 70%</span></div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Assessment</th><th>Due</th><th class="r">Marks</th><th class="r">Score</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Algebra homework<div class="type">Assignment</div></td><td class="num">2 Sep</td><td class="r num">18 / 20</td><td><div class="bar"><i><em style="width:90%"></em></i><span class="num">90%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Chapter 2 test<div class="type">Test</div></td><td class="num">9 Sep</td><td class="r num">28 / 40</td><td><div class="bar"><i><em style="width:70%"></em></i><span class="num">70%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Geometry worksheet<div class="type">Assignment</div></td><td class="num">16 Sep</td><td class="r num">15 / 20</td><td><div class="bar"><i><em style="width:75%"></em></i><span class="num">75%*</span></div></td><td><span class="pill warn">Late</span></td></tr>
+          <tr><td>Chapter 3 test<div class="type">Test</div></td><td class="num">23 Sep</td><td class="r num">32 / 40</td><td><div class="bar"><i><em style="width:80%"></em></i><span class="num">80%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Trigonometry worksheet<div class="type">Assignment</div></td><td class="num">29 Sep</td><td class="r num">17 / 20</td><td><div class="bar"><i><em style="width:85%"></em></i><span class="num">85%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Quadratics practice<div class="type">Assignment</div></td><td class="num">30 Sep</td><td class="r">—</td><td class="r">—</td><td><span class="pill late">Missing</span></td></tr>
+          <tr><td>Mock paper 1<div class="type">Test</div></td><td class="num">14 Oct</td><td class="r">—</td><td class="r">—</td><td><span class="pill info">Upcoming</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note">* Submitted late, so not included in the scores.</p>
+
+    <div class="teacher">
+      <h4>Teacher's assessment</h4>
+      <div class="meters">
+        <div class="meter"><small>Effort</small><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><b>Excellent</b></div></div>
+        <div class="meter"><small>Class participation</small><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><b>Good</b></div></div>
+      </div>
+      <div class="notes">
+        <div><small>Strengths</small>Strong algebra and clear, well-organised working.</div>
+        <div><small>Areas to improve</small>Timed practice for tests; checking answers before submitting.</div>
+      </div>
+      <p class="quote">“A focused student who is making steady progress. More past-paper practice under timed conditions will lift her test scores.”</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="subj-head">
+      <div><small>O Level</small><h2>Physics</h2></div>
+      <div class="scores">
+        <div class="score"><small>Overall</small><b class="num">72.5%</b></div>
+        <div class="score"><small>Assignments</small><b class="num">77.5%</b></div>
+        <div class="score"><small>Tests</small><b class="num">70.0%</b></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel trend">
+        <h4>Marks over time <span>average 73%</span></h4>
+        <svg viewBox="0 0 520 160" role="img" aria-label="Marks over time for Physics: 85, 65, 70, 75 percent">
+          <line class="grid" x1="32" x2="508" y1="10" y2="10"/><line class="grid" x1="32" x2="508" y1="51.33" y2="51.33"/><line class="grid" x1="32" x2="508" y1="92.67" y2="92.67"/><line class="grid" x1="32" x2="508" y1="134" y2="134"/>
+          <text x="24" y="14" text-anchor="end">100</text><text x="24" y="55" text-anchor="end">80</text><text x="24" y="96" text-anchor="end">60</text><text x="24" y="138" text-anchor="end">40</text>
+          <line class="avg" x1="32" x2="508" y1="66.83" y2="66.83"/>
+          <polyline class="ln" points="32,41 190.67,82.33 349.33,72 508,61.67"/>
+          <circle class="pt" cx="32" cy="41" r="5"><title>Kinematics homework: 85%</title></circle>
+          <circle class="pt" cx="190.67" cy="82.33" r="5"><title>Forces test: 65%</title></circle>
+          <circle class="pt" cx="349.33" cy="72" r="5"><title>Energy worksheet: 70%</title></circle>
+          <circle class="pt" cx="508" cy="61.67" r="5"><title>Waves test: 75%</title></circle>
+          <text x="32" y="154" text-anchor="start">4 Sep</text><text x="508" y="154" text-anchor="end">27 Sep</text>
+        </svg>
+      </div>
+      <div class="hl">
+        <div class="best"><small>Strongest</small><b>Kinematics homework</b><span class="num">17 / 20 · 85%</span></div>
+        <div class="work"><small>Needs work</small><b>Forces test</b><span class="num">26 / 40 · 65%</span></div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Assessment</th><th>Due</th><th class="r">Marks</th><th class="r">Score</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Kinematics homework<div class="type">Assignment</div></td><td class="num">4 Sep</td><td class="r num">17 / 20</td><td><div class="bar"><i><em style="width:85%"></em></i><span class="num">85%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Forces test<div class="type">Test</div></td><td class="num">11 Sep</td><td class="r num">26 / 40</td><td><div class="bar"><i><em style="width:65%"></em></i><span class="num">65%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Energy worksheet<div class="type">Assignment</div></td><td class="num">18 Sep</td><td class="r num">14 / 20</td><td><div class="bar"><i><em style="width:70%"></em></i><span class="num">70%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+          <tr><td>Waves test<div class="type">Test</div></td><td class="num">27 Sep</td><td class="r num">30 / 40</td><td><div class="bar"><i><em style="width:75%"></em></i><span class="num">75%</span></div></td><td><span class="pill ok">Marked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="teacher">
+      <h4>Teacher's assessment</h4>
+      <div class="meters">
+        <div class="meter"><small>Effort</small><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><b>Good</b></div></div>
+        <div class="meter"><small>Class participation</small><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><b>Good</b></div></div>
+      </div>
+      <div class="notes">
+        <div><small>Strengths</small>Good understanding of motion and graphs.</div>
+        <div><small>Areas to improve</small>Showing units and formulas clearly in every step.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="explain">
+      <p><b>How scores are worked out.</b> Each score is the total of marks received divided by the total marks available, for marked work that counts.</p>
+      <p>Late work is not included unless the teacher decides to include it. Missing work is shown separately and does not change the score.</p>
+    </div>
+  </section>
+</article>
+
+<script>
+(function(){
+  var r=document.documentElement;
+  function dark(){var t=r.getAttribute('data-theme');if(t)return t==='dark';return matchMedia('(prefers-color-scheme: dark)').matches;}
+  document.getElementById('tt').addEventListener('click',function(){r.setAttribute('data-theme',dark()?'light':'dark');});
+})();
+</script>
