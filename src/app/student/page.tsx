@@ -32,7 +32,7 @@ export default async function StudentDashboard() {
 
   return (
     <div className="space-y-8">
-      <DashboardBand name={profile.full_name ?? profile.email} batchName={batchName} />
+      <DashboardBand name={profile.full_name} batchName={batchName} />
 
       <div className="-mt-10 sm:-mt-12">
         {error ? (
