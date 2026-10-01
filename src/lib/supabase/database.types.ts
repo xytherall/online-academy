@@ -353,6 +353,36 @@ export type Database = {
           },
         ]
       }
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          is_published: boolean
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           batch_id: string | null
@@ -585,6 +615,10 @@ export type Database = {
       complete_password_change: { Args: never; Returns: undefined }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      move_faq: {
+        Args: { p_direction: string; p_faq_id: string }
+        Returns: undefined
+      }
       submit_assignment: {
         Args: { p_assessment_id: string; p_file_paths: string[] }
         Returns: {
