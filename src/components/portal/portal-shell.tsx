@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AcademyBrand } from "@/components/academy-brand";
+import { Badge } from "@/components/ui/badge";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getSiteSettings } from "@/lib/get-site-settings";
@@ -32,7 +33,9 @@ export async function PortalShell({
             {mobileNav}
             <div className="flex items-center gap-2">
               <AcademyBrand settings={settings} className="font-heading text-base" />
-              <span className="hidden text-sm text-muted-foreground sm:inline">· {userLabel}</span>
+              <Badge variant="secondary" className="hidden font-normal text-muted-foreground sm:inline-flex">
+                {userLabel}
+              </Badge>
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { LocalDateTime } from "@/components/local-date-time";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { displayName } from "@/lib/display-name";
 import type { Tables } from "@/lib/supabase/database.types";
 import { MarkingTable } from "./marking-table";
 
@@ -52,7 +53,7 @@ export default async function AdminAssessmentMarkingPage({ params }: { params: P
   );
 
   const entries = Array.from(roster.values())
-    .sort((a, b) => (a.full_name ?? a.email).localeCompare(b.full_name ?? b.email))
+    .sort((a, b) => displayName(a).localeCompare(displayName(b)))
     .map((student) => ({ student, submission: submissionByStudent.get(student.id) ?? null }));
 
   return (

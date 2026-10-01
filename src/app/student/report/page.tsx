@@ -1,5 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProgressReport } from "@/components/report/progress-report";
+import { displayName } from "@/lib/display-name";
 import { buildPublicAssetUrl } from "@/lib/settings";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { getStudentCourseReports } from "@/lib/progress-report";
@@ -31,7 +32,7 @@ export default async function StudentReportPage() {
       data={{
         academyName: settings?.academy_name?.trim() || null,
         logoUrl: settings?.logo_path ? buildPublicAssetUrl(settings.logo_path) : null,
-        studentName: profile.full_name?.trim() || profile.email,
+        studentName: displayName(profile),
         batchName: batch?.name ?? null,
         country: profile.country,
         generatedAtIso: new Date().toISOString(),

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BookOpenIcon, CalendarClockIcon, ClipboardCheckIcon, MegaphoneIcon } from "lucide-react";
 import { AnnouncementBody } from "@/components/announcement-body";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -32,25 +33,24 @@ export default async function StudentDashboard() {
 
   return (
     <div className="space-y-8">
-      <DashboardBand name={profile.full_name} batchName={batchName} />
+      <div>
+        <DashboardBand name={profile.full_name?.trim() || null} batchName={batchName} />
 
-      <div className="-mt-10 sm:-mt-12">
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>Could not load your courses. Please refresh the page.</AlertDescription>
-          </Alert>
-        ) : courses.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {courses.map(({ report }) => (
-              <CourseProgressCard key={report.course.id} report={report} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No courses yet"
-            description="You're not enrolled in any courses yet — contact the academy."
-          />
-        )}
+        <div className="relative z-10 -mt-10 px-6 sm:px-8">
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>Could not load your courses. Please refresh the page.</AlertDescription>
+            </Alert>
+          ) : courses.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {courses.map(({ report }) => (
+                <CourseProgressCard key={report.course.id} report={report} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState compact icon={BookOpenIcon} title="You're not enrolled in any courses yet" />
+          )}
+        </div>
       </div>
 
       <div>
@@ -85,7 +85,7 @@ export default async function StudentDashboard() {
             })}
           </ul>
         ) : (
-          <EmptyState title="Nothing due soon" description="No assignments due in the next 7 days." />
+          <EmptyState compact icon={CalendarClockIcon} title="Nothing due in the next 7 days" />
         )}
       </div>
 
@@ -122,7 +122,7 @@ export default async function StudentDashboard() {
               ))}
           </ul>
         ) : (
-          <EmptyState title="Nothing marked yet" description="Marked work will show up here." />
+          <EmptyState compact icon={ClipboardCheckIcon} title="Nothing marked yet" />
         )}
       </div>
 
@@ -152,7 +152,7 @@ export default async function StudentDashboard() {
             ))}
           </ul>
         ) : (
-          <EmptyState title="No announcements yet" description="Announcements from the academy will show up here." />
+          <EmptyState compact icon={MegaphoneIcon} title="No announcements yet" />
         )}
       </div>
     </div>

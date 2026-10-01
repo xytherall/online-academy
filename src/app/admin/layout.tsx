@@ -4,6 +4,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { PortalShell } from "@/components/portal/portal-shell";
 import { getPendingApplicationCount } from "@/lib/applications";
 import { requireAdmin } from "@/lib/auth";
+import { displayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       mobileNav={<AdminMobileNav pendingApplicationCount={pendingApplicationCount} />}
       sidebar={<AdminSidebar pendingApplicationCount={pendingApplicationCount} />}
       userLabel="Admin"
-      userName={profile.full_name ?? profile.email}
+      userName={displayName(profile)}
     >
       {children}
     </PortalShell>

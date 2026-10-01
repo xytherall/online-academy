@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProgressReport } from "@/components/report/progress-report";
+import { displayName } from "@/lib/display-name";
 import { buildPublicAssetUrl } from "@/lib/settings";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { getStudentCourseReports } from "@/lib/progress-report";
@@ -42,7 +43,7 @@ export default async function AdminStudentReportPage({ params }: { params: Promi
         data={{
           academyName: settings?.academy_name?.trim() || null,
           logoUrl: settings?.logo_path ? buildPublicAssetUrl(settings.logo_path) : null,
-          studentName: student.full_name?.trim() || student.email,
+          studentName: displayName(student),
           batchName: batch?.name ?? null,
           country: student.country,
           generatedAtIso: new Date().toISOString(),

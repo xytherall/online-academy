@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/admin/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requireAdmin } from "@/lib/auth";
+import { displayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminMarkingQueue() {
@@ -59,7 +60,7 @@ export default async function AdminMarkingQueue() {
                       {submission.assessment.course?.title ?? "Unknown course"}
                     </TableCell>
                     <TableCell>
-                      {submission.student?.full_name ?? submission.student?.email ?? "Unknown student"}
+                      {submission.student ? displayName(submission.student) : "Unknown student"}
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground sm:table-cell">
                       {submission.submitted_at ? <LocalDateTime iso={submission.submitted_at} /> : "—"}

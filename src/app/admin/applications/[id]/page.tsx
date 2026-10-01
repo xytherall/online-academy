@@ -4,6 +4,7 @@ import { LocalDateTime } from "@/components/local-date-time";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getApplication } from "@/lib/applications";
+import { displayName } from "@/lib/display-name";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
 import { applicationStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
@@ -47,7 +48,7 @@ export default async function ApplicationDetailPage({
             <>
               {" · reviewed "}
               <LocalDateTime iso={application.reviewed_at} />
-              {reviewer ? ` by ${reviewer.full_name ?? reviewer.email}` : ""}
+              {reviewer ? ` by ${displayName(reviewer)}` : ""}
             </>
           ) : null}
         </p>

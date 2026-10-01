@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { displayName } from "@/lib/display-name";
 import { activeStatusBadgeVariant } from "@/lib/status-badge";
 
 export type StudentRow = {
@@ -164,7 +165,7 @@ export function StudentsTable({
               <TableRow key={student.id}>
                 <TableCell>
                   <Link href={`/admin/students/${student.id}`} className="font-medium hover:underline">
-                    {student.full_name?.trim() ? student.full_name : student.email}
+                    {displayName(student)}
                   </Link>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{student.email}</TableCell>

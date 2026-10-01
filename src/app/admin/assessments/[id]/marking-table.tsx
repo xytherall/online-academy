@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { displayName } from "@/lib/display-name";
 import type { Tables } from "@/lib/supabase/database.types";
 import { saveMarks } from "./actions";
 
@@ -91,7 +92,7 @@ function MarkingRow({
   return (
     <TableRow>
       <TableCell className="align-top">
-        <p className="font-medium">{student.full_name ?? student.email}</p>
+        <p className="font-medium">{displayName(student)}</p>
         <p className="text-xs text-muted-foreground">
           {submission?.submitted_at ? (
             <>

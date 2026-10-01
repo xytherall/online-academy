@@ -7,7 +7,7 @@
 export function DashboardBand({ name, batchName }: { name: string | null; batchName: string | null }) {
   return (
     <div
-      className="relative overflow-hidden rounded-3xl px-6 py-8 text-dashboard-band-foreground sm:px-8 sm:py-10"
+      className="relative overflow-hidden rounded-3xl px-6 pt-6 pb-14 text-dashboard-band-foreground sm:px-8 sm:pt-7 sm:pb-14"
       style={{ backgroundImage: "linear-gradient(135deg, var(--dashboard-band-from), var(--dashboard-band-to))" }}
     >
       <div

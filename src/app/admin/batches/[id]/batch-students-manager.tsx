@@ -6,13 +6,10 @@ import { EmptyState } from "@/components/admin/empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { displayName } from "@/lib/display-name";
 import { assignStudentToBatch, removeStudentFromBatch } from "../actions";
 
 type StudentOption = { id: string; full_name: string | null; email: string };
-
-function studentLabel(student: StudentOption) {
-  return student.full_name?.trim() ? student.full_name : student.email;
-}
 
 export function BatchStudentsManager({
   batchId,
@@ -71,7 +68,7 @@ export function BatchStudentsManager({
               className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card p-3"
             >
               <div className="min-w-0">
-                <p className="truncate font-medium">{studentLabel(student)}</p>
+                <p className="truncate font-medium">{displayName(student)}</p>
                 <p className="truncate text-xs text-muted-foreground">{student.email}</p>
               </div>
               <Button
@@ -99,7 +96,7 @@ export function BatchStudentsManager({
           <div className="min-w-[220px] space-y-2">
             <p className="text-sm font-medium">Assign a student</p>
             <Select
-              items={Object.fromEntries(unassignedStudents.map((s) => [s.id, studentLabel(s)]))}
+              items={Object.fromEntries(unassignedStudents.map((s) => [s.id, displayName(s)]))}
               value={selectedStudentId}
               onValueChange={(value) => setSelectedStudentId(value)}
             >
@@ -109,7 +106,7 @@ export function BatchStudentsManager({
               <SelectContent>
                 {unassignedStudents.map((student) => (
                   <SelectItem key={student.id} value={student.id}>
-                    {studentLabel(student)}
+                    {displayName(student)}
                   </SelectItem>
                 ))}
               </SelectContent>

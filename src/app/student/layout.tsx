@@ -3,6 +3,7 @@ import { PortalShell } from "@/components/portal/portal-shell";
 import { StudentMobileNav } from "@/components/student/student-mobile-nav";
 import { StudentSidebar } from "@/components/student/student-sidebar";
 import { requireStudent } from "@/lib/auth";
+import { displayName } from "@/lib/display-name";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -16,8 +17,8 @@ export default async function StudentLayout({ children }: { children: React.Reac
     <PortalShell
       mobileNav={<StudentMobileNav />}
       sidebar={<StudentSidebar />}
-      userLabel="Student portal"
-      userName={profile.full_name ?? profile.email}
+      userLabel="Portal"
+      userName={displayName(profile)}
     >
       {children}
     </PortalShell>

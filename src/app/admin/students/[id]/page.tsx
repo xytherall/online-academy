@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { displayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
 import { BatchReassignSelect } from "./batch-reassign-select";
 import { StudentEnrollmentsManager } from "./student-enrollments-manager";
@@ -41,9 +42,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">
-            {student.full_name?.trim() ? student.full_name : student.email}
-          </h1>
+          <h1 className="text-xl font-semibold">{displayName(student)}</h1>
           <p className="text-sm text-muted-foreground">{student.email}</p>
         </div>
         <div className="flex items-center gap-2">
