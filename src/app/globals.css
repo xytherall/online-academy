@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-background-portal: var(--background-portal);
-  --color-background-cream: var(--background-cream);
+  --color-background-alt: var(--background-alt);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-figtree);
   --font-mono: var(--font-geist-mono);
@@ -62,7 +62,7 @@
   /* Quiet Ink — light (SPEC §12) */
   --background: #ffffff;
   --background-portal: hsl(216 25% 97%);
-  --background-cream: hsl(40 45% 96%);
+  --background-alt: #f6f5f3;
   --card: #ffffff;
   --card-foreground: hsl(216 52% 14%);
   --popover: #ffffff;
@@ -119,12 +119,15 @@
   --hero-glow-2: hsl(246 80% 85% / 0.45);
   --grid-line: hsl(216 40% 50% / 0.11);
   --grid-line-band: hsl(216 60% 70% / 0.06);
+
+  /* Floating/elevated surfaces (home hero portal illustration) */
+  --shadow-elevated: 0 1px 2px hsl(216 40% 20% / 0.06), 0 12px 32px -12px hsl(216 50% 20% / 0.22);
 }
 
 .dark {
   --background: hsl(216 45% 7%);
   --background-portal: hsl(216 40% 8%);
-  --background-cream: hsl(216 35% 10%);
+  --background-alt: hsl(216 35% 10%);
   --card: hsl(216 38% 11%);
   --card-foreground: hsl(216 30% 93%);
   --popover: hsl(216 38% 11%);
@@ -175,6 +178,8 @@
   --hero-glow-2: hsl(246 70% 40% / 0.22);
   --grid-line: hsl(216 60% 70% / 0.09);
   --grid-line-band: hsl(216 60% 70% / 0.06);
+
+  --shadow-elevated: 0 1px 2px hsl(0 0% 0% / 0.3), 0 16px 40px -14px hsl(0 0% 0% / 0.6);
 }
 
 @layer base {
@@ -204,7 +209,7 @@
   .dark {
     --background: #ffffff;
     --background-portal: #ffffff;
-    --background-cream: #ffffff;
+    --background-alt: #ffffff;
     --card: #ffffff;
     --card-foreground: hsl(216 52% 14%);
     --popover: #ffffff;

@@ -20,7 +20,7 @@ export function PublicHeader({ settings }: { settings: SiteSettings | null }) {
             <Button variant="outline" render={<Link href="/login" />} nativeButton={false}>
               Student login
             </Button>
-            <Button render={<Link href="/apply" />} nativeButton={false}>
+            <Button variant="dark" render={<Link href="/apply" />} nativeButton={false}>
               Apply now
             </Button>
           </div>
