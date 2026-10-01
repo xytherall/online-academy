@@ -4,15 +4,17 @@ import { PageHeader } from "@/components/public/page-header";
 import { CourseGrid } from "@/components/public/course-grid";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  return {
+  return buildPageMetadata({
+    path: "/courses",
     title: `Courses | ${academyName}`,
     description: settings?.tagline?.trim() || `Courses offered by ${academyName}.`,
-  };
+  });
 }
 
 export default async function CoursesPage() {

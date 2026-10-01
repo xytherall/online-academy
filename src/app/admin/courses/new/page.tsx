@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { CourseForm } from "../course-form";
+
+export const metadata: Metadata = { title: "New course" };
 
 export default function NewCoursePage() {
   return (

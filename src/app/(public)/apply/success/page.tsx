@@ -3,14 +3,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   return {
-    title: `Application sent | ${academyName}`,
-    description: "We have received your application.",
+    ...buildPageMetadata({
+      path: "/apply/success",
+      title: `Application sent | ${academyName}`,
+      description: "We have received your application.",
+    }),
     robots: { index: false, follow: false },
   };
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/admin/empty-state";
@@ -6,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { requireAdmin } from "@/lib/auth";
 import { displayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = { title: "Marking" };
 
 export default async function AdminMarkingQueue() {
   await requireAdmin();

@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicationsTable, type ApplicationRow } from "./applications-table";
+
+export const metadata: Metadata = { title: "Applications" };
 
 export default async function AdminApplicationsPage() {
   const supabase = await createClient();

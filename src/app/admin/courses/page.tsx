@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/admin/empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -6,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { publishedStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = { title: "Courses" };
 import { DeleteCourseButton } from "./course-row-actions";
 
 export default async function AdminCoursesPage() {

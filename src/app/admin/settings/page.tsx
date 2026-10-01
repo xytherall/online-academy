@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
 import { LogoUploader } from "./logo-uploader";
 import { SettingsForm } from "./settings-form";
+
+export const metadata: Metadata = { title: "Settings" };
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient();

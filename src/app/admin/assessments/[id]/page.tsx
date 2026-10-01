@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,8 @@ import type { Tables } from "@/lib/supabase/database.types";
 import { MarkingTable } from "./marking-table";
 
 type RosterStudent = { id: string; full_name: string | null; email: string };
+
+export const metadata: Metadata = { title: "Marking" };
 
 export default async function AdminAssessmentMarkingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

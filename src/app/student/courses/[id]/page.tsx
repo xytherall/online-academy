@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileTextIcon, LinkIcon } from "lucide-react";
@@ -10,6 +11,8 @@ import { computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = { title: "Course" };
 
 export default async function StudentCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

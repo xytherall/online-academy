@@ -5,16 +5,18 @@ import { PageHeader } from "@/components/public/page-header";
 import { issueApplyToken } from "@/lib/apply-token";
 import { getPublishedCourses } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { ApplyForm } from "./apply-form";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  return {
+  return buildPageMetadata({
+    path: "/apply",
     title: `Apply | ${academyName}`,
     description: `Apply to ${academyName}.`,
-  };
+  });
 }
 
 export default async function ApplyPage({

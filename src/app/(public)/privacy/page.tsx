@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/public/page-header";
 import { buildWhatsAppUrl, FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { buildPageMetadata } from "@/lib/page-metadata";
 
 const LAST_UPDATED = "2 October 2026";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  return {
+  return buildPageMetadata({
+    path: "/privacy",
     title: `Privacy Policy | ${academyName}`,
     description: `How ${academyName} collects, uses and protects your information.`,
-  };
+  });
 }
 
 export default async function PrivacyPage() {

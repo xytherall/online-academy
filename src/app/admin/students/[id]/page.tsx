@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -6,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { BatchReassignSelect } from "./batch-reassign-select";
 import { StudentEnrollmentsManager } from "./student-enrollments-manager";
 import { StudentProfileForm } from "./student-profile-form";
+
+export const metadata: Metadata = { title: "Student" };
 import { StudentStatusActions } from "./student-status-actions";
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {

@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { BatchForm } from "../batch-form";
+
+export const metadata: Metadata = { title: "New batch" };
 
 export default function NewBatchPage() {
   return (

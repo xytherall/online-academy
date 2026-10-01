@@ -3,16 +3,18 @@ import { MailIcon, MessageCircleIcon, MapPinIcon, PhoneIcon } from "lucide-react
 import { EmptyState } from "@/components/admin/empty-state";
 import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import { getSocialLinkEntries } from "@/lib/social-links";
 import { buildWhatsAppUrl, FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  return {
+  return buildPageMetadata({
+    path: "/contact",
     title: `Contact | ${academyName}`,
     description: `Get in touch with ${academyName}.`,
-  };
+  });
 }
 
 export default async function ContactPage() {

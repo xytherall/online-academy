@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/public/page-header";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata({
@@ -16,13 +17,15 @@ export async function generateMetadata({
   const { slug } = await params;
   const [course, settings] = await Promise.all([getPublishedCourseBySlug(slug), getSiteSettings()]);
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
+  const path = `/courses/${slug}`;
 
-  if (!course) return { title: `Course not found | ${academyName}` };
+  if (!course) return buildPageMetadata({ path, title: `Course not found | ${academyName}`, description: "" });
 
-  return {
+  return buildPageMetadata({
+    path,
     title: `${course.title} | ${academyName}`,
     description: course.description?.trim() || `${COURSE_LEVEL_LABELS[course.level]} course at ${academyName}.`,
-  };
+  });
 }
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {

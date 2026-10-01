@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProgressReport } from "@/components/report/progress-report";
 import { displayName } from "@/lib/display-name";
@@ -6,6 +7,8 @@ import { getSiteSettings } from "@/lib/get-site-settings";
 import { computeHomeworkSummary, getStudentCourseReports } from "@/lib/progress-report";
 import { requireStudent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = { title: "Progress report" };
 
 export default async function StudentReportPage() {
   const profile = await requireStudent();

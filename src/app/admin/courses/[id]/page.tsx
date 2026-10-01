@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import { CourseForm } from "../course-form";
 import { AssessmentManager } from "./assessment-manager";
 import { ResourceManager } from "./resource-manager";
+
+export const metadata: Metadata = { title: "Edit course" };
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

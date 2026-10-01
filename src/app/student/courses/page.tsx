@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { EmptyState } from "@/components/admin/empty-state";
 import { requireStudent } from "@/lib/auth";
 import { getStudentCourseReports } from "@/lib/progress-report";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = { title: "My Courses" };
 
 export default async function StudentCoursesPage() {
   const profile = await requireStudent();

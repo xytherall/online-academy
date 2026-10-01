@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import { BatchForm } from "../batch-form";
 import { BatchStudentsManager } from "./batch-students-manager";
+
+export const metadata: Metadata = { title: "Edit batch" };
 
 export default async function EditBatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
