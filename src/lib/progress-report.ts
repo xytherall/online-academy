@@ -27,12 +27,30 @@ export type AssessmentReportRow = {
   counted: boolean;
   /** Submitted late and excluded from the percentages — shown with a footnote. */
   lateAndUncounted: boolean;
+  /** marks/total, rounded to 1 decimal; null when unmarked. */
+  pct: number | null;
+  /** Not yet due AND nothing submitted AND unmarked — drives the "Upcoming" pill only. */
+  upcoming: boolean;
 };
 
 export type ExtremeResult = {
   assessment: ReportAssessment;
   marks: number;
   percentage: number;
+};
+
+export type TrendPoint = {
+  assessment: ReportAssessment;
+  marks: number;
+  pct: number;
+  /** Late and not counted — drawn hollow, excluded from the average line. */
+  hollow: boolean;
+};
+
+export type CourseTrend = {
+  points: TrendPoint[];
+  /** The course's overallPct; null only if every marked row is late-and-uncounted. */
+  averagePct: number | null;
 };
 
 export type CourseReport = {
@@ -49,7 +67,61 @@ export type CourseReport = {
   strongest: ExtremeResult | null;
   weakest: ExtremeResult | null;
   rows: AssessmentReportRow[];
+  /** Only set once 3+ assessments are marked (counted or late-and-uncounted). */
+  trend: CourseTrend | null;
 };
+
+export type HomeworkSummary = {
+  onTime: number;
+  late: number;
+  missing: number;
+  total: number;
+};
+
+/**
+ * The homework donut's "handed in" rule, decided separately from the report
+ * row's `status` field: a submission row existing at all — whether from a
+ * student upload or marks entered directly by the admin (e.g. work sent via
+ * WhatsApp, SPEC §8) — counts as handed in. On time unless `is_late` is
+ * true. Only a past-due assignment with no submission row counts as Missing.
+ */
+export function computeHomeworkSummary(
+  rows: Pick<AssessmentReportRow, "assessment" | "submission">[],
+  now: Date = new Date(),
+): HomeworkSummary | null {
+  const dueRows = rows.filter(
+    (row) => row.assessment.type === "assignment" && new Date(row.assessment.due_at) <= now,
+  );
+
+  if (dueRows.length === 0) return null;
+
+  let onTime = 0;
+  let late = 0;
+  let missing = 0;
+
+  for (const row of dueRows) {
+    if (!row.submission) missing++;
+    else if (row.submission.is_late) late++;
+    else onTime++;
+  }
+
+  return { onTime, late, missing, total: dueRows.length };
+}
+
+/**
+ * Distinguishes the report's two "nothing counted" wordings for a score box:
+ * "Not marked yet" when the course has no counted work at all, vs "—" with
+ * a "none marked yet" caption when this particular category (assignments or
+ * tests) has none but the course does have other counted work.
+ */
+export function formatScoreValue(
+  pct: number | null,
+  overallPct: number | null,
+): { value: string; caption: string | null } {
+  if (pct !== null) return { value: `${pct}%`, caption: null };
+  if (overallPct === null) return { value: "Not marked yet", caption: null };
+  return { value: "—", caption: "none marked yet" };
+}
 
 function roundToOneDecimal(value: number): number {
   return Math.round(value * 10) / 10;
@@ -119,7 +191,12 @@ export function computeCourseReport(
         submission.marks != null &&
         submission.is_late === true &&
         submission.counts_toward_report === false;
-      return { assessment, submission, status, counted, lateAndUncounted };
+      const pct =
+        submission?.marks != null
+          ? roundToOneDecimal((submission.marks / assessment.total_marks) * 100)
+          : null;
+      const upcoming = submission == null && new Date(assessment.due_at) > now;
+      return { assessment, submission, status, counted, lateAndUncounted, pct, upcoming };
     });
 
   const markedCount = rows.filter((row) => row.submission?.marks != null).length;
@@ -148,6 +225,20 @@ export function computeCourseReport(
       weakestRow.assessment.id === strongestRow.assessment.id ? null : toExtremeResult(weakestRow);
   }
 
+  const markedRows = rows.filter((row) => row.submission?.marks != null);
+  let trend: CourseTrend | null = null;
+  if (markedRows.length >= 3) {
+    trend = {
+      points: markedRows.map((row) => ({
+        assessment: row.assessment,
+        marks: row.submission!.marks!,
+        pct: row.pct!,
+        hollow: row.lateAndUncounted,
+      })),
+      averagePct: overallPct,
+    };
+  }
+
   return {
     course,
     overallPct,
@@ -159,6 +250,7 @@ export function computeCourseReport(
     strongest,
     weakest,
     rows,
+    trend,
   };
 }
 

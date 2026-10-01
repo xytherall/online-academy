@@ -3,7 +3,7 @@ import { ProgressReport } from "@/components/report/progress-report";
 import { displayName } from "@/lib/display-name";
 import { buildPublicAssetUrl } from "@/lib/settings";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { getStudentCourseReports } from "@/lib/progress-report";
+import { computeHomeworkSummary, getStudentCourseReports } from "@/lib/progress-report";
 import { requireStudent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,6 +27,8 @@ export default async function StudentReportPage() {
     );
   }
 
+  const homework = computeHomeworkSummary(courses.flatMap(({ report }) => report.rows));
+
   return (
     <ProgressReport
       data={{
@@ -37,6 +39,7 @@ export default async function StudentReportPage() {
         country: profile.country,
         generatedAtIso: new Date().toISOString(),
         courses,
+        homework,
       }}
     />
   );

@@ -203,8 +203,15 @@
   }
 }
 
-/* Print is always light, regardless of the active theme (SPEC §12). */
+/* Print is always light, regardless of the active theme (SPEC §12). Exact
+   color printing so the report letterhead gradient and chart colours survive
+   (Chrome drops backgrounds/colours on print by default otherwise). */
 @media print {
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   :root,
   .dark {
     --background: #ffffff;

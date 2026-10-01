@@ -4,7 +4,7 @@ import { ProgressReport } from "@/components/report/progress-report";
 import { displayName } from "@/lib/display-name";
 import { buildPublicAssetUrl } from "@/lib/settings";
 import { getSiteSettings } from "@/lib/get-site-settings";
-import { getStudentCourseReports } from "@/lib/progress-report";
+import { computeHomeworkSummary, getStudentCourseReports } from "@/lib/progress-report";
 import { getStudentProfile } from "@/lib/students";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -34,6 +34,8 @@ export default async function AdminStudentReportPage({ params }: { params: Promi
     );
   }
 
+  const homework = computeHomeworkSummary(courses.flatMap(({ report }) => report.rows));
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end print:hidden">
@@ -48,6 +50,7 @@ export default async function AdminStudentReportPage({ params }: { params: Promi
           country: student.country,
           generatedAtIso: new Date().toISOString(),
           courses,
+          homework,
         }}
       />
     </div>

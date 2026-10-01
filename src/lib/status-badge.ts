@@ -27,6 +27,21 @@ export function assessmentStatusBadgeVariant(status: AssessmentStatus): StatusBa
 }
 
 /**
+ * Progress report assessment table pill: the row's normal status, with two
+ * report-only overrides layered on top (SPEC §9) — not a change to
+ * `computeAssessmentStatus` itself, which still drives every other page.
+ */
+export function reportRowBadge(row: {
+  status: AssessmentStatus;
+  upcoming: boolean;
+  lateAndUncounted: boolean;
+}): { label: string; variant: StatusBadgeVariant } {
+  if (row.upcoming) return { label: "Upcoming", variant: "info" };
+  if (row.lateAndUncounted) return { label: "Late", variant: "warning" };
+  return { label: row.status, variant: assessmentStatusBadgeVariant(row.status) };
+}
+
+/**
  * Due/overdue pill for upcoming assignments (dashboard "Due soon" list).
  * Purely a display label derived from the existing `due_at` — not a stored
  * status and does not change `computeAssessmentStatus`.

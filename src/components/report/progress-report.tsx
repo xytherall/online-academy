@@ -1,9 +1,8 @@
 import { LocalDateTime } from "@/components/local-date-time";
-import { Badge } from "@/components/ui/badge";
-import { ProgressRing } from "@/components/progress-ring";
-import type { AssessmentStatus } from "@/lib/assessments";
-import type { CourseReport, TeacherAssessment } from "@/lib/progress-report";
-import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
+import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
+import type { CourseReport, HomeworkSummary, TeacherAssessment } from "@/lib/progress-report";
+import { AtAGlance } from "./glance-cards";
+import { CourseSection } from "./course-section";
 
 export type ProgressReportData = {
   academyName: string | null;
@@ -13,248 +12,91 @@ export type ProgressReportData = {
   country: string | null;
   generatedAtIso: string;
   courses: { report: CourseReport; teacherAssessment: TeacherAssessment }[];
-};
-
-const RATING_LABELS: Record<NonNullable<TeacherAssessment["effort_rating"]>, string> = {
-  excellent: "Excellent",
-  good: "Good",
-  satisfactory: "Satisfactory",
-  needs_improvement: "Needs improvement",
-};
-
-function formatPct(pct: number | null): string {
-  return pct === null ? "No marked work yet" : `${pct}%`;
-}
-
-function hasAnyTeacherAssessment(assessment: TeacherAssessment): boolean {
-  return Boolean(
-    assessment.effort_rating ||
-      assessment.participation_rating ||
-      assessment.strengths ||
-      assessment.areas_to_improve ||
-      assessment.remarks,
-  );
-}
-
-const STATUS_LABEL: Record<AssessmentStatus, string> = {
-  "Not submitted": "Not submitted",
-  Submitted: "Submitted",
-  "Submitted late": "Submitted late",
-  Marked: "Marked",
-  Missing: "Missing",
-  "Not yet marked": "Not yet marked",
+  homework: HomeworkSummary | null;
 };
 
 export function ProgressReport({ data }: { data: ProgressReportData }) {
+  const levels = Array.from(new Set(data.courses.map(({ report }) => report.course.level)));
+  const levelLabel = levels.map((level) => COURSE_LEVEL_LABELS[level]).join(" · ");
+  const subjects = data.courses.map(({ report }) => report.course.title).join(", ");
+
   return (
-    <div className="space-y-8 print:space-y-6">
-      <header className="space-y-3 border-b border-border pb-4 print:border-black">
-        {data.academyName || data.logoUrl ? (
-          <div className="flex items-center gap-3">
+    <article className="overflow-hidden rounded-3xl border border-border bg-card print:rounded-none print:border-black">
+      <header
+        className="grid gap-6 px-6 py-8 text-dashboard-band-foreground sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:px-10 print:text-white"
+        style={{ backgroundImage: "linear-gradient(120deg, var(--dashboard-band-from), var(--dashboard-band-to))" }}
+      >
+        <div>
+          <div className="flex items-center gap-3 text-sm text-dashboard-band-foreground/80">
             {data.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- public bucket asset
-              <img src={data.logoUrl} alt="" className="h-10 w-10 rounded object-contain" />
+              <img src={data.logoUrl} alt="" className="h-8 w-8 rounded object-contain" />
             ) : null}
-            {data.academyName ? <span className="text-lg font-semibold">{data.academyName}</span> : null}
+            {data.academyName ? <span>{data.academyName}</span> : null}
           </div>
-        ) : null}
-        <h1 className="text-xl font-semibold">Student Progress Report</h1>
-        <dl className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
-          <div>
-            <span className="font-medium text-foreground">Student:</span> {data.studentName}
-          </div>
-          {data.batchName ? (
-            <div>
-              <span className="font-medium text-foreground">Batch:</span> {data.batchName}
-            </div>
-          ) : null}
-          {data.country ? (
-            <div>
-              <span className="font-medium text-foreground">Country:</span> {data.country}
-            </div>
-          ) : null}
-          <div>
-            <span className="font-medium text-foreground">Generated:</span>{" "}
+          <h1 className="mt-1.5 text-[clamp(28px,4vw,38px)] text-dashboard-band-foreground">
+            Student Progress Report
+          </h1>
+        </div>
+        <div className="text-sm text-dashboard-band-foreground/70 sm:text-right">
+          <p>Generated</p>
+          <p className="text-[15px] font-medium text-dashboard-band-foreground">
             <LocalDateTime iso={data.generatedAtIso} />
-          </div>
-        </dl>
+          </p>
+        </div>
       </header>
 
-      {data.courses.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Not enrolled in any courses yet.</p>
-      ) : (
-        <>
-          <section aria-label="Summary" className="overflow-x-auto">
-            <table className="w-full min-w-[560px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border text-left print:border-black">
-                  <th className="py-2 pr-3 font-medium">Course</th>
-                  <th className="py-2 pr-3 font-medium">Overall</th>
-                  <th className="py-2 pr-3 font-medium">Assignments</th>
-                  <th className="py-2 pr-3 font-medium">Tests</th>
-                  <th className="py-2 pr-3 font-medium">Missing</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.courses.map(({ report }) => (
-                  <tr key={report.course.id} className="border-b border-border/60 print:border-black/40">
-                    <td className="py-2 pr-3">{report.course.title}</td>
-                    <td className="py-2 pr-3">{formatPct(report.overallPct)}</td>
-                    <td className="py-2 pr-3">{formatPct(report.assignmentsPct)}</td>
-                    <td className="py-2 pr-3">{formatPct(report.testsPct)}</td>
-                    <td className="py-2 pr-3">{report.missingCount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          {data.courses.map(({ report, teacherAssessment }, index) => (
-            <CourseSection
-              key={report.course.id}
-              report={report}
-              teacherAssessment={teacherAssessment}
-              breakBefore={index > 0}
-            />
-          ))}
-        </>
-      )}
-    </div>
-  );
-}
-
-function CourseSection({
-  report,
-  teacherAssessment,
-  breakBefore,
-}: {
-  report: CourseReport;
-  teacherAssessment: TeacherAssessment;
-  breakBefore: boolean;
-}) {
-  const hasFootnote = report.rows.some((row) => row.lateAndUncounted);
-
-  return (
-    <section className={`space-y-4 ${breakBefore ? "print:break-before-page" : ""}`}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold">{report.course.title}</h2>
-          <p className="text-sm text-muted-foreground">{report.course.level} Level</p>
+      <dl className="grid grid-cols-2 border-b border-border sm:grid-cols-4 print:border-black">
+        <div className="border-r border-b border-border p-4 sm:border-b-0 print:border-black">
+          <dt className="text-xs text-muted-foreground">Student</dt>
+          <dd className="font-medium">{data.studentName}</dd>
         </div>
-        <ProgressRing pct={report.overallPct} size={56} />
-      </div>
-
-      <dl className="grid gap-2 text-sm sm:grid-cols-3">
-        <div>
-          <dt className="text-muted-foreground">Overall</dt>
-          <dd className="font-medium">{formatPct(report.overallPct)}</dd>
+        <div className="border-b border-border p-4 sm:border-r sm:border-b-0 print:border-black">
+          <dt className="text-xs text-muted-foreground">Level</dt>
+          <dd className="font-medium">{levelLabel || "—"}</dd>
         </div>
-        <div>
-          <dt className="text-muted-foreground">Assignments</dt>
-          <dd className="font-medium">{formatPct(report.assignmentsPct)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Tests</dt>
-          <dd className="font-medium">{formatPct(report.testsPct)}</dd>
+        {data.batchName ? (
+          <div className="border-r border-border p-4 print:border-black">
+            <dt className="text-xs text-muted-foreground">Batch</dt>
+            <dd className="font-medium">{data.batchName}</dd>
+          </div>
+        ) : null}
+        <div className="p-4">
+          <dt className="text-xs text-muted-foreground">Subjects</dt>
+          <dd className="font-medium">{subjects || "—"}</dd>
         </div>
       </dl>
 
-      <p className="text-sm text-muted-foreground">
-        {report.markedCount} of {report.totalCount} marked
-        {report.missingCount > 0 ? ` · ${report.missingCount} missing` : ""}
-      </p>
-
-      {report.strongest ? (
-        <div className="grid gap-2 text-sm sm:grid-cols-2">
-          <div>
-            <span className="font-medium">Strongest result:</span> {report.strongest.assessment.title} (
-            {report.strongest.percentage}%)
-          </div>
-          {report.weakest ? (
+      {data.courses.length === 0 ? (
+        <p className="p-10 text-sm text-muted-foreground">Not enrolled in any courses yet.</p>
+      ) : (
+        <>
+          <section className="space-y-5 border-b border-border p-6 sm:p-10 print:border-black">
             <div>
-              <span className="font-medium">Weakest result:</span> {report.weakest.assessment.title} (
-              {report.weakest.percentage}%)
+              <p className="text-xs font-semibold tracking-wide text-primary uppercase">At a glance</p>
+              <h2 className="text-[26px] font-heading">Overall picture</h2>
             </div>
-          ) : null}
-        </div>
-      ) : null}
+            <AtAGlance courses={data.courses.map((c) => c.report)} homework={data.homework} />
+          </section>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-border text-left print:border-black">
-              <th className="py-2 pr-3 font-medium">Title</th>
-              <th className="py-2 pr-3 font-medium">Type</th>
-              <th className="py-2 pr-3 font-medium">Due</th>
-              <th className="py-2 pr-3 font-medium">Marks</th>
-              <th className="py-2 pr-3 font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {report.rows.map((row) => (
-              <tr key={row.assessment.id} className="border-b border-border/60 print:border-black/40">
-                <td className="py-2 pr-3">
-                  {row.assessment.title}
-                  {row.lateAndUncounted ? <sup className="ml-0.5">*</sup> : null}
-                </td>
-                <td className="py-2 pr-3 capitalize">{row.assessment.type}</td>
-                <td className="py-2 pr-3">
-                  <LocalDateTime iso={row.assessment.due_at} />
-                </td>
-                <td className="py-2 pr-3">
-                  {row.submission?.marks != null ? `${row.submission.marks} / ${row.assessment.total_marks}` : "—"}
-                </td>
-                <td className="py-2 pr-3">
-                  <Badge variant={assessmentStatusBadgeVariant(row.status)}>{STATUS_LABEL[row.status]}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {hasFootnote ? (
-          <p className="mt-1 text-xs text-muted-foreground">
-            * Submitted late; not counted toward the percentages above.
-          </p>
-        ) : null}
-      </div>
+          {data.courses.map(({ report, teacherAssessment }, index) => (
+            <div key={report.course.id} className="border-b border-border p-6 sm:p-10 print:border-black">
+              <CourseSection report={report} teacherAssessment={teacherAssessment} breakBefore={index > 0} />
+            </div>
+          ))}
 
-      {hasAnyTeacherAssessment(teacherAssessment) ? (
-        <div className="space-y-2 rounded-lg border border-border bg-card p-4 print:border-black">
-          <h3 className="font-medium">Teacher assessment</h3>
-          <dl className="grid gap-2 text-sm sm:grid-cols-2">
-            {teacherAssessment.effort_rating ? (
-              <div>
-                <dt className="text-muted-foreground">Effort</dt>
-                <dd>{RATING_LABELS[teacherAssessment.effort_rating]}</dd>
-              </div>
-            ) : null}
-            {teacherAssessment.participation_rating ? (
-              <div>
-                <dt className="text-muted-foreground">Class participation</dt>
-                <dd>{RATING_LABELS[teacherAssessment.participation_rating]}</dd>
-              </div>
-            ) : null}
-          </dl>
-          {teacherAssessment.strengths ? (
-            <div className="text-sm">
-              <p className="text-muted-foreground">Strengths</p>
-              <p>{teacherAssessment.strengths}</p>
-            </div>
-          ) : null}
-          {teacherAssessment.areas_to_improve ? (
-            <div className="text-sm">
-              <p className="text-muted-foreground">Areas to improve</p>
-              <p>{teacherAssessment.areas_to_improve}</p>
-            </div>
-          ) : null}
-          {teacherAssessment.remarks ? (
-            <div className="text-sm">
-              <p className="text-muted-foreground">Other comments</p>
-              <p>{teacherAssessment.remarks}</p>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-    </section>
+          <section className="space-y-1.5 p-6 text-xs text-muted-foreground sm:p-10">
+            <p>
+              <span className="font-semibold text-foreground">How scores are worked out.</span> Each score is the
+              total of marks received divided by the total marks available, for marked work that counts.
+            </p>
+            <p>
+              Late work is not included unless the teacher decides to include it. Missing work is shown separately
+              and does not change the score.
+            </p>
+          </section>
+        </>
+      )}
+    </article>
   );
 }

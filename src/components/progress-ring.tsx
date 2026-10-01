@@ -5,9 +5,17 @@
  * from the shared report calculation (`computeCourseReport` /
  * `getStudentCourseReports`), never recomputed here.
  */
-export function ProgressRing({ pct, size = 64 }: { pct: number | null; size?: number }) {
+export function ProgressRing({
+  pct,
+  size = 64,
+  emptyLabel = "No marked work yet",
+}: {
+  pct: number | null;
+  size?: number;
+  emptyLabel?: string;
+}) {
   if (pct === null) {
-    return <p className="text-sm text-muted-foreground">No marked work yet</p>;
+    return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
   const strokeWidth = Math.max(4, Math.round(size / 10));

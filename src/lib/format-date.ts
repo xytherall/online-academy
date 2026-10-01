@@ -31,3 +31,8 @@ export function formatLocalDateTime(iso: string): string {
     timeStyle: "short",
   });
 }
+
+/** Short "2 Sep" form used for chart axis labels and tooltips. */
+export function formatShortLocalDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
