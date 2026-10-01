@@ -15,7 +15,8 @@ export function buildPublicAssetUrl(path: string): string {
 }
 
 /** wa.me links need digits only (no "+", spaces or punctuation). Returns null if nothing usable is left. */
-export function buildWhatsAppUrl(rawNumber: string): string | null {
+export function buildWhatsAppUrl(rawNumber: string, message?: string): string | null {
   const digits = rawNumber.replace(/\D/g, "");
-  return digits.length > 0 ? `https://wa.me/${digits}` : null;
+  if (digits.length === 0) return null;
+  return message ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}` : `https://wa.me/${digits}`;
 }
