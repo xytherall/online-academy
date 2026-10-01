@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import type { z } from "zod";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,10 @@ export function SettingsForm({ settings }: { settings: SiteSettings | null }) {
   const [state, formAction, isPending] = useActionState(updateSettings, initialState);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const social = readSocialLinks(settings);
+
+  useEffect(() => {
+    if (state.success) toast.success("Saved");
+  }, [state]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     const parsed = settingsSchema.safeParse(parseFormValues(new FormData(event.currentTarget)));
@@ -135,12 +140,6 @@ export function SettingsForm({ settings }: { settings: SiteSettings | null }) {
           <AlertDescription role="alert">{state.error}</AlertDescription>
         </Alert>
       ) : null}
-      {state.success ? (
-        <Alert>
-          <AlertDescription>Settings saved.</AlertDescription>
-        </Alert>
-      ) : null}
-
       <Button type="submit" disabled={isPending}>
         {isPending ? "Saving…" : "Save settings"}
       </Button>

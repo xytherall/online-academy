@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ function LinkResourceForm({ courseId }: { courseId: string }) {
 
   useEffect(() => {
     if (state.success) {
+      toast.success("Added");
       formRef.current?.reset();
       router.refresh();
     }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AnnouncementBody } from "@/components/announcement-body";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";

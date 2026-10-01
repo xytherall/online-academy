@@ -5,8 +5,9 @@ import { FileTextIcon, LinkIcon } from "lucide-react";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { Separator } from "@/components/ui/separator";
+import { SubjectIcon } from "@/components/subject-icon";
 import { computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
@@ -56,6 +57,7 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
+          <SubjectIcon title={course.title} />
           <h1 className="text-xl font-semibold">{course.title}</h1>
           <Badge variant="secondary">{course.level} Level</Badge>
         </div>
@@ -96,7 +98,10 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
             ))}
           </ul>
         ) : (
-          <EmptyState title="No resources yet" description="Check back later." />
+          <EmptyState
+            title="No resources yet"
+            description="Your teacher hasn't added any notes or files for this course yet."
+          />
         )}
       </div>
 
@@ -138,7 +143,10 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
             })}
           </ul>
         ) : (
-          <EmptyState title="No assessments yet" description="Check back later." />
+          <EmptyState
+            title="No assessments yet"
+            description="Your teacher hasn't posted any assignments or tests for this course yet."
+          />
         )}
       </div>
     </div>

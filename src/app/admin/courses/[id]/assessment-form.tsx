@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +51,10 @@ export function AssessmentForm(
     userEditedDueAt ?? (isClient && assessment ? toDatetimeLocalValue(assessment.due_at) : "");
 
   useEffect(() => {
-    if (state.success) props.onDone();
+    if (state.success) {
+      toast.success("Saved");
+      props.onDone();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 

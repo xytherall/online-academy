@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDownIcon, ArrowUpIcon, Trash2Icon } from "lucide-react";
-import { EmptyState } from "@/components/admin/empty-state";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,8 +91,10 @@ function ResourceRow({
       const result = await updateResourceTitle(courseId, resource.id, title);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Saved");
       setIsEditing(false);
       router.refresh();
     });
@@ -102,8 +105,10 @@ function ResourceRow({
       const result = await deleteResource(courseId, resource.id);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Deleted");
       setDeleteOpen(false);
       router.refresh();
     });

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { EmptyState } from "@/components/admin/empty-state";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,8 +62,10 @@ export function StudentEnrollmentsManager({
       const result = await addEnrollment(studentId, selectedCourseId);
       if (result.error) {
         setAddError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Added");
       setSelectedCourseId(null);
       router.refresh();
     });
@@ -193,8 +196,10 @@ function EnrollmentRow({ studentId, enrollment }: { studentId: string; enrollmen
       const result = await updateTeacherAssessment(studentId, enrollment.id, form);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Saved");
       setIsEditing(false);
       router.refresh();
     });
@@ -206,8 +211,10 @@ function EnrollmentRow({ studentId, enrollment }: { studentId: string; enrollmen
       const result = await removeEnrollment(studentId, enrollment.id);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Removed");
       router.refresh();
     });
   }

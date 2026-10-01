@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { DashboardBand } from "@/components/student/dashboard-band";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { getAnnouncementsForStudent } from "@/lib/announcements";
 import { requireStudent } from "@/lib/auth";
@@ -48,7 +48,12 @@ export default async function StudentDashboard() {
               ))}
             </div>
           ) : (
-            <EmptyState compact icon={BookOpenIcon} title="You're not enrolled in any courses yet" />
+            <EmptyState
+              compact
+              icon={BookOpenIcon}
+              title="You're not enrolled in any courses yet"
+              description="The academy will enroll you once you're set up."
+            />
           )}
         </div>
       </div>
@@ -85,7 +90,12 @@ export default async function StudentDashboard() {
             })}
           </ul>
         ) : (
-          <EmptyState compact icon={CalendarClockIcon} title="Nothing due in the next 7 days" />
+          <EmptyState
+            compact
+            icon={CalendarClockIcon}
+            title="Nothing due in the next 7 days"
+            description="New assignments will show up here as your teacher posts them."
+          />
         )}
       </div>
 
@@ -122,7 +132,12 @@ export default async function StudentDashboard() {
               ))}
           </ul>
         ) : (
-          <EmptyState compact icon={ClipboardCheckIcon} title="Nothing marked yet" />
+          <EmptyState
+            compact
+            icon={ClipboardCheckIcon}
+            title="Nothing marked yet"
+            description="Marked work and feedback will appear here."
+          />
         )}
       </div>
 
@@ -152,7 +167,12 @@ export default async function StudentDashboard() {
             ))}
           </ul>
         ) : (
-          <EmptyState compact icon={MegaphoneIcon} title="No announcements yet" />
+          <EmptyState
+            compact
+            icon={MegaphoneIcon}
+            title="No announcements yet"
+            description="Updates from the academy will show up here."
+          />
         )}
       </div>
     </div>

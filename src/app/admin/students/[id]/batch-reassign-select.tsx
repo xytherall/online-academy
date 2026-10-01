@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { reassignStudentBatch } from "../actions";
@@ -30,9 +31,11 @@ export function BatchReassignSelect({
       const result = await reassignStudentBatch(studentId, nextValue === NO_BATCH ? null : nextValue);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         setValue(currentBatchId ?? NO_BATCH);
         return;
       }
+      toast.success("Saved");
       router.refresh();
     });
   }

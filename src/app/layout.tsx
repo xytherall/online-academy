@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { AppToaster } from "@/components/app-toaster";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { getSiteUrl } from "@/lib/site-url";
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {THEME_INIT_SCRIPT}
         </Script>
         {children}
+        <AppToaster />
       </body>
     </html>
   );

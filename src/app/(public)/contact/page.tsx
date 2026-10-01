@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MailIcon, MessageCircleIcon, MapPinIcon, PhoneIcon } from "lucide-react";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { buildPageMetadata } from "@/lib/page-metadata";

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,10 @@ const initialState: ChangeOwnPasswordState = { error: null, success: false };
 export function ChangePasswordForm() {
   const [state, formAction, isPending] = useActionState(changeOwnPassword, initialState);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  useEffect(() => {
+    if (state.success) toast.success("Password changed");
+  }, [state]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);
@@ -104,12 +109,6 @@ export function ChangePasswordForm() {
           {state.error}
         </p>
       ) : null}
-      {state.success ? (
-        <p role="status" className="text-sm text-success">
-          Password changed.
-        </p>
-      ) : null}
-
       <Button type="submit" disabled={isPending}>
         {isPending ? "Saving…" : "Change password"}
       </Button>

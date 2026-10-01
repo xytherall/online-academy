@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { EmptyState } from "@/components/admin/empty-state";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,12 +70,10 @@ function MarkingRow({
   const [feedback, setFeedback] = useState(submission?.feedback ?? "");
   const [countsTowardReport, setCountsTowardReport] = useState(submission?.counts_toward_report ?? true);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleSave() {
     setError(null);
-    setSaved(false);
     startTransition(async () => {
       const result = await saveMarks(assessmentId, student.id, {
         marks,
@@ -83,9 +82,10 @@ function MarkingRow({
       });
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
-      setSaved(true);
+      toast.success("Saved");
     });
   }
 
@@ -172,7 +172,6 @@ function MarkingRow({
           {isPending ? "Saving…" : "Save"}
         </Button>
         {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
-        {saved && !error ? <p className="mt-1 text-xs text-muted-foreground">Saved.</p> : null}
       </TableCell>
     </TableRow>
   );

@@ -15,7 +15,7 @@ import {
   type TeacherAssessmentInput,
 } from "@/lib/validation/students";
 
-export type StudentFormState = { error: string | null };
+export type StudentFormState = { error: string | null; success?: boolean };
 type ActionResult = { error: string | null };
 
 const NOT_A_STUDENT_ERROR = "That account is not a student.";
@@ -81,7 +81,7 @@ export async function updateStudentProfile(
 
   revalidatePath(`/admin/students/${studentId}`);
   revalidatePath("/admin/students");
-  return { error: null };
+  return { error: null, success: true };
 }
 
 export async function reassignStudentBatch(studentId: string, batchId: string | null): Promise<ActionResult> {

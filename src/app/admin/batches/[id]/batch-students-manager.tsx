@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { EmptyState } from "@/components/admin/empty-state";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,8 +33,10 @@ export function BatchStudentsManager({
       const result = await assignStudentToBatch(batchId, selectedStudentId);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Saved");
       setSelectedStudentId(null);
       router.refresh();
     });
@@ -45,8 +48,10 @@ export function BatchStudentsManager({
       const result = await removeStudentFromBatch(batchId, studentId);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Removed");
       router.refresh();
     });
   }

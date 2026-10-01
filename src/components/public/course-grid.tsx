@@ -16,14 +16,14 @@ export function CourseGrid({ courses }: { courses: PublicCourse[] }) {
               <li key={course.id}>
                 <Link
                   href={`/courses/${course.slug}`}
-                  className="group flex items-center justify-between gap-4 py-4 transition-colors hover:text-primary"
+                  className="group hover-arrow-group flex items-center justify-between gap-4 py-4 transition-colors hover:text-primary"
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-heading text-lg">{course.title}</span>
                     <span className="block text-sm text-muted-foreground">{COURSE_LEVEL_LABELS[level]}</span>
                   </span>
                   <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
-                    <ArrowRightIcon className="size-4" aria-hidden />
+                    <ArrowRightIcon className="hover-arrow size-4" aria-hidden />
                   </span>
                 </Link>
               </li>

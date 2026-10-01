@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDownIcon, ArrowUpIcon, Trash2Icon } from "lucide-react";
-import { EmptyState } from "@/components/admin/empty-state";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,14 +73,23 @@ function FaqRow({ faq, isFirst, isLast }: { faq: Faq; isFirst: boolean; isLast: 
 
   function handleMove(direction: "up" | "down") {
     startTransition(async () => {
-      await moveFaq(faq.id, direction);
+      const result = await moveFaq(faq.id, direction);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
       router.refresh();
     });
   }
 
   function handlePublishedChange(checked: boolean) {
     startTransition(async () => {
-      await setFaqPublished(faq.id, checked);
+      const result = await setFaqPublished(faq.id, checked);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(checked ? "Published" : "Unpublished");
       router.refresh();
     });
   }
@@ -90,8 +100,10 @@ function FaqRow({ faq, isFirst, isLast }: { faq: Faq; isFirst: boolean; isLast: 
       const result = await deleteFaq(faq.id);
       if (result.error) {
         setDeleteError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Deleted");
       setDeleteOpen(false);
       router.refresh();
     });

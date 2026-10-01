@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2Icon } from "lucide-react";
+import { toast } from "sonner";
 import { AnnouncementBody } from "@/components/announcement-body";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -110,8 +111,10 @@ function AnnouncementRow({
       const result = await deleteAnnouncement(announcement.id);
       if (result.error) {
         setDeleteError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Deleted");
       setDeleteOpen(false);
       router.refresh();
     });

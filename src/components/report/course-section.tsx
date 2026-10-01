@@ -1,4 +1,5 @@
 import { TrendChart } from "@/components/charts/trend-chart";
+import { SubjectIcon } from "@/components/subject-icon";
 import { Badge } from "@/components/ui/badge";
 import { LocalShortDate } from "@/components/local-short-date";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
@@ -31,11 +32,14 @@ export function CourseSection({
   if (report.totalCount === 0) {
     return (
       <section className={`space-y-4 ${breakBefore ? "print:break-before-page" : ""}`}>
-        <div>
-          <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            {COURSE_LEVEL_LABELS[report.course.level]}
-          </p>
-          <h2 className="text-2xl font-heading">{report.course.title}</h2>
+        <div className="flex items-center gap-3">
+          <SubjectIcon title={report.course.title} />
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              {COURSE_LEVEL_LABELS[report.course.level]}
+            </p>
+            <h2 className="text-2xl font-heading">{report.course.title}</h2>
+          </div>
         </div>
         <p className="text-sm text-muted-foreground">No work has been set for this course yet.</p>
         <TeacherAssessmentCard assessment={teacherAssessment} />
@@ -46,11 +50,14 @@ export function CourseSection({
   return (
     <section className={`space-y-6 ${breakBefore ? "print:break-before-page" : ""}`}>
       <div className="flex flex-wrap items-center gap-4">
-        <div>
-          <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            {COURSE_LEVEL_LABELS[report.course.level]}
-          </p>
-          <h2 className="text-[28px] font-heading">{report.course.title}</h2>
+        <div className="flex items-center gap-3">
+          <SubjectIcon title={report.course.title} />
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              {COURSE_LEVEL_LABELS[report.course.level]}
+            </p>
+            <h2 className="text-[28px] font-heading">{report.course.title}</h2>
+          </div>
         </div>
         <div className="ml-auto flex flex-wrap gap-2.5">
           <ScoreBox label="Overall" pct={report.overallPct} overallPct={report.overallPct} />

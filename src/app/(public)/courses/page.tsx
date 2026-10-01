@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/public/page-header";
 import { CourseGrid } from "@/components/public/course-grid";
 import { getPublishedCourses } from "@/lib/courses";

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,8 +26,10 @@ export function DeleteBatchButton({ batchId, batchName }: { batchId: string; bat
       const result = await deleteBatch(batchId);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Deleted");
       setOpen(false);
       router.refresh();
     });

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +81,7 @@ export function FileUploadField({ courseId }: { courseId: string }) {
       return;
     }
 
+    toast.success("Added");
     setTitle("");
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
