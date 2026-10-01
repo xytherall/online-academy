@@ -79,11 +79,14 @@ export type HomeworkSummary = {
 };
 
 /**
- * The homework donut's "handed in" rule, decided separately from the report
- * row's `status` field: a submission row existing at all — whether from a
- * student upload or marks entered directly by the admin (e.g. work sent via
- * WhatsApp, SPEC §8) — counts as handed in. On time unless `is_late` is
- * true. Only a past-due assignment with no submission row counts as Missing.
+ * The homework donut's "handed in" rule: a submission row existing at all —
+ * whether from a student upload or marks entered directly by the admin
+ * (e.g. work sent via WhatsApp, SPEC §8) — counts as handed in. On time
+ * unless `is_late` is true. Only a past-due assignment with no submission
+ * row counts as Missing. A submission row can't exist without this being
+ * consistent with `computeAssessmentStatus`'s own "Missing" rule (marks
+ * can't be set without a submission row), so this agrees with every other
+ * page's Missing count (SPEC §15) rather than being a separate rule.
  */
 export function computeHomeworkSummary(
   rows: Pick<AssessmentReportRow, "assessment" | "submission">[],

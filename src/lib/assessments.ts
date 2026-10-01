@@ -17,21 +17,29 @@ export type AssessmentStatus =
  * SPEC §7 assessment statuses shown to students. "Marked" is decided by
  * `marks` being non-null (not `marked_at`), consistently everywhere marking
  * state is shown — a saved mark is what makes something "marked".
+ *
+ * Marks take precedence over everything else (owner decision, SPEC §15):
+ * work an admin marks without an upload (e.g. sent over WhatsApp) is
+ * "Marked", never "Missing", regardless of `submitted_at`. "Missing" is
+ * reached only for an assignment that is past due with neither a
+ * submission nor marks. This is the single place this precedence lives —
+ * every page that shows a status, a "Missing" count, or the homework
+ * summary goes through this function (directly or via
+ * `computeCourseReport`), so they can never disagree.
  */
 export function computeAssessmentStatus(
   assessment: Pick<Assessment, "type" | "due_at">,
   submission: Pick<Submission, "submitted_at" | "is_late" | "marks"> | null,
   now: Date = new Date(),
 ): AssessmentStatus {
-  if (assessment.type === "test") {
-    return submission?.marks != null ? "Marked" : "Not yet marked";
-  }
+  if (submission?.marks != null) return "Marked";
+
+  if (assessment.type === "test") return "Not yet marked";
 
   if (!submission || !submission.submitted_at) {
     return new Date(assessment.due_at) < now ? "Missing" : "Not submitted";
   }
 
-  if (submission.marks != null) return "Marked";
   return submission.is_late ? "Submitted late" : "Submitted";
 }
 

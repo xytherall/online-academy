@@ -107,6 +107,23 @@ describe("computeCourseReport", () => {
     expect(report.rows.find((r) => r.assessment.id === "t1")?.status).toBe("Not yet marked");
   });
 
+  it("marks entered without an upload, past due, are Marked and excluded from missingCount (owner decision, SPEC §15)", () => {
+    const assessments = [
+      assessment({ id: "a1", type: "assignment", due_at: "2026-01-01T00:00:00Z" }),
+      assessment({ id: "a2", type: "assignment", due_at: "2026-01-01T00:00:00Z" }),
+    ];
+    const submissions = [
+      // marked by the admin without an upload (e.g. WhatsApp) — no submitted_at
+      submission({ assessment_id: "a1", submitted_at: null, marks: 8, counts_toward_report: true }),
+    ];
+
+    const report = computeCourseReport(COURSE, assessments, submissions, NOW);
+
+    expect(report.rows.find((r) => r.assessment.id === "a1")?.status).toBe("Marked");
+    expect(report.rows.find((r) => r.assessment.id === "a2")?.status).toBe("Missing");
+    expect(report.missingCount).toBe(1);
+  });
+
   it("rounds percentages to one decimal place", () => {
     const assessments = [assessment({ id: "a1", total_marks: 3 })];
     const submissions = [submission({ assessment_id: "a1", marks: 1, counts_toward_report: true })];
