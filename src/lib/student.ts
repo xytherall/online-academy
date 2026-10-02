@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
 
 export async function getBatchName(batchId: string | null): Promise<string | null> {
   if (!batchId) return null;
@@ -10,14 +11,17 @@ export async function getBatchName(batchId: string | null): Promise<string | nul
 export type DueSoonAssessment = {
   id: string;
   title: string;
+  type: Database["public"]["Enums"]["assessment_type"];
   due_at: string;
   course: { id: string; title: string } | null;
 };
 
 /**
- * Visible, unsubmitted assignments due in the next 7 days, plus overdue
- * ones — a `due_at` in the past already satisfies "within the next 7 days"
- * too, so a single upper-bound filter covers both (SPEC §7 dashboard).
+ * Everything still ahead of the student (SPEC §7 dashboard), with no upper
+ * date limit: every visible, unsubmitted assignment (overdue ones included)
+ * plus every test whose date hasn't passed. A student can't submit a test,
+ * so a past test is over rather than overdue and is left out. Any submission
+ * row, including admin-entered marks, takes an item off the list.
  */
 export async function getDueSoonAssessments(
   studentId: string,
@@ -41,21 +45,20 @@ export async function getDueSoonAssessments(
   if (submissionsError) return { assessments: null, error: true };
   const submittedIds = new Set(submissions.map((row) => row.assessment_id));
 
-  const cutoff = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const now = new Date().toISOString();
 
   const { data, error } = await supabase
     .from("assessments")
-    .select("id, title, due_at, batch_id, course:courses(id, title)")
-    .eq("type", "assignment")
+    .select("id, title, type, due_at, batch_id, course:courses(id, title)")
     .in("course_id", courseIds)
-    .lte("due_at", cutoff)
+    .or(`type.eq.assignment,due_at.gte.${now}`)
     .order("due_at", { ascending: true });
 
   if (error) return { assessments: null, error: true };
 
   const assessments = data
     .filter((a) => !submittedIds.has(a.id) && (a.batch_id === null || a.batch_id === batchId))
-    .map(({ id, title, due_at, course }) => ({ id, title, due_at, course }));
+    .map(({ id, title, type, due_at, course }) => ({ id, title, type, due_at, course }));
 
   return { assessments, error: false };
 }

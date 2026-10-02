@@ -59,10 +59,10 @@ export default async function StudentDashboard() {
       </div>
 
       <div>
-        <h2 className="mb-3 font-medium">Due soon</h2>
+        <h2 className="mb-3 font-medium">Upcoming work</h2>
         {dueSoonError ? (
           <Alert variant="destructive">
-            <AlertDescription>Could not load upcoming assignments. Please refresh the page.</AlertDescription>
+            <AlertDescription>Could not load your upcoming work. Please refresh the page.</AlertDescription>
           </Alert>
         ) : dueSoon && dueSoon.length > 0 ? (
           <ul className="space-y-2">
@@ -74,11 +74,14 @@ export default async function StudentDashboard() {
                     href={`/student/assessments/${assessment.id}`}
                     className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 hover:bg-accent/50"
                   >
-                    <span className="min-w-0">
-                      <span className="font-medium">{assessment.title}</span>
-                      {assessment.course ? (
-                        <span className="text-sm text-muted-foreground"> · {assessment.course.title}</span>
-                      ) : null}
+                    <span className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span>
+                        <span className="font-medium">{assessment.title}</span>
+                        {assessment.course ? (
+                          <span className="text-sm text-muted-foreground"> · {assessment.course.title}</span>
+                        ) : null}
+                      </span>
+                      <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
                     </span>
                     <span className="flex items-center gap-2 text-sm text-muted-foreground">
                       Due <LocalDateTime iso={assessment.due_at} />
@@ -93,8 +96,8 @@ export default async function StudentDashboard() {
           <EmptyState
             compact
             icon={CalendarClockIcon}
-            title="Nothing due in the next 7 days"
-            description="New assignments will show up here as your teacher posts them."
+            title="Nothing coming up"
+            description="New assignments and tests will show up here as your teacher posts them."
           />
         )}
       </div>

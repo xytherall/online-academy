@@ -41,13 +41,18 @@ export function reportRowBadge(row: {
   return { label: row.status, variant: assessmentStatusBadgeVariant(row.status) };
 }
 
+const DUE_SOON_MS = 7 * 24 * 60 * 60 * 1000;
+
 /**
- * Due/overdue pill for upcoming assignments (dashboard "Due soon" list).
- * Purely a display label derived from the existing `due_at` — not a stored
- * status and does not change `computeAssessmentStatus`.
+ * Overdue / Due soon (next 7 days) / Upcoming pill for the dashboard's
+ * upcoming-work list. Purely a display label derived from the existing
+ * `due_at` — not a stored status and does not change `computeAssessmentStatus`.
  */
 export function dueDateBadge(dueAtIso: string, now: Date = new Date()): { label: string; variant: StatusBadgeVariant } {
-  return new Date(dueAtIso) < now ? { label: "Overdue", variant: "late" } : { label: "Due soon", variant: "warning" };
+  const msUntilDue = new Date(dueAtIso).getTime() - now.getTime();
+  if (msUntilDue < 0) return { label: "Overdue", variant: "late" };
+  if (msUntilDue <= DUE_SOON_MS) return { label: "Due soon", variant: "warning" };
+  return { label: "Upcoming", variant: "info" };
 }
 
 /** Active/Deactivated pill (students list + detail). */
