@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProgressReport } from "@/components/report/progress-report";
@@ -9,6 +10,8 @@ import { getStudentProfile } from "@/lib/students";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "./print-button";
+
+export const metadata: Metadata = { title: "Progress report" };
 
 export default async function AdminStudentReportPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();

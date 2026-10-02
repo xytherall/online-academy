@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/public/page-header";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  return {
+  return buildPageMetadata({
+    path: "/about",
     title: `About | ${academyName}`,
     description: settings?.about_text?.trim()?.slice(0, 160) || `About ${academyName}.`,
-  };
+  });
 }
 
 export default async function AboutPage() {

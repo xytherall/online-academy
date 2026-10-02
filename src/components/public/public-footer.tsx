@@ -37,6 +37,11 @@ export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
                   Student login
                 </Link>
               </li>
+              <li>
+                <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </FooterColumn>
 

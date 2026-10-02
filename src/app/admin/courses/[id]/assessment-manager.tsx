@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2Icon } from "lucide-react";
-import { EmptyState } from "@/components/admin/empty-state";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -102,8 +103,10 @@ function AssessmentRow({
       const result = await deleteAssessment(courseId, assessment.id);
       if (result.error) {
         setDeleteError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Deleted");
       setDeleteOpen(false);
       router.refresh();
     });

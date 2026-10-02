@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { CopyButton } from "@/components/copy-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -168,8 +169,10 @@ function AcceptApplicationForm({
       const result = await acceptApplication(applicationId, parsed.data);
       if (!result.ok) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Accepted");
       // Handed to the parent, which stays mounted across the refresh below —
       // this is the one and only time the temporary password can be read.
       onAccepted({
@@ -354,8 +357,10 @@ function RejectApplicationButton({ applicationId }: { applicationId: string }) {
       const result = await rejectApplication(applicationId);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Rejected");
       setOpen(false);
       router.refresh();
     });
@@ -403,8 +408,10 @@ function DeleteApplicationButton({ applicationId }: { applicationId: string }) {
       const result = await deleteApplication(applicationId);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Deleted");
       router.push("/admin/applications");
     });
   }

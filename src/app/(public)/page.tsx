@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { Eyebrow } from "@/components/eyebrow";
 import { BentoGrid } from "@/components/public/bento-grid";
+import { FaqSection } from "@/components/public/faq-section";
 import { HeroBackground } from "@/components/public/hero-background";
 import { HeroCurves } from "@/components/public/hero-curves";
 import { HowToJoin } from "@/components/public/how-to-join";
@@ -11,11 +12,16 @@ import { SubjectCard } from "@/components/public/subject-card";
 import { excerpt } from "@/lib/excerpt";
 import { parseEmphasis } from "@/lib/parse-emphasis";
 import { getPublishedCourses } from "@/lib/courses";
+import { getPublishedFaqs } from "@/lib/faqs";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { COURSE_LEVEL_LABELS, groupCoursesByLevel } from "@/lib/group-courses";
 
 export default async function HomePage() {
-  const [settings, courses] = await Promise.all([getSiteSettings(), getPublishedCourses()]);
+  const [settings, courses, faqs] = await Promise.all([
+    getSiteSettings(),
+    getPublishedCourses(),
+    getPublishedFaqs(),
+  ]);
   // No invented academy name (SPEC §2/§12): a neutral greeting, never a fake name, when unset.
   const academyName = settings?.academy_name?.trim();
   const tagline = settings?.tagline?.trim();
@@ -101,6 +107,8 @@ export default async function HomePage() {
       </section>
 
       <HowToJoin />
+
+      <FaqSection faqs={faqs} />
 
       <section className="border-t border-border bg-background-alt px-4 py-[72px] text-center sm:px-6 sm:py-[104px]">
         <div className="mx-auto max-w-2xl">

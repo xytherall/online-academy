@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { StudentForm } from "../student-form";
+
+export const metadata: Metadata = { title: "New student" };
 
 export default async function NewStudentPage() {
   const supabase = await createClient();

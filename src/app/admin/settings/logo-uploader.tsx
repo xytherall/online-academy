@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,6 @@ const EXTENSION_BY_MIME: Record<string, string> = {
 export function LogoUploader({ logoPath: initialLogoPath }: { logoPath: string | null }) {
   const [logoPath, setLogoPath] = useState(initialLogoPath);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -28,7 +28,6 @@ export function LogoUploader({ logoPath: initialLogoPath }: { logoPath: string |
     if (!file) return;
 
     setError(null);
-    setSuccess(false);
 
     if (!ALLOWED_LOGO_MIME_TYPES.includes(file.type)) {
       setError("Logo must be a PNG, JPG or WEBP image.");
@@ -63,12 +62,11 @@ export function LogoUploader({ logoPath: initialLogoPath }: { logoPath: string |
     }
 
     setLogoPath(path);
-    setSuccess(true);
+    toast.success("Saved");
   }
 
   async function handleRemove() {
     setError(null);
-    setSuccess(false);
     setIsPending(true);
     const result = await removeLogo();
     setIsPending(false);
@@ -78,6 +76,7 @@ export function LogoUploader({ logoPath: initialLogoPath }: { logoPath: string |
       return;
     }
     setLogoPath(null);
+    toast.success("Removed");
   }
 
   return (
@@ -115,11 +114,6 @@ export function LogoUploader({ logoPath: initialLogoPath }: { logoPath: string |
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-      {success ? (
-        <Alert>
-          <AlertDescription>Logo saved.</AlertDescription>
         </Alert>
       ) : null}
     </div>

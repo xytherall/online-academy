@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -100,10 +101,12 @@ export function SubmissionUploadForm({
 
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         setConfirmOpen(false);
         return;
       }
 
+      toast.success("Submitted");
       setConfirmOpen(false);
       router.refresh();
     } catch {
@@ -113,6 +116,7 @@ export function SubmissionUploadForm({
         await supabase.storage.from("submissions").remove(uploadedPaths);
       }
       setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
       setProgress(null);

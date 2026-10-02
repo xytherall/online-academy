@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { CountrySelect } from "@/components/country-select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -290,6 +291,14 @@ export function ApplyForm({
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       ) : null}
+
+      <p className="text-sm text-muted-foreground">
+        By applying you agree to our{" "}
+        <Link href="/privacy" className="underline hover:text-foreground">
+          Privacy Policy
+        </Link>
+        .
+      </p>
 
       <Button type="submit" size="lg" disabled={isPending}>
         {isPending ? "Sending…" : "Send application"}

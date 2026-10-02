@@ -18,6 +18,7 @@ export function EmptyState({
       <div className="flex min-h-[120px] flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border px-4 py-5 text-center">
         {Icon ? <Icon className="size-4 text-muted-foreground" aria-hidden /> : null}
         <p className="text-sm text-muted-foreground">{title}</p>
+        {description ? <p className="text-xs text-muted-foreground/80">{description}</p> : null}
         {action}
       </div>
     );

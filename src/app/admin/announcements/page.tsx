@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
 import { AnnouncementManager } from "./announcement-manager";
+
+export const metadata: Metadata = { title: "Announcements" };
 
 export default async function AdminAnnouncementsPage() {
   const supabase = await createClient();

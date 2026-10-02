@@ -242,3 +242,36 @@
     --destructive: hsl(0 60% 45%);
   }
 }
+
+/* Hover polish (SPEC §12 pre-launch pass): cards lift 2px with a soft shadow,
+   "→" arrows nudge 2px, 150-200ms ease. Scoped to `(hover: hover)` so a tap
+   on a touch device never leaves an effect visually "stuck" on. */
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift {
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .hover-arrow-group:hover .hover-arrow {
+    transform: translateX(2px);
+  }
+}
+
+.hover-arrow {
+  transition: transform 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift,
+  .hover-arrow {
+    transition: none;
+  }
+  .hover-lift:hover {
+    transform: none;
+  }
+}

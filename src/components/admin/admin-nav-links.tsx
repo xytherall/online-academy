@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BookOpenIcon,
   CheckSquareIcon,
+  HelpCircleIcon,
   InboxIcon,
   LayersIcon,
   LayoutDashboardIcon,
@@ -22,6 +23,7 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/courses", label: "Courses", icon: BookOpenIcon },
   { href: "/admin/marking", label: "Marking", icon: CheckSquareIcon },
   { href: "/admin/announcements", label: "Announcements", icon: MegaphoneIcon },
+  { href: "/admin/faqs", label: "FAQ", icon: HelpCircleIcon },
   { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 

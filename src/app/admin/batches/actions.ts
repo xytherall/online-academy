@@ -7,7 +7,7 @@ import { getStudentProfile } from "@/lib/students";
 import { createClient } from "@/lib/supabase/server";
 import { batchSchema } from "@/lib/validation/batches";
 
-export type BatchFormState = { error: string | null };
+export type BatchFormState = { error: string | null; success?: boolean };
 type ActionResult = { error: string | null };
 
 const DUPLICATE_NAME_ERROR = "A batch with this name already exists. Choose a different name.";
@@ -83,7 +83,7 @@ export async function updateBatch(
 
   revalidatePath("/admin/batches");
   revalidatePath(`/admin/batches/${batchId}`);
-  return { error: null };
+  return { error: null, success: true };
 }
 
 export async function deleteBatch(batchId: string): Promise<ActionResult> {

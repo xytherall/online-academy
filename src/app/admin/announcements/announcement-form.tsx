@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { AnnouncementBody } from "@/components/announcement-body";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,10 @@ export function AnnouncementForm(
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (state.success) props.onDone();
+    if (state.success) {
+      toast.success("Saved");
+      props.onDone();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 

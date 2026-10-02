@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
+import { SubjectIcon } from "@/components/subject-icon";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
 import type { PublicCourse } from "@/lib/courses";
 
@@ -16,18 +17,19 @@ export function SubjectCard({ course }: { course: PublicCourse }) {
 
   return (
     <article
-      className={`relative flex ${minHeight} flex-col overflow-hidden rounded-3xl border border-border bg-card p-7 sm:p-9`}
+      className={`hover-lift relative flex ${minHeight} flex-col overflow-hidden rounded-3xl border border-border bg-card p-7 sm:p-9`}
     >
       <SubjectSymbol title={course.title} />
+      <SubjectIcon title={course.title} className="relative mb-3" />
       <h3 className="relative font-heading text-3xl sm:text-4xl">{course.title}</h3>
       {excerpt ? <p className="relative mt-2.5 max-w-[34ch] text-muted-foreground">{excerpt}</p> : null}
       <div className="relative mt-auto pt-7">
         <Link
           href={`/courses/${course.slug}`}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:border-primary"
+          className="hover-arrow-group inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:border-primary"
         >
           {COURSE_LEVEL_LABELS[course.level]}
-          <ArrowRightIcon className="size-4 text-primary" aria-hidden />
+          <ArrowRightIcon className="hover-arrow size-4 text-primary" aria-hidden />
         </Link>
       </div>
     </article>

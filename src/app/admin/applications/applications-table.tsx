@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";

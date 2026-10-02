@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,10 @@ export function CourseForm(
   const course = props.mode === "edit" ? props.course : undefined;
   const action = props.mode === "create" ? createCourse : updateCourse.bind(null, props.course.id);
   const [state, formAction, isPending] = useActionState(action, initialState);
+
+  useEffect(() => {
+    if (state.success) toast.success("Saved");
+  }, [state]);
 
   const [title, setTitle] = useState(course?.title ?? "");
   const [slug, setSlug] = useState(course?.slug ?? "");

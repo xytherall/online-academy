@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/admin/empty-state";
+import { EmptyState } from "@/components/empty-state";
 
 export default function AdminNotFound() {
   return (

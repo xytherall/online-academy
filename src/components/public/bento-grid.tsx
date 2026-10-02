@@ -85,7 +85,7 @@ function Tile({ span, children }: { span: "s4" | "s2"; children: React.ReactNode
     <div
       className={
         (span === "s4" ? "col-span-6 md:col-span-4" : "col-span-6 sm:col-span-3 md:col-span-2") +
-        " flex min-w-0 flex-col gap-2 overflow-hidden rounded-3xl border border-border bg-card p-6"
+        " hover-lift flex min-w-0 flex-col gap-2 overflow-hidden rounded-3xl border border-border bg-card p-6"
       }
     >
       {children}

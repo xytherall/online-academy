@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,8 +40,10 @@ function ToggleActiveButton({ studentId, isActive }: { studentId: string; isActi
       const result = await setStudentActive(studentId, !isActive);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success(isActive ? "Deactivated" : "Reactivated");
       setOpen(false);
       router.refresh();
     });
@@ -110,8 +113,10 @@ function ResetPasswordButton({ studentId }: { studentId: string }) {
       const result = await resetStudentPassword(studentId, parsed.data.password);
       if (result.error) {
         setServerError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success("Password reset");
       setOpen(false);
       router.refresh();
     });

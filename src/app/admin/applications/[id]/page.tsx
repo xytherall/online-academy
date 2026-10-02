@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LocalDateTime } from "@/components/local-date-time";
@@ -11,6 +12,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ApplicationReview } from "./application-review";
 
 const STATUS_LABELS = { pending: "Pending", accepted: "Accepted", rejected: "Rejected" } as const;
+
+export const metadata: Metadata = { title: "Application" };
 
 export default async function ApplicationDetailPage({
   params,

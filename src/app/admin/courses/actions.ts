@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { courseSchema } from "@/lib/validation/courses";
 
-export type CourseFormState = { error: string | null };
+export type CourseFormState = { error: string | null; success?: boolean };
 
 const DUPLICATE_SLUG_ERROR = "A course with this slug already exists. Choose a different slug.";
 const HAS_RESOURCES_ERROR =
@@ -105,7 +105,7 @@ export async function updateCourse(
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePublicCoursePaths(current?.slug, parsed.data.slug);
-  return { error: null };
+  return { error: null, success: true };
 }
 
 export async function deleteCourse(courseId: string): Promise<{ error: string | null }> {

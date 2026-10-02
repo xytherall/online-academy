@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireStudent } from "@/lib/auth";
 import { getBatchName } from "@/lib/student";
 import { ChangePasswordForm } from "./change-password-form";
+
+export const metadata: Metadata = { title: "Account" };
 
 function Field({ label, value }: { label: string; value: string | null }) {
   return (

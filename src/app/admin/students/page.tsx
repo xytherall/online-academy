@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { StudentsTable, type StudentRow } from "./students-table";
+
+export const metadata: Metadata = { title: "Students" };
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();

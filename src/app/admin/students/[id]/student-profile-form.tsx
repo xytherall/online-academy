@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { CountrySelect } from "@/components/country-select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,10 @@ export function StudentProfileForm({ student }: { student: Profile }) {
   const action = updateStudentProfile.bind(null, student.id);
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (state.success) toast.success("Saved");
+  }, [state]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);

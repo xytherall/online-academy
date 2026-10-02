@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileTextIcon } from "lucide-react";
@@ -9,6 +10,8 @@ import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { SubmissionUploadForm } from "./submission-upload-form";
+
+export const metadata: Metadata = { title: "Assessment" };
 
 export default async function StudentAssessmentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
