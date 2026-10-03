@@ -55,7 +55,7 @@ export function PortalPreview() {
           </div>
         </div>
 
-        <div className="relative z-20 mt-[14px] w-full rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elevated)] min-[961px]:absolute min-[961px]:top-auto min-[961px]:bottom-[-40px] min-[961px]:left-[-8px] min-[961px]:mt-0 min-[961px]:w-[270px] min-[961px]:-rotate-2">
+        <div className="relative z-20 mt-[14px] w-full rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-elevated)] min-[961px]:absolute min-[961px]:top-auto min-[961px]:bottom-1 min-[961px]:left-[-8px] min-[961px]:mt-0 min-[961px]:w-[270px] min-[961px]:-rotate-2">
           <p className="mb-2.5 text-sm font-semibold">Due this week</p>
           <div className="flex items-center justify-between gap-2 py-2 text-sm">
             <div>
