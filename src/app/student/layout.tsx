@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { PortalShell } from "@/components/portal/portal-shell";
 import { StudentMobileNav } from "@/components/student/student-mobile-nav";
 import { StudentSidebar } from "@/components/student/student-sidebar";
+import { countUnreadAnnouncements } from "@/lib/announcements";
 import { requireStudent } from "@/lib/auth";
 import { displayName } from "@/lib/display-name";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -22,11 +24,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   // Enforced here in server code, not only in the proxy.
   const profile = await requireStudent();
+  const supabase = await createClient();
+  const unreadAnnouncements = await countUnreadAnnouncements(supabase, profile);
 
   return (
     <PortalShell
-      mobileNav={<StudentMobileNav />}
-      sidebar={<StudentSidebar />}
+      mobileNav={<StudentMobileNav unreadAnnouncements={unreadAnnouncements} />}
+      sidebar={<StudentSidebar unreadAnnouncements={unreadAnnouncements} />}
       userLabel="Portal"
       userName={displayName(profile)}
     >

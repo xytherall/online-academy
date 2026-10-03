@@ -39,6 +39,29 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_seen: {
+        Row: {
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          last_seen_at: string
+          user_id: string
+        }
+        Update: {
+          last_seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_seen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           batch_id: string | null

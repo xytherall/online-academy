@@ -4,17 +4,32 @@ import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { announcementTargetLabel, getAnnouncementsForStudent } from "@/lib/announcements";
+import {
+  announcementTargetLabel,
+  getAnnouncementSeenCutoff,
+  getAnnouncementsForStudent,
+} from "@/lib/announcements";
+import { isNew } from "@/lib/announcements-unread";
 import { requireStudent } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { MarkSeenOnMount } from "./mark-seen-on-mount";
 
 export const metadata: Metadata = { title: "Announcements" };
 
 export default async function StudentAnnouncementsPage() {
-  await requireStudent();
-  const { announcements, error } = await getAnnouncementsForStudent();
+  const profile = await requireStudent();
+  const supabase = await createClient();
+
+  // Read the cutoff before it gets updated, so "New" pills reflect what was
+  // unseen when this visit started, not after MarkSeenOnMount runs.
+  const [cutoff, { announcements, error }] = await Promise.all([
+    getAnnouncementSeenCutoff(supabase, profile),
+    getAnnouncementsForStudent(),
+  ]);
 
   return (
     <div className="space-y-6">
+      <MarkSeenOnMount />
       <h1 className="text-xl font-semibold">Announcements</h1>
 
       {error ? (
@@ -28,6 +43,7 @@ export default async function StudentAnnouncementsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium">{announcement.title}</p>
                 <Badge variant="outline">{announcementTargetLabel(announcement)}</Badge>
+                {isNew(announcement.created_at, cutoff) ? <Badge variant="info">New</Badge> : null}
               </div>
               <p className="mb-2 text-xs text-muted-foreground">
                 <LocalDateTime iso={announcement.created_at} />

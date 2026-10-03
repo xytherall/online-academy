@@ -7,7 +7,8 @@ import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { DashboardBand } from "@/components/student/dashboard-band";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
-import { getAnnouncementsForStudent } from "@/lib/announcements";
+import { getAnnouncementSeenCutoff, getAnnouncementsForStudent } from "@/lib/announcements";
+import { isNew } from "@/lib/announcements-unread";
 import { requireStudent } from "@/lib/auth";
 import { getBatchName, getDueSoonAssessments, getRecentlyMarked } from "@/lib/student";
 import { getStudentCourseReports } from "@/lib/progress-report";
@@ -23,12 +24,14 @@ export default async function StudentDashboard() {
     { assessments: dueSoon, error: dueSoonError },
     { submissions: recentlyMarked, error: recentlyMarkedError },
     { announcements, error: announcementsError },
+    announcementCutoff,
   ] = await Promise.all([
     getStudentCourseReports(supabase, profile.id, profile.batch_id),
     getBatchName(profile.batch_id),
     getDueSoonAssessments(profile.id, profile.batch_id),
     getRecentlyMarked(profile.id),
     getAnnouncementsForStudent(3),
+    getAnnouncementSeenCutoff(supabase, profile),
   ]);
 
   return (
@@ -160,7 +163,10 @@ export default async function StudentDashboard() {
             {announcements.map((announcement) => (
               <li key={announcement.id} className="rounded-lg border border-border bg-card p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-medium">{announcement.title}</span>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">{announcement.title}</span>
+                    {isNew(announcement.created_at, announcementCutoff) ? <Badge variant="info">New</Badge> : null}
+                  </span>
                   <span className="text-sm text-muted-foreground">
                     <LocalDateTime iso={announcement.created_at} />
                   </span>

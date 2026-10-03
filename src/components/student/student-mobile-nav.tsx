@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StudentNavLinks } from "@/components/student/student-nav-links";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export function StudentMobileNav() {
+export function StudentMobileNav({ unreadAnnouncements }: { unreadAnnouncements: number }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,7 +24,7 @@ export function StudentMobileNav() {
           <SheetTitle>Student portal</SheetTitle>
         </SheetHeader>
         <div className="px-4 pb-4">
-          <StudentNavLinks onNavigate={() => setOpen(false)} />
+          <StudentNavLinks onNavigate={() => setOpen(false)} unreadAnnouncements={unreadAnnouncements} />
         </div>
       </SheetContent>
     </Sheet>

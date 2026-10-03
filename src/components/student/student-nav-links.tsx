@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpenIcon, ClipboardListIcon, LayoutDashboardIcon, MegaphoneIcon, UserIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { formatUnreadBadge } from "@/lib/announcements-unread";
 import { cn } from "@/lib/utils";
 
 export const STUDENT_NAV_ITEMS = [
@@ -13,7 +15,13 @@ export const STUDENT_NAV_ITEMS = [
   { href: "/student/account", label: "Account", icon: UserIcon },
 ] as const;
 
-export function StudentNavLinks({ onNavigate }: { onNavigate?: () => void }) {
+export function StudentNavLinks({
+  onNavigate,
+  unreadAnnouncements = 0,
+}: {
+  onNavigate?: () => void;
+  unreadAnnouncements?: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -22,6 +30,7 @@ export function StudentNavLinks({ onNavigate }: { onNavigate?: () => void }) {
         const isActive =
           pathname === item.href || (item.href !== "/student" && pathname.startsWith(`${item.href}/`));
         const Icon = item.icon;
+        const showUnread = item.href === "/student/announcements" && unreadAnnouncements > 0;
         return (
           <Link
             key={item.href}
@@ -34,6 +43,15 @@ export function StudentNavLinks({ onNavigate }: { onNavigate?: () => void }) {
           >
             <Icon className="size-4 shrink-0" aria-hidden="true" />
             {item.label}
+            {showUnread ? (
+              <span className="ml-auto flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+                <Badge variant="info" className="h-5 min-w-5 justify-center px-1 text-[11px]">
+                  <span className="sr-only">{unreadAnnouncements} unread</span>
+                  <span aria-hidden="true">{formatUnreadBadge(unreadAnnouncements)}</span>
+                </Badge>
+              </span>
+            ) : null}
           </Link>
         );
       })}
