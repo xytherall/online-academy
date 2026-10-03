@@ -39,7 +39,7 @@ Everything else stays outside the website for now. Live classes happen on Zoom /
 | Admins | Project owner and current teacher (both have full admin rights) |
 | Assignments | Due dates set by the teacher. Late submissions are **accepted and flagged**. |
 | Late marks | Do **not** count toward the report by default. Admin can override per submission. |
-| Tests | Marks entered manually by admin (no upload) |
+| Tests | Same as assignments: admin can attach the paper (PDF/image), students download it and upload their answers by the due date (late accepted and flagged). Admin can also enter marks directly with no upload (e.g. a test sat on paper in class). |
 | Remarks | Admin can write remarks per student per course |
 | Guardians | Guardian contact collected on the application. Progress shared via a printable report. No guardian accounts. |
 | Announcements | Target: everyone, one course, or one batch |
@@ -106,12 +106,12 @@ Permissions are enforced **on the server and in the database (Supabase Row Level
 - Can optionally target one batch; otherwise it is visible to everyone enrolled in the course.
 - Two types:
   - **Assignment**: students upload work (PDF or images) and admin marks it.
-  - **Test**: no upload. Admin enters marks directly.
+  - **Test**: students upload their answers exactly like an assignment, or the admin enters marks directly with no upload (e.g. sat on paper in class).
 - Fields: title, instructions, optional attachment, due date, total marks.
 
 **Submission / Result**
 - One record per student per assessment.
-- For assignments it holds the uploaded files. For tests it holds only marks.
+- Holds the uploaded files when the student uploads (assignment or test). A test marked without an upload holds only marks.
 - Stores marks, feedback, late flag and whether it counts toward the report.
 
 ---
@@ -205,7 +205,7 @@ Email-based "forgot password" and invites will be added once a domain and email 
 - **Marked**
 - **Missing** (past due, nothing submitted)
 
-Tests show **Marked** or **Not yet marked**.
+Tests with an upload use the same statuses as assignments. A test with no upload shows **Marked** or **Not yet marked** (never **Missing**, since it may have been sat on paper in class).
 
 All dates and times are shown in the **viewer's local time**.
 
@@ -226,7 +226,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/courses` | List of courses |
 | `/admin/courses/new` | Create course |
 | `/admin/courses/[id]` | Edit course, publish/unpublish, manage resources and assessments |
-| `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback. For tests, enter marks for all targeted students in one table. |
+| `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback and open uploaded files (assignments and tests). Marks can be entered for any targeted student, with or without an upload. |
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
 | `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
 | `/admin/settings` | Academy name, logo, tagline, about text, contact details |
@@ -719,6 +719,15 @@ Owner-requested polish ahead of launch (privacy page, link previews/favicon, Wha
 - [x] Polish: hover details, toast notifications (sonner), reusable empty states, `SubjectIcon` component
 - [x] Unread announcements indicator (nav dot/count, "New" pills, `announcement_seen` table) — student-only, see §15
 
+### Stage 14 — Test uploads
+
+Owner request (2026-10-04): tests work like assignments — no timed/online test, no start time.
+
+- [x] Migration `stage14_test_uploads`: storage upload policy and `submit_assignment()` no longer reject tests
+- [x] Student assessment page shows the upload form and "Your submission" for tests too
+- [x] Status rules: a test with an upload is Submitted / Submitted late; a test with no upload stays "Not yet marked" (never Missing)
+- [x] Admin marking unchanged (same table for both types; marks can still be entered without an upload)
+
 
 ---
 
@@ -875,3 +884,4 @@ Owner-requested polish ahead of launch (privacy page, link previews/favicon, Wha
 | 2026-10-03 | **Owner-requested: unread announcements indicator (student-only), superseding Stage 8's "no read/unread tracking" line above.** Announcements have no publish/schedule state (confirmed: no such field exists in `announcements` or anywhere in the spec), so "unread" is simply `created_at >` the student's watermark — RLS alone still decides visibility, this only adds a per-student time cutoff on top of it. New table `announcement_seen` (`user_id` PK → `profiles` cascade, `last_seen_at`), RLS: a user can select/insert/update only their own row, no delete policy. A new student's cutoff defaults to their `profiles.created_at` (no row yet), so nothing posted before their account existed counts as unread. Pure comparison/formatting logic lives in `src/lib/announcements-unread.ts` (unit-tested) so it doesn't need a database to test; `src/lib/announcements.ts` wraps it with the actual RLS-scoped queries |
 | 2026-10-03 | Unread indicator: the portal nav badge is computed once in `StudentLayout` (server) and passed down to `StudentSidebar`/`StudentMobileNav`/`StudentNavLinks` as a prop — admins never get this prop at all, so there's no "no dot for admins" branch to get wrong. Opening `/student/announcements` renders "New" pills from the *old* cutoff (read before it's updated), then a client-only `MarkSeenOnMount` upserts `last_seen_at = now()` and calls `router.refresh()` — without the refresh, the nav badge would keep showing the stale count until a full reload, since the App Router caches layout output across client-side navigations. The dashboard's announcement card also shows "New" pills (read-only cutoff) but never marks anything seen — only opening the Announcements page does |
 | 2026-10-01 | **Decided: marks take precedence over submission state.** `computeAssessmentStatus()` previously marked an assignment "Missing" whenever `submission.submitted_at` was null and the due date had passed, even when an admin had entered marks for that student without an upload (e.g. work sent via WhatsApp). Fixed: `marks != null` now returns "Marked" unconditionally, checked before anything else — "Missing" is reached only for an assignment past due with neither a submission nor marks. One function, used everywhere a status, a "Missing" count, or the homework summary is shown (student course page, assessment page, dashboard Due soon/Overdue, progress report table/`missingCount`, homework donut), so they can never disagree again. `is_late` is untouched — it still reflects only what the admin/actual submission set, never recomputed by this precedence change |
+| 2026-10-04 | **Owner decision: tests accept student uploads, exactly like assignments** (superseding "Test: no upload" in §2/§4). The admin attaches the paper as the existing optional attachment; students download it and upload answers by the due date, with the same late flag and `counts_toward_report` default. No start time, timer or online quiz — "Quizzes / auto-graded tests" stays in §13. The admin can still enter marks for a test with no upload (owner confirmed), so a test with no upload is "Not yet marked" rather than "Missing", and the dashboard still drops a test from upcoming work once its due date passes. The homework donut stays assignments-only. `submit_assignment()` keeps its name to avoid an app-wide rename |

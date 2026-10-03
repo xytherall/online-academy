@@ -48,6 +48,15 @@ describe("computeAssessmentStatus", () => {
     expect(computeAssessmentStatus({ type: "test", due_at: FUTURE }, null, NOW)).toBe("Not yet marked");
   });
 
+  it("is Submitted / Submitted late for a test with an upload and no marks yet", () => {
+    expect(
+      computeAssessmentStatus({ type: "test", due_at: PAST }, { submitted_at: PAST, is_late: false, marks: null }, NOW),
+    ).toBe("Submitted");
+    expect(
+      computeAssessmentStatus({ type: "test", due_at: PAST }, { submitted_at: NOW.toISOString(), is_late: true, marks: null }, NOW),
+    ).toBe("Submitted late");
+  });
+
   it("is Submitted / Submitted late for an on-time/late upload with no marks yet", () => {
     expect(
       computeAssessmentStatus(

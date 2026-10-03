@@ -71,14 +71,14 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         </div>
       ) : null}
 
-      {assessment.type === "assignment" && !submission ? (
+      {!submission ? (
         <div className="space-y-2">
           <h2 className="font-medium">Submit your work</h2>
           <SubmissionUploadForm assessmentId={assessment.id} studentId={profile.id} dueAt={assessment.due_at} />
         </div>
       ) : null}
 
-      {assessment.type === "assignment" && submission?.submitted_at ? (
+      {submission?.submitted_at ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Your submission</CardTitle>
