@@ -22,7 +22,10 @@ export type AssessmentStatus =
  * work an admin marks without an upload (e.g. sent over WhatsApp) is
  * "Marked", never "Missing", regardless of `submitted_at`. "Missing" is
  * reached only for an assignment that is past due with neither a
- * submission nor marks. This is the single place this precedence lives —
+ * submission nor marks. A test can take an upload too (Stage 14), but one
+ * with no upload is "Not yet marked", never "Missing" — it may have been sat
+ * on paper in class and marked directly. This is the single place this
+ * precedence lives —
  * every page that shows a status, a "Missing" count, or the homework
  * summary goes through this function (directly or via
  * `computeCourseReport`), so they can never disagree.
@@ -34,9 +37,8 @@ export function computeAssessmentStatus(
 ): AssessmentStatus {
   if (submission?.marks != null) return "Marked";
 
-  if (assessment.type === "test") return "Not yet marked";
-
   if (!submission || !submission.submitted_at) {
+    if (assessment.type === "test") return "Not yet marked";
     return new Date(assessment.due_at) < now ? "Missing" : "Not submitted";
   }
 

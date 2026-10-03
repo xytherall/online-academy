@@ -166,7 +166,7 @@ export function SubmissionUploadForm({
       <Dialog open={confirmOpen} onOpenChange={(next) => !isSubmitting && setConfirmOpen(next)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Submit this assignment?</DialogTitle>
+            <DialogTitle>Submit your work?</DialogTitle>
             <DialogDescription>
               Submissions are final and cannot be edited or replaced once sent.
               {isLate ? " This is past the due date, so your submission will be marked late." : ""}
