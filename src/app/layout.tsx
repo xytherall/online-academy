@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { AppInstallSetup } from "@/components/app-install-setup";
 import { AppToaster } from "@/components/app-toaster";
+import { APP_NAVY } from "@/lib/app-icon";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { getSiteUrl } from "@/lib/site-url";
@@ -19,8 +21,15 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: "/" },
     openGraph: { title, description, url: "/", type: "website" },
     twitter: { card: "summary_large_image", title, description },
+    // iPhone home-screen app: opens full screen, named after the academy.
+    appleWebApp: { capable: true, title, statusBarStyle: "default" },
   };
 }
+
+// Colours the phone's status bar in the installed app (and Android Chrome's toolbar).
+export const viewport: Viewport = {
+  themeColor: APP_NAVY,
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -35,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
         {children}
         <AppToaster />
+        <AppInstallSetup />
       </body>
     </html>
   );

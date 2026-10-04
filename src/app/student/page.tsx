@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { DashboardBand } from "@/components/student/dashboard-band";
+import { InstallAppCard } from "@/components/student/install-app-card";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { getAnnouncementSeenCutoff, getAnnouncementsForStudent } from "@/lib/announcements";
@@ -60,6 +61,8 @@ export default async function StudentDashboard() {
           )}
         </div>
       </div>
+
+      <InstallAppCard />
 
       <div>
         <h2 className="mb-3 font-medium">Upcoming work</h2>
