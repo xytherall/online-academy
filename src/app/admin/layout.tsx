@@ -6,6 +6,7 @@ import { getPendingApplicationCount } from "@/lib/applications";
 import { requireAdmin } from "@/lib/auth";
 import { displayName } from "@/lib/display-name";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { getWaitingQuestionCount } from "@/lib/questions";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,12 +27,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const profile = await requireAdmin();
 
   const supabase = await createClient();
-  const pendingApplicationCount = await getPendingApplicationCount(supabase);
+  const [pendingApplications, waitingQuestions] = await Promise.all([
+    getPendingApplicationCount(supabase),
+    getWaitingQuestionCount(supabase),
+  ]);
+  const counts = { pendingApplications, waitingQuestions };
 
   return (
     <PortalShell
-      mobileNav={<AdminMobileNav pendingApplicationCount={pendingApplicationCount} />}
-      sidebar={<AdminSidebar pendingApplicationCount={pendingApplicationCount} />}
+      mobileNav={<AdminMobileNav counts={counts} />}
+      sidebar={<AdminSidebar counts={counts} />}
       userLabel="Admin"
       userName={displayName(profile)}
     >

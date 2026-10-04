@@ -11,7 +11,7 @@ type StudentRef = Pick<Tables<"profiles">, "id" | "batch_id">;
 
 export type StudentNotification = Pick<
   Tables<"notifications">,
-  "id" | "kind" | "title" | "body" | "assessment_id" | "read_at" | "created_at"
+  "id" | "kind" | "title" | "body" | "assessment_id" | "question_id" | "read_at" | "created_at"
 >;
 
 /** No preferences row yet means notifications are on (the default). */
@@ -64,7 +64,7 @@ export async function getRecentNotifications(
 ): Promise<{ notifications: StudentNotification[] | null; error: boolean }> {
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, kind, title, body, assessment_id, read_at, created_at")
+    .select("id, kind, title, body, assessment_id, question_id, read_at, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT);
@@ -105,4 +105,8 @@ export function notifyMarks(supabase: SupabaseServerClient, assessmentId: string
     "marks",
     supabase.rpc("notify_marks", { p_assessment_id: assessmentId, p_student_id: studentId }),
   );
+}
+
+export function notifyAnswer(supabase: SupabaseServerClient, questionId: string) {
+  return createAndPush("answer", supabase.rpc("notify_answer", { p_question_id: questionId }));
 }

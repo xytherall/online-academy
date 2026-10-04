@@ -76,3 +76,18 @@ export function applicationStatusBadgeVariant(status: "pending" | "accepted" | "
       return "warning";
   }
 }
+
+/** Waiting/Answered/Closed pill ("Ask the teacher", student + admin). */
+export function questionStatusBadge(status: "waiting" | "answered" | "closed"): {
+  label: string;
+  variant: StatusBadgeVariant;
+} {
+  switch (status) {
+    case "waiting":
+      return { label: "Waiting", variant: "warning" };
+    case "answered":
+      return { label: "Answered", variant: "success" };
+    case "closed":
+      return { label: "Closed", variant: "secondary" };
+  }
+}

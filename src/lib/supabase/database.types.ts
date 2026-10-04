@@ -440,6 +440,7 @@ export type Database = {
           created_at: string
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          question_id: string | null
           read_at: string | null
           title: string
           user_id: string
@@ -451,6 +452,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          question_id?: string | null
           read_at?: string | null
           title: string
           user_id: string
@@ -462,6 +464,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
+          question_id?: string | null
           read_at?: string | null
           title?: string
           user_id?: string
@@ -479,6 +482,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
           {
@@ -584,6 +594,73 @@ export type Database = {
           {
             foreignKeyName: "push_subscriptions_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          answer: string | null
+          answer_attachment_path: string | null
+          answered_at: string | null
+          answered_by: string | null
+          attachment_path: string | null
+          body: string
+          course_id: string | null
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["question_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          answer_attachment_path?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          attachment_path?: string | null
+          body: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["question_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          answer_attachment_path?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          attachment_path?: string | null
+          body?: string
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["question_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_answered_by_fkey"
+            columns: ["answered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_student_id_fkey"
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -761,6 +838,7 @@ export type Database = {
         Args: { p_direction: string; p_faq_id: string }
         Returns: undefined
       }
+      notify_answer: { Args: { p_question_id: string }; Returns: string[] }
       notify_marks: {
         Args: { p_assessment_id: string; p_student_id: string }
         Returns: string[]
@@ -811,7 +889,13 @@ export type Database = {
         | "good"
         | "satisfactory"
         | "needs_improvement"
-      notification_kind: "assignment" | "test" | "announcement" | "marks"
+      notification_kind:
+        | "assignment"
+        | "test"
+        | "announcement"
+        | "marks"
+        | "answer"
+      question_status: "waiting" | "answered" | "closed"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
     }
@@ -953,7 +1037,8 @@ export const Constants = {
         "satisfactory",
         "needs_improvement",
       ],
-      notification_kind: ["assignment", "test", "announcement", "marks"],
+      notification_kind: ["assignment", "test", "announcement", "marks", "answer"],
+      question_status: ["waiting", "answered", "closed"],
       resource_kind: ["file", "link"],
       user_role: ["admin", "teacher", "student"],
     },

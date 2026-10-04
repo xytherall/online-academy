@@ -88,7 +88,7 @@ export async function sendPushForNotifications(notificationIds: string[]): Promi
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("notifications")
-    .select("id, user_id, kind, title, body, assessment_id")
+    .select("id, user_id, kind, title, body, assessment_id, question_id")
     .in("id", notificationIds);
 
   if (error) {

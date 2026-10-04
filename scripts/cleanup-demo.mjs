@@ -63,8 +63,16 @@ for (const r of DEMO_RESOURCES) {
 
 check(await sb.from("applications").delete().like("email", `%${DEMO_EMAIL_DOMAIN}`), "delete demo applications");
 
-// Deleting the auth user cascades to the profile, its enrollments and submissions.
+// Deleting the auth user cascades to the profile, its enrollments, submissions
+// and questions. Question files live under {student_id}/ and {student_id}/answers/.
 const users = await listDemoUsers(sb);
+for (const u of users) {
+  for (const folder of [u.id, `${u.id}/answers`]) {
+    const files = check(await sb.storage.from("questions").list(folder), "list question files");
+    const paths = files.filter((f) => f.id).map((f) => `${folder}/${f.name}`);
+    if (paths.length) check(await sb.storage.from("questions").remove(paths), "remove question files");
+  }
+}
 for (const u of users) {
   const { error } = await sb.auth.admin.deleteUser(u.id);
   if (error) throw new Error(`delete user ${u.email}: ${error.message}`);

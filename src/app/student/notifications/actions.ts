@@ -27,7 +27,7 @@ export async function openNotification(notificationId: string): Promise<Notifica
   const supabase = await createClient();
   const { data: notification, error } = await supabase
     .from("notifications")
-    .select("id, kind, assessment_id, read_at")
+    .select("id, kind, assessment_id, question_id, read_at")
     .eq("id", parsed.data)
     .eq("user_id", profile.id)
     .maybeSingle();

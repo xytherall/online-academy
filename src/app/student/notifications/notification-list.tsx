@@ -2,7 +2,14 @@
 
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { BellIcon, ClipboardCheckIcon, FileTextIcon, MegaphoneIcon, PenLineIcon } from "lucide-react";
+import {
+  BellIcon,
+  ClipboardCheckIcon,
+  FileTextIcon,
+  MegaphoneIcon,
+  MessageCircleQuestionMarkIcon,
+  PenLineIcon,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Button } from "@/components/ui/button";
@@ -16,6 +23,7 @@ const KIND_ICONS: Record<StudentNotification["kind"], LucideIcon> = {
   test: PenLineIcon,
   announcement: MegaphoneIcon,
   marks: ClipboardCheckIcon,
+  answer: MessageCircleQuestionMarkIcon,
 };
 
 function NotificationRow({ notification }: { notification: StudentNotification }) {
