@@ -85,6 +85,15 @@ export default async function StudentNotificationsPage() {
         </section>
       )}
 
+      {enabled ? (
+        <p className="text-sm text-muted-foreground">
+          Want these as pop-ups on your phone?{" "}
+          <Link href="/student/account" className="font-medium text-primary hover:underline">
+            Turn on phone notifications
+          </Link>
+        </p>
+      ) : null}
+
       <section>
         <h2 className="mb-3 font-medium">Recent</h2>
         {error ? (

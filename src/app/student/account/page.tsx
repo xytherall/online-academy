@@ -7,6 +7,7 @@ import { getBatchName } from "@/lib/student";
 import { createClient } from "@/lib/supabase/server";
 import { ChangePasswordForm } from "./change-password-form";
 import { NotificationsToggle } from "./notifications-toggle";
+import { PhoneNotifications } from "./phone-notifications";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -55,8 +56,9 @@ export default async function StudentAccountPage() {
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <NotificationsToggle initialEnabled={notificationsEnabled} />
+          <PhoneNotifications notificationsEnabled={notificationsEnabled} />
         </CardContent>
       </Card>
 

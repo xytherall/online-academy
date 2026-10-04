@@ -1,5 +1,7 @@
 import "server-only";
+import { after } from "next/server";
 import { bellCount, isDueForReminder } from "@/lib/notifications-core";
+import { sendPushForNotifications } from "@/lib/push";
 import { getDueSoonAssessments, type DueSoonAssessment } from "@/lib/student";
 import type { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
@@ -74,23 +76,32 @@ export async function getRecentNotifications(
 /**
  * Called by the admin Server Actions after the main write has succeeded.
  * A failed notification must never undo or fail the admin's actual change,
- * so the error is logged rather than returned.
+ * so the error is logged rather than returned. Phone pushes for the new rows
+ * are sent after the response, so the admin isn't kept waiting on them.
  */
-async function logIfFailed(label: string, promise: PromiseLike<{ error: { message: string } | null }>) {
-  const { error } = await promise;
-  if (error) console.error(`Could not create ${label} notifications:`, error.message);
+async function createAndPush(
+  label: string,
+  promise: PromiseLike<{ data: string[] | null; error: { message: string } | null }>,
+) {
+  const { data, error } = await promise;
+  if (error) {
+    console.error(`Could not create ${label} notifications:`, error.message);
+    return;
+  }
+  const ids = data ?? [];
+  if (ids.length > 0) after(() => sendPushForNotifications(ids));
 }
 
 export function notifyNewAssessment(supabase: SupabaseServerClient, assessmentId: string) {
-  return logIfFailed("assessment", supabase.rpc("notify_new_assessment", { p_assessment_id: assessmentId }));
+  return createAndPush("assessment", supabase.rpc("notify_new_assessment", { p_assessment_id: assessmentId }));
 }
 
 export function notifyNewAnnouncement(supabase: SupabaseServerClient, announcementId: string) {
-  return logIfFailed("announcement", supabase.rpc("notify_new_announcement", { p_announcement_id: announcementId }));
+  return createAndPush("announcement", supabase.rpc("notify_new_announcement", { p_announcement_id: announcementId }));
 }
 
 export function notifyMarks(supabase: SupabaseServerClient, assessmentId: string, studentId: string) {
-  return logIfFailed(
+  return createAndPush(
     "marks",
     supabase.rpc("notify_marks", { p_assessment_id: assessmentId, p_student_id: studentId }),
   );

@@ -555,6 +555,41 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           course_id: string
@@ -728,15 +763,19 @@ export type Database = {
       }
       notify_marks: {
         Args: { p_assessment_id: string; p_student_id: string }
-        Returns: number
+        Returns: string[]
       }
       notify_new_announcement: {
         Args: { p_announcement_id: string }
-        Returns: number
+        Returns: string[]
       }
       notify_new_assessment: {
         Args: { p_assessment_id: string }
-        Returns: number
+        Returns: string[]
+      }
+      save_push_subscription: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
+        Returns: undefined
       }
       submit_assignment: {
         Args: { p_assessment_id: string; p_file_paths: string[] }
