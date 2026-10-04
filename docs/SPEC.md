@@ -861,7 +861,7 @@ Owner decision (2026-10-04, "option 1").
 - [x] Student dashboard checked in the browser as Ayesha (phone + desktop dark): own-batch and in-progress classes shown soonest first, finished and other-batch classes hidden, Join opens in a new tab; the notification shows the time and opens the dashboard
 - [x] Admin pages checked in the browser (owner)
 - [x] Owner request: no Saudi time. The admin enters the time in their own time zone (like due dates) and the admin list shows local time; the notification shows the class time in each student's own time zone: migration `stage19b_live_class_local_time` stores no time text, the bell list formats the class's `starts_at` on the device, and the phone push carries `startsAt` for the service worker to format
-- [ ] Migration `stage19b` applied to the Supabase project
+- [x] Migration `stage19b` applied to the Supabase project (version `20261004213214`)
 
 ## 15. Decision log
 
