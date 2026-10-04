@@ -1,7 +1,10 @@
-// Service worker for the installed app. It does one thing: when a page can't
-// be loaded because the phone is offline, it shows /offline instead of the
-// browser's own error page. Nothing else is cached; every request still goes
-// to the network, so students always see live data.
+// Service worker for the installed app. It does two things:
+// 1. When a page can't be loaded because the phone is offline, it shows
+//    /offline instead of the browser's own error page. Nothing else is
+//    cached; every request still goes to the network, so students always see
+//    live data.
+// 2. Shows phone notifications (Web Push) sent by the server, and opens the
+//    right portal page when one is tapped.
 
 const CACHE = "offline-v1";
 const OFFLINE_URL = "/offline";
@@ -54,4 +57,46 @@ self.addEventListener("fetch", (event) => {
       fetch(request).catch(async () => (await caches.match(request)) ?? Response.error()),
     );
   }
+});
+
+// --- Phone notifications ----------------------------------------------------
+
+const DEFAULT_NOTIFICATION_URL = "/student/notifications";
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "New notification", {
+      body: data.body || "",
+      tag: data.tag,
+      icon: "/app-icon/192",
+      data: { url: data.url || DEFAULT_NOTIFICATION_URL },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  // Only ever open pages on this site, whatever the payload says.
+  const target = new URL(event.notification.data?.url || DEFAULT_NOTIFICATION_URL, self.location.origin);
+  const url = target.origin === self.location.origin ? target.href : new URL(DEFAULT_NOTIFICATION_URL, self.location.origin).href;
+
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const existing = windows.find((client) => new URL(client.url).origin === self.location.origin);
+      if (existing) {
+        await existing.focus();
+        return existing.navigate(url);
+      }
+      return self.clients.openWindow(url);
+    })(),
+  );
 });

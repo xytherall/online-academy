@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { PortalShell } from "@/components/portal/portal-shell";
+import { NotificationBell } from "@/components/student/notification-bell";
 import { StudentMobileNav } from "@/components/student/student-mobile-nav";
 import { StudentSidebar } from "@/components/student/student-sidebar";
 import { countUnreadAnnouncements } from "@/lib/announcements";
 import { requireStudent } from "@/lib/auth";
 import { displayName } from "@/lib/display-name";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { getBellCount } from "@/lib/notifications";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,10 +27,14 @@ export default async function StudentLayout({ children }: { children: React.Reac
   // Enforced here in server code, not only in the proxy.
   const profile = await requireStudent();
   const supabase = await createClient();
-  const unreadAnnouncements = await countUnreadAnnouncements(supabase, profile);
+  const [unreadAnnouncements, bellCount] = await Promise.all([
+    countUnreadAnnouncements(supabase, profile),
+    getBellCount(supabase, profile),
+  ]);
 
   return (
     <PortalShell
+      headerActions={<NotificationBell initialCount={bellCount} />}
       mobileNav={<StudentMobileNav unreadAnnouncements={unreadAnnouncements} />}
       sidebar={<StudentSidebar unreadAnnouncements={unreadAnnouncements} />}
       userLabel="Portal"

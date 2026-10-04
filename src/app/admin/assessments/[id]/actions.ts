@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { notifyMarks } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { buildSaveMarksSchema } from "@/lib/validation/submissions";
 
@@ -61,6 +62,13 @@ export async function saveMarks(
 
     if (error) return { error: friendlyDbError(error, "Could not save. Please try again.") };
   } else {
+    const { data: previous } = await supabase
+      .from("submissions")
+      .select("marks, feedback")
+      .eq("assessment_id", assessmentId)
+      .eq("student_id", studentId)
+      .maybeSingle();
+
     const { error } = await supabase.from("submissions").upsert(
       {
         assessment_id: assessmentId,
@@ -75,6 +83,12 @@ export async function saveMarks(
     );
 
     if (error) return { error: friendlyDbError(error, "Could not save. Please try again.") };
+
+    // Notify the student only when their marks or feedback actually changed,
+    // so re-saving the same values doesn't ping them again.
+    if (!previous || previous.marks !== marks || previous.feedback !== feedback) {
+      await notifyMarks(supabase, assessmentId, studentId);
+    }
   }
 
   revalidatePath(`/admin/assessments/${assessmentId}`);
