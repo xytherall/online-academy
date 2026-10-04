@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { DashboardBand } from "@/components/student/dashboard-band";
 import { InstallAppCard } from "@/components/student/install-app-card";
+import { PhoneNotificationsCard } from "@/components/student/phone-notifications-card";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { getAnnouncementSeenCutoff, getAnnouncementsForStudent } from "@/lib/announcements";
 import { isNew } from "@/lib/announcements-unread";
 import { requireStudent } from "@/lib/auth";
+import { getNotificationsEnabled } from "@/lib/notifications";
 import { getBatchName, getDueSoonAssessments, getRecentlyMarked } from "@/lib/student";
 import { getStudentCourseReports } from "@/lib/progress-report";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +28,7 @@ export default async function StudentDashboard() {
     { submissions: recentlyMarked, error: recentlyMarkedError },
     { announcements, error: announcementsError },
     announcementCutoff,
+    notificationsEnabled,
   ] = await Promise.all([
     getStudentCourseReports(supabase, profile.id, profile.batch_id),
     getBatchName(profile.batch_id),
@@ -33,6 +36,7 @@ export default async function StudentDashboard() {
     getRecentlyMarked(profile.id),
     getAnnouncementsForStudent(3),
     getAnnouncementSeenCutoff(supabase, profile),
+    getNotificationsEnabled(supabase, profile.id),
   ]);
 
   return (
@@ -63,6 +67,7 @@ export default async function StudentDashboard() {
       </div>
 
       <InstallAppCard />
+      <PhoneNotificationsCard notificationsEnabled={notificationsEnabled} />
 
       <div>
         <h2 className="mb-3 font-medium">Upcoming work</h2>
