@@ -2,7 +2,7 @@ import { z } from "zod";
 import { saudiLocalToIso } from "@/lib/live-classes-core";
 
 // Lengths must match the checks in
-// supabase/migrations/20261005090000_stage19_live_classes.sql.
+// supabase/migrations/20261004191728_stage19_live_classes.sql.
 
 /** Select value for a class that is for every student. */
 export const EVERYONE_VALUE = "everyone";

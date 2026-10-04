@@ -852,13 +852,13 @@ Owner request (2026-10-04).
 Owner decision (2026-10-04, "option 1").
 
 - [x] Migration `stage19_live_classes`: `live_classes` table + RLS, `live_class` notification kind, `notifications.live_class_id`, `notify_new_live_class()`
-- [ ] Migration applied to the Supabase project
+- [x] Migration applied to the Supabase project (version `20261004191728`)
 - [x] Admin: "Live classes" nav item; add / edit / delete with title, date and time (Saudi time), join link (http/https only), optional note, all students or one batch; upcoming and past lists
 - [x] Student: "Upcoming live classes" card at the top of the dashboard with a Join button, only their classes, hidden when there are none, a class drops off an hour after it starts
 - [x] Adding a class notifies its students (bell + phone push, respects the notifications switch); editing does not; tapping opens the dashboard
 - [x] Demo cleanup removes live classes of demo batches
-- [ ] Checked against the live database: RLS, notification on add, none on edit
-- [ ] Student dashboard checked in the browser as a demo student
+- [x] Checked against the live database (rolled back): RLS (18 cases: admin full access; students see all-student + own-batch classes only; no-batch, other-batch, deactivated and anon cases; no student writes or notify calls; `javascript:` links rejected), notify reaches only the class's active students with notifications on, Saudi-time body, delete removes its notifications
+- [x] Student dashboard checked in the browser as Ayesha (phone + desktop dark): own-batch and in-progress classes shown soonest first, finished and other-batch classes hidden, Join opens in a new tab; the notification shows the time and opens the dashboard
 - [ ] Admin pages checked in the browser
 
 ## 15. Decision log

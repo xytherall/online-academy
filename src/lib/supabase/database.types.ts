@@ -908,12 +908,12 @@ export type Database = {
         Args: { p_announcement_id: string }
         Returns: string[]
       }
-      notify_new_live_class: {
-        Args: { p_live_class_id: string }
-        Returns: string[]
-      }
       notify_new_assessment: {
         Args: { p_assessment_id: string }
+        Returns: string[]
+      }
+      notify_new_live_class: {
+        Args: { p_live_class_id: string }
         Returns: string[]
       }
       save_push_subscription: {
