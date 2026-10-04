@@ -11,7 +11,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * due-work reminder route, after it has checked CRON_SECRET.
  */
 
-export type PushMessage = { title: string; body: string; url: string; tag: string };
+/**
+ * `startsAt` (a live class's start, UTC ISO) makes the phone show the time
+ * in its own time zone instead of `body` — see public/sw.js.
+ */
+export type PushMessage = { title: string; body: string; url: string; tag: string; startsAt?: string };
 
 let configured: boolean | null = null;
 
@@ -88,7 +92,7 @@ export async function sendPushForNotifications(notificationIds: string[]): Promi
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("notifications")
-    .select("id, user_id, kind, title, body, assessment_id, question_id")
+    .select("id, user_id, kind, title, body, assessment_id, question_id, live_class:live_classes(starts_at)")
     .in("id", notificationIds);
 
   if (error) {
@@ -104,6 +108,7 @@ export async function sendPushForNotifications(notificationIds: string[]): Promi
         body: n.body ?? "Tap to open.",
         url: notificationHref(n),
         tag: n.id,
+        startsAt: n.live_class?.starts_at,
       },
     })),
   );

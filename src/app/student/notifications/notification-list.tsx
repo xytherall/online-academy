@@ -62,7 +62,11 @@ function NotificationRow({ notification }: { notification: StudentNotification }
           <span className={cn("block text-sm", isUnread ? "font-semibold" : "text-muted-foreground")}>
             {notification.title}
           </span>
-          {notification.body ? (
+          {notification.live_class ? (
+            <span className="block text-xs text-muted-foreground">
+              Starts <LocalDateTime iso={notification.live_class.starts_at} />
+            </span>
+          ) : notification.body ? (
             <span className="block text-xs text-muted-foreground">{notification.body}</span>
           ) : null}
           <span className="mt-0.5 block text-xs text-muted-foreground">
