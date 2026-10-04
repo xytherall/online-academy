@@ -793,6 +793,7 @@ Owner request (2026-10-04), after the installable app (Stage 15) was merged.
 - [x] Every bell notification is also sent as a Web Push (`web-push`, VAPID keys in env), after the admin's response; dead subscriptions (404/410) are removed
 - [x] Service worker shows the push and opens the right portal page when tapped
 - [x] "Turn on phone notifications" on `/student/account`, with hints for iPhone (home-screen app, iOS 16.4+), blocked permission and unsupported browsers
+- [x] "Get notifications on your phone" card on the student dashboard (owner request), next to the install card, sharing the same turn-on logic (`src/lib/use-phone-notifications.ts`); hidden once on, dismissed, blocked, unsupported or while notifications are off; on iPhone Safari it shows the add-to-home-screen hint
 - [x] Daily due-work reminder push: `POST /api/cron/due-reminders` (needs `CRON_SECRET`), called by the Netlify scheduled function `netlify/functions/due-reminders.mjs` at 14:00 UTC (5 pm Saudi time)
 - [ ] On Netlify at deploy: set `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`; check the scheduled function appears under Functions
 - [ ] Test on a real Android phone and an iPhone (home-screen app) once the site is live on HTTPS
