@@ -13,6 +13,7 @@ import {
   MessageCircleQuestionMarkIcon,
   SettingsIcon,
   UsersIcon,
+  VideoIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/courses", label: "Courses", icon: BookOpenIcon },
   { href: "/admin/marking", label: "Marking", icon: CheckSquareIcon },
   { href: "/admin/questions", label: "Questions", icon: MessageCircleQuestionMarkIcon },
+  { href: "/admin/live-classes", label: "Live classes", icon: VideoIcon },
   { href: "/admin/announcements", label: "Announcements", icon: MegaphoneIcon },
   { href: "/admin/faqs", label: "FAQ", icon: HelpCircleIcon },
   { href: "/admin/settings", label: "Settings", icon: SettingsIcon },

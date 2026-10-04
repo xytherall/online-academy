@@ -100,6 +100,10 @@ export function notifyNewAnnouncement(supabase: SupabaseServerClient, announceme
   return createAndPush("announcement", supabase.rpc("notify_new_announcement", { p_announcement_id: announcementId }));
 }
 
+export function notifyNewLiveClass(supabase: SupabaseServerClient, liveClassId: string) {
+  return createAndPush("live class", supabase.rpc("notify_new_live_class", { p_live_class_id: liveClassId }));
+}
+
 export function notifyMarks(supabase: SupabaseServerClient, assessmentId: string, studentId: string) {
   return createAndPush(
     "marks",

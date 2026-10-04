@@ -16,7 +16,7 @@ It does three things:
 2. **Gives students one place** for their courses, study materials, assignments, marks, progress and announcements.
 3. **Gives admins one place** to manage applications, students, batches, courses, marking, reports and announcements — without editing code.
 
-Everything else stays outside the website for now. Live classes happen on Zoom / Google Meet. Class schedules, meeting links, attendance and fees are handled by the academy directly, e.g. over WhatsApp.
+Everything else stays outside the website for now. Live classes happen on Zoom / Google Meet; the admin posts each upcoming class with its join link in the portal (Stage 19). Timetables, attendance and fees are handled by the academy directly, e.g. over WhatsApp.
 
 **Guiding rule:** keep it simple. This is a practical academy system, not a commercial LMS. Build only what is listed here.
 
@@ -32,7 +32,7 @@ Everything else stays outside the website for now. Live classes happen on Zoom /
 | Admissions | Public application form → admin accepts/rejects → accepted students get an account |
 | Existing students | About 10 already enrolled. Admin adds them directly (no application). |
 | Payments | **Not built.** Handled offline (JazzCash etc.). |
-| Class schedule / meeting links | **Not built.** Handled via WhatsApp. |
+| Class schedule / meeting links | Upcoming class entries with a join link (Stage 19, owner decision 2026-10-04). **No weekly schedule or timetable.** |
 | Attendance | **Not built.** Handled by the academy. |
 | Batches | Admin-defined groups of students, e.g. by country. Not tied to a course. **One batch per student.** |
 | Roles in v1 | Admin and Student. Teacher role exists in the database but has **no dashboard in v1**. |
@@ -190,7 +190,7 @@ Email-based "forgot password" and invites will be added once a domain and email 
 
 | Route | Shows |
 |---|---|
-| `/student` | Dashboard: latest announcements, upcoming work (every unsubmitted assignment, overdue included, and every test not yet past, with no date limit), recently marked work |
+| `/student` | Dashboard: upcoming live classes for the student (card at the top with a Join button, hidden when there are none; a class drops off an hour after it starts), latest announcements, upcoming work (every unsubmitted assignment, overdue included, and every test not yet past, with no date limit), recently marked work |
 | `/student/courses` | Enrolled courses |
 | `/student/courses/[id]` | Course: resources, assessments with status and marks |
 | `/student/assessments/[id]` | Instructions, attachment, due date, upload/replace submission, marks and feedback once marked |
@@ -231,6 +231,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/courses/[id]` | Edit course, publish/unpublish, manage resources and assessments |
 | `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback and open uploaded files (assignments and tests). Marks can be entered for any targeted student, with or without an upload. |
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
+| `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, all students or one batch. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
 | `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
 | `/admin/settings` | Academy name, logo, tagline, about text, contact details |
 
@@ -417,7 +418,7 @@ Student notifications. Created only by the admin-only `notify_new_assessment` / 
 | Field | Notes |
 |---|---|
 | `user_id` | FK → `profiles` (cascade) |
-| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` |
+| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` / `live_class` |
 | `title` | |
 | `body` | nullable (course title) |
 | `assessment_id` | nullable, FK → `assessments` (cascade) |
@@ -461,6 +462,20 @@ RLS: a user can read and delete only their own rows. Rows are saved only through
 | `answered_by`, `answered_at` | nullable |
 
 RLS: a student can insert their own (only `student_id`, `course_id`, `body`, `attachment_path` — column grant; course must be one they're enrolled in or null; active students only), read their own, and delete their own only while `waiting`. Admins can read, update and delete all. `notifications.question_id` (cascade) + kind `answer` link the "Your question was answered" notification, created by the admin-only `notify_answer()`.
+
+### `live_classes`
+One upcoming (or past) live class. No recurring schedule.
+
+| Field | Notes |
+|---|---|
+| `title` | 1–200 characters |
+| `starts_at` | timestamptz; entered in the admin's device time zone, shown to students in theirs |
+| `join_url` | http(s) link, up to 2,000 characters |
+| `note` | nullable, up to 1,000 characters |
+| `batch_id` | nullable (all students), FK → `batches` (cascade) |
+| `created_by` | FK → `profiles` (set null) |
+
+RLS: admins can read, insert, update and delete all. An active user can read classes for all students or for their own batch; no student writes. `notifications.live_class_id` (cascade) + kind `live_class` link the "New live class" notification, created by the admin-only `notify_new_live_class()`.
 
 ### `site_settings`
 Single row.
@@ -651,7 +666,7 @@ No orange is used as a brand or accent colour anywhere; `warning` above is the o
 
 Future options, only if the academy asks:
 
-- Class schedule / meeting links in the portal
+- Weekly class schedule / timetable (single upcoming class entries with a join link were added in Stage 19)
 - Attendance tracking
 - Payments / fee tracking
 - Teacher dashboard and teacher-scoped permissions
@@ -832,6 +847,22 @@ Owner request (2026-10-04).
 - [x] Admin pages checked in the browser: waiting badge (2 → 1 → none), waiting listed before answered, first line only, send answer with a file (notification created, student can open the file, other students can't), edit answer + remove file (no second notification, old file deleted, answer time kept), close (student sees Closed, no notification)
 - [ ] Confirm on the phone that the answer push arrives (sent without errors to the one device Ayesha turned on)
 
+### Stage 19 — Live classes
+
+Owner decision (2026-10-04, "option 1").
+
+- [x] Migration `stage19_live_classes`: `live_classes` table + RLS, `live_class` notification kind, `notifications.live_class_id`, `notify_new_live_class()`
+- [x] Migration applied to the Supabase project (version `20261004191728`)
+- [x] Admin: "Live classes" nav item; add / edit / delete with title, date and time, join link (http/https only), optional note, all students or one batch; upcoming and past lists
+- [x] Student: "Upcoming live classes" card at the top of the dashboard with a Join button, only their classes, hidden when there are none, a class drops off an hour after it starts
+- [x] Adding a class notifies its students (bell + phone push, respects the notifications switch); editing does not; tapping opens the dashboard
+- [x] Demo cleanup removes live classes of demo batches
+- [x] Checked against the live database (rolled back): RLS (18 cases: admin full access; students see all-student + own-batch classes only; no-batch, other-batch, deactivated and anon cases; no student writes or notify calls; `javascript:` links rejected), notify reaches only the class's active students with notifications on, Saudi-time body, delete removes its notifications
+- [x] Student dashboard checked in the browser as Ayesha (phone + desktop dark): own-batch and in-progress classes shown soonest first, finished and other-batch classes hidden, Join opens in a new tab; the notification shows the time and opens the dashboard
+- [x] Admin pages checked in the browser (owner)
+- [x] Owner request: no Saudi time. The admin enters the time in their own time zone (like due dates) and the admin list shows local time; the notification shows no time at all, just "New live class: <title>" (owner decision); migration `stage19b_live_class_local_time` stores no body, and the time is shown only on the dashboard card, in the student's own time zone
+- [x] Migration `stage19b` applied to the Supabase project (version `20261004213214`)
+
 ## 15. Decision log
 
 | Date | Decision |
@@ -991,3 +1022,5 @@ Owner request (2026-10-04).
 | 2026-10-04 | Bell count bug (owner report): the count was rendered once in `StudentLayout`, and the App Router does not re-render a layout on client-side navigation, so the badge kept its first value. The bell is now a client component that re-fetches `/student/notifications/count` on every pathname change, on tab focus, and on a `notifications:changed` window event fired after marking read or changing the setting; a fresh server render still wins over its local value |
 | 2026-10-04 | **Owner request: phone notifications (Web Push)** for the installed app, using the `web-push` library (new dependency, owner-requested) with VAPID keys from env. Every bell notification also goes out as a push to the student's turned-on devices; the bell's off switch still applies (no row, no push). Sending needs other students' subscriptions, so `src/lib/push.ts` uses the secret-key client — only from admin Server Actions after `requireAdmin()`, and from the cron route after it checks `CRON_SECRET` (the one secret-key use not tied to an admin session). Pushes are sent with `after()` so the admin's save isn't delayed. Daily due-work reminder: one push per student for unsubmitted work due within the next 24 hours (overdue work is not re-pushed daily), at 14:00 UTC (5 pm Saudi time, owner hadn't picked a time; change the cron string in `netlify/functions/due-reminders.mjs`). In development the service worker is registered only when a student turns phone notifications on (production registers it on load, Stage 15) |
 | 2026-10-04 | **Owner decision: "Ask the teacher"** — a narrow exception to "Chat, forums, comments" in §13: one question, one answer, no thread. A student asks about one enrolled course or "General" with at most one optional file; the admin answers once (optionally with one file), can edit the answer later without re-notifying, or close the question unanswered. The student may delete a question only while it is waiting. Questions are private to the student and admins. Admins see a waiting-count badge on "Questions" (no push to staff). The first answer creates a bell notification + phone push via `notify_answer()` |
+| 2026-10-04 | **Owner decision: live classes ("option 1")**, superseding the "no class schedule / meeting links" line of 2026-09-29 and narrowing the §13 item to weekly timetables. The admin adds one entry per class (title, start time in Saudi time, Zoom/Meet join link, optional note, all students or one batch, following the announcements targeting idea without the course option) and can edit or delete it. Students see their upcoming classes in a card at the top of the dashboard with a Join button; a class stays listed until an hour after it starts so a class in progress can still be joined, then drops off (rows are kept; the admin page lists the latest 20 past classes). Adding a class creates a bell notification + phone push via `notify_new_live_class()`; editing never re-notifies. Students read classes only while active, because the join link lets anyone holding it into the class. Saudi time is a fixed UTC+3 offset (no daylight saving), so the admin's entry is converted on the server regardless of their device's time zone; students see times in their own local time like every other date |
+| 2026-10-04 | **Owner request: live class times are not Saudi time** (superseding the Saudi-time part of the entry above). The admin enters the start time in their own device's time zone, exactly like assessment due dates (converted to UTC in the browser), with no time-zone label; the admin list and the student card show it in the viewer's local time. The "New live class" notification shows no time at all, only "New live class: <title>" (owner decision; the phone pop-up uses the usual "Tap to open." line). The time is shown only on the dashboard card, in the student's own time zone |

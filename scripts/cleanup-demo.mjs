@@ -49,6 +49,7 @@ check(
 );
 if (batchIds.length) {
   check(await sb.from("announcements").delete().in("batch_id", batchIds), "delete batch announcements");
+  check(await sb.from("live_classes").delete().in("batch_id", batchIds), "delete batch live classes");
 }
 
 const courses = check(await sb.from("courses").select("id, slug"), "load courses");

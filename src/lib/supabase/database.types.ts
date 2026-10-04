@@ -406,6 +406,57 @@ export type Database = {
         }
         Relationships: []
       }
+      live_classes: {
+        Row: {
+          batch_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          join_url: string
+          note: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          join_url: string
+          note?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          join_url?: string
+          note?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_classes_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_classes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           enabled: boolean
@@ -440,6 +491,7 @@ export type Database = {
           created_at: string
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          live_class_id: string | null
           question_id: string | null
           read_at: string | null
           title: string
@@ -452,6 +504,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
           title: string
@@ -464,6 +517,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
+          live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
           title?: string
@@ -482,6 +536,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_live_class_id_fkey"
+            columns: ["live_class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
             referencedColumns: ["id"]
           },
           {
@@ -851,6 +912,10 @@ export type Database = {
         Args: { p_assessment_id: string }
         Returns: string[]
       }
+      notify_new_live_class: {
+        Args: { p_live_class_id: string }
+        Returns: string[]
+      }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined
@@ -895,6 +960,7 @@ export type Database = {
         | "announcement"
         | "marks"
         | "answer"
+        | "live_class"
       question_status: "waiting" | "answered" | "closed"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
@@ -1043,6 +1109,7 @@ export const Constants = {
         "announcement",
         "marks",
         "answer",
+        "live_class",
       ],
       question_status: ["waiting", "answered", "closed"],
       resource_kind: ["file", "link"],
