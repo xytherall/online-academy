@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AdminNavLinks } from "@/components/admin/admin-nav-links";
+import { AdminNavLinks, type AdminNavCounts } from "@/components/admin/admin-nav-links";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export function AdminMobileNav({ pendingApplicationCount }: { pendingApplicationCount: number }) {
+export function AdminMobileNav({ counts }: { counts: AdminNavCounts }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,10 +24,7 @@ export function AdminMobileNav({ pendingApplicationCount }: { pendingApplication
           <SheetTitle>Admin</SheetTitle>
         </SheetHeader>
         <div className="px-4 pb-4">
-          <AdminNavLinks
-            onNavigate={() => setOpen(false)}
-            pendingApplicationCount={pendingApplicationCount}
-          />
+          <AdminNavLinks onNavigate={() => setOpen(false)} counts={counts} />
         </div>
       </SheetContent>
     </Sheet>

@@ -25,8 +25,11 @@ export function isDueForReminder(dueAtIso: string, now: Date = new Date()): bool
  * from a stored URL, so it can only ever point inside the student portal.
  */
 export function notificationHref(
-  notification: Pick<Tables<"notifications">, "kind" | "assessment_id">,
+  notification: Pick<Tables<"notifications">, "kind" | "assessment_id" | "question_id">,
 ): string {
+  if (notification.kind === "answer") {
+    return notification.question_id ? `/student/questions/${notification.question_id}` : "/student/questions";
+  }
   if (notification.kind === "announcement" || !notification.assessment_id) return "/student/announcements";
   return `/student/assessments/${notification.assessment_id}`;
 }

@@ -10,6 +10,7 @@ import {
   LayersIcon,
   LayoutDashboardIcon,
   MegaphoneIcon,
+  MessageCircleQuestionMarkIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
@@ -22,23 +23,20 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/batches", label: "Batches", icon: LayersIcon },
   { href: "/admin/courses", label: "Courses", icon: BookOpenIcon },
   { href: "/admin/marking", label: "Marking", icon: CheckSquareIcon },
+  { href: "/admin/questions", label: "Questions", icon: MessageCircleQuestionMarkIcon },
   { href: "/admin/announcements", label: "Announcements", icon: MegaphoneIcon },
   { href: "/admin/faqs", label: "FAQ", icon: HelpCircleIcon },
   { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
+export type AdminNavCounts = { pendingApplications: number; waitingQuestions: number };
+
 /**
- * `pendingApplicationCount` is read once per request in the admin layout and
- * shown as a badge, so a new application is noticeable without visiting the
- * page. Zero renders no badge rather than a "0".
+ * `counts` are read once per request in the admin layout and shown as
+ * badges, so a new application or question is noticeable without visiting
+ * the page. Zero renders no badge rather than a "0".
  */
-export function AdminNavLinks({
-  onNavigate,
-  pendingApplicationCount = 0,
-}: {
-  onNavigate?: () => void;
-  pendingApplicationCount?: number;
-}) {
+export function AdminNavLinks({ onNavigate, counts }: { onNavigate?: () => void; counts: AdminNavCounts }) {
   const pathname = usePathname();
 
   return (
@@ -46,7 +44,12 @@ export function AdminNavLinks({
       {ADMIN_NAV_ITEMS.map((item) => {
         const isActive =
           pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
-        const badgeCount = item.href === "/admin/applications" ? pendingApplicationCount : 0;
+        const badgeCount =
+          item.href === "/admin/applications"
+            ? counts.pendingApplications
+            : item.href === "/admin/questions"
+              ? counts.waitingQuestions
+              : 0;
         const Icon = item.icon;
         return (
           <Link

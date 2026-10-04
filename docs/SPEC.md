@@ -65,6 +65,7 @@ Permissions are enforced **on the server and in the database (Supabase Row Level
 - Can see courses they are enrolled in, and resources/assessments for those courses. Assessments targeted at a batch are visible only to that batch.
 - Can create and replace **their own** submissions (rules in §8).
 - Can see announcements addressed to everyone, to their courses, or to their batch.
+- Can ask questions ("Ask the teacher") and read only their own questions and answers; can delete their own question only while it is waiting.
 - Can change their own password.
 - **Cannot** change their own role, batch, enrollments, marks, late flag or active status.
 
@@ -195,6 +196,7 @@ Email-based "forgot password" and invites will be added once a domain and email 
 | `/student/assessments/[id]` | Instructions, attachment, due date, upload/replace submission, marks and feedback once marked |
 | `/student/report` | Progress report (see §9) |
 | `/student/announcements` | All announcements addressed to the student |
+| `/student/questions` | "Ask the teacher": ask a question (an enrolled course or General, optional one file) and see their own questions (Waiting / Answered / Closed); `/student/questions/[id]` shows the question and answer |
 | `/student/account` | View own details, change password |
 | `/student/notifications` | Notifications (opened from the header bell): work due within a day or overdue, and recent notifications; tap one to open it, "Mark all read". Turned on/off from `/student/account` |
 | `/change-password` | Forced password change on first login / after reset |
@@ -415,7 +417,7 @@ Student notifications. Created only by the admin-only `notify_new_assessment` / 
 | Field | Notes |
 |---|---|
 | `user_id` | FK → `profiles` (cascade) |
-| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` |
+| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` |
 | `title` | |
 | `body` | nullable (course title) |
 | `assessment_id` | nullable, FK → `assessments` (cascade) |
@@ -444,6 +446,22 @@ One row per phone/browser that turned on phone notifications.
 
 RLS: a user can read and delete only their own rows. Rows are saved only through `save_push_subscription()` (active students only; takes the row over if another student used the same browser). Sending uses the secret key on the server.
 
+### `questions`
+"Ask the teacher". One answer per question, no back-and-forth.
+
+| Field | Notes |
+|---|---|
+| `student_id` | FK → `profiles` (cascade) |
+| `course_id` | nullable (General), FK → `courses` (set null) |
+| `body` | 1–5,000 characters |
+| `attachment_path` | nullable, `questions` bucket, `{student_id}/...` |
+| `status` | enum `question_status`: `waiting` / `answered` / `closed` |
+| `answer` | nullable, 1–5,000 characters |
+| `answer_attachment_path` | nullable, `{student_id}/answers/...` |
+| `answered_by`, `answered_at` | nullable |
+
+RLS: a student can insert their own (only `student_id`, `course_id`, `body`, `attachment_path` — column grant; course must be one they're enrolled in or null; active students only), read their own, and delete their own only while `waiting`. Admins can read, update and delete all. `notifications.question_id` (cascade) + kind `answer` link the "Your question was answered" notification, created by the admin-only `notify_answer()`.
+
 ### `site_settings`
 Single row.
 
@@ -468,6 +486,7 @@ All fields are nullable.
 | `public-assets` | public | Logo |
 | `course-files` | private | Resource PDFs and assessment attachments. Readable by admins and by students enrolled in that course, via short-lived signed URLs. |
 | `submissions` | private | Student uploads. Readable by the owning student and admins. Path: `{assessment_id}/{student_id}/...` |
+| `questions` | private | "Ask the teacher" files (max 10 MB, PDF/JPG/PNG/WEBP). Path: `{student_id}/...` (student) and `{student_id}/answers/...` (admin). The student can read their whole folder, upload/delete only directly in it (not after the question is answered/closed); admins full. Served through 60-second signed URLs after an owner-or-admin check |
 
 ### File limits
 - Allowed types: PDF, JPG, PNG, WEBP.
@@ -800,6 +819,19 @@ Owner request (2026-10-04), after the installable app (Stage 15) was merged.
 
 ---
 
+### Stage 18 — Ask the teacher
+
+Owner request (2026-10-04).
+
+- [x] Migration `stage18_questions`: `questions` table + RLS, private `questions` bucket + storage policies, `answer` notification kind, `notifications.question_id`, `notify_answer()`
+- [x] Migration applied to the Supabase project (version `20261004181234`)
+- [x] Student: "Ask the teacher" nav item, ask form (course or General, optional one file, images compressed), own questions list with Waiting / Answered / Closed, detail page, delete while waiting (file deleted too)
+- [x] Admin: "Questions" nav item with a waiting-count badge, list (waiting first, longest-waiting on top), detail with answer + optional file, edit answer (no re-notify), close without answering
+- [x] Answer notifies the student (bell + phone push), tapping opens `/student/questions/[id]`
+- [x] Checked against the live database: RLS (19 cases, rolled back), student asks with/without a file (image compressed), file opens via signed URL, answer → notification → opens the question, delete while waiting removes row + file
+- [x] Admin pages checked in the browser: waiting badge (2 → 1 → none), waiting listed before answered, first line only, send answer with a file (notification created, student can open the file, other students can't), edit answer + remove file (no second notification, old file deleted, answer time kept), close (student sees Closed, no notification)
+- [ ] Confirm on the phone that the answer push arrives (sent without errors to the one device Ayesha turned on)
+
 ## 15. Decision log
 
 | Date | Decision |
@@ -958,3 +990,4 @@ Owner request (2026-10-04), after the installable app (Stage 15) was merged.
 | 2026-10-04 | **Owner decision: in-portal notifications bell for students** (no phone push yet). Notifications are created when the admin creates an assignment/test (there is no separate publish step, so creating it is publishing it), posts an announcement, or saves marks for a student (only that student; only when marks or feedback actually changed, and an older unread marks notification for the same assessment is replaced rather than stacked). Editing an assessment or announcement does not notify. Recipients are chosen in SQL by SECURITY DEFINER `notify_*` functions that re-check `is_admin()` and mirror the existing visibility rules (course enrollment, batch target, active student) — the app never passes a list of students. A failed notification is logged and never fails the admin's actual save. "Due work" (unsubmitted assignments due within 24 hours or overdue, and tests due within 24 hours) is computed live from `getDueSoonAssessments` and never stored. The bell opens a page (`/student/notifications`) rather than a dropdown, to avoid a new popover dependency and work well on phones. Turning notifications off (`notification_preferences.enabled = false`) stops new rows being created for that student and hides the badge and due list; older notifications stay readable |
 | 2026-10-04 | Bell count bug (owner report): the count was rendered once in `StudentLayout`, and the App Router does not re-render a layout on client-side navigation, so the badge kept its first value. The bell is now a client component that re-fetches `/student/notifications/count` on every pathname change, on tab focus, and on a `notifications:changed` window event fired after marking read or changing the setting; a fresh server render still wins over its local value |
 | 2026-10-04 | **Owner request: phone notifications (Web Push)** for the installed app, using the `web-push` library (new dependency, owner-requested) with VAPID keys from env. Every bell notification also goes out as a push to the student's turned-on devices; the bell's off switch still applies (no row, no push). Sending needs other students' subscriptions, so `src/lib/push.ts` uses the secret-key client — only from admin Server Actions after `requireAdmin()`, and from the cron route after it checks `CRON_SECRET` (the one secret-key use not tied to an admin session). Pushes are sent with `after()` so the admin's save isn't delayed. Daily due-work reminder: one push per student for unsubmitted work due within the next 24 hours (overdue work is not re-pushed daily), at 14:00 UTC (5 pm Saudi time, owner hadn't picked a time; change the cron string in `netlify/functions/due-reminders.mjs`). In development the service worker is registered only when a student turns phone notifications on (production registers it on load, Stage 15) |
+| 2026-10-04 | **Owner decision: "Ask the teacher"** — a narrow exception to "Chat, forums, comments" in §13: one question, one answer, no thread. A student asks about one enrolled course or "General" with at most one optional file; the admin answers once (optionally with one file), can edit the answer later without re-notifying, or close the question unanswered. The student may delete a question only while it is waiting. Questions are private to the student and admins. Admins see a waiting-count badge on "Questions" (no push to staff). The first answer creates a bell notification + phone push via `notify_answer()` |

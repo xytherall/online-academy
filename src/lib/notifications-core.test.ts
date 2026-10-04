@@ -20,13 +20,21 @@ describe("isDueForReminder", () => {
 
 describe("notificationHref", () => {
   it("links assessment notifications to the assessment page", () => {
-    expect(notificationHref({ kind: "assignment", assessment_id: "a1" })).toBe("/student/assessments/a1");
-    expect(notificationHref({ kind: "test", assessment_id: "a2" })).toBe("/student/assessments/a2");
-    expect(notificationHref({ kind: "marks", assessment_id: "a3" })).toBe("/student/assessments/a3");
+    expect(notificationHref({ kind: "assignment", assessment_id: "a1", question_id: null })).toBe(
+      "/student/assessments/a1",
+    );
+    expect(notificationHref({ kind: "test", assessment_id: "a2", question_id: null })).toBe("/student/assessments/a2");
+    expect(notificationHref({ kind: "marks", assessment_id: "a3", question_id: null })).toBe("/student/assessments/a3");
   });
 
   it("links announcements to the announcements page", () => {
-    expect(notificationHref({ kind: "announcement", assessment_id: null })).toBe("/student/announcements");
+    expect(notificationHref({ kind: "announcement", assessment_id: null, question_id: null })).toBe(
+      "/student/announcements",
+    );
+  });
+
+  it("links answered questions to the question page", () => {
+    expect(notificationHref({ kind: "answer", assessment_id: null, question_id: "q1" })).toBe("/student/questions/q1");
   });
 });
 

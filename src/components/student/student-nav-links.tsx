@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpenIcon, ClipboardListIcon, LayoutDashboardIcon, MegaphoneIcon, UserIcon } from "lucide-react";
+import {
+  BookOpenIcon,
+  ClipboardListIcon,
+  LayoutDashboardIcon,
+  MegaphoneIcon,
+  MessageCircleQuestionMarkIcon,
+  UserIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatUnreadBadge } from "@/lib/announcements-unread";
 import { cn } from "@/lib/utils";
@@ -11,6 +18,7 @@ export const STUDENT_NAV_ITEMS = [
   { href: "/student", label: "Dashboard", icon: LayoutDashboardIcon },
   { href: "/student/courses", label: "My Courses", icon: BookOpenIcon },
   { href: "/student/announcements", label: "Announcements", icon: MegaphoneIcon },
+  { href: "/student/questions", label: "Ask the teacher", icon: MessageCircleQuestionMarkIcon },
   { href: "/student/report", label: "Progress report", icon: ClipboardListIcon },
   { href: "/student/account", label: "Account", icon: UserIcon },
 ] as const;
