@@ -71,19 +71,9 @@ self.addEventListener("push", (event) => {
     data = { body: event.data ? event.data.text() : "" };
   }
 
-  // A live class's time is formatted here, on the phone, so it is shown in
-  // the student's own time zone (the server can't know it).
-  let body = data.body || "";
-  if (data.startsAt) {
-    const startsAt = new Date(data.startsAt);
-    if (!Number.isNaN(startsAt.getTime())) {
-      body = "Starts " + startsAt.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-    }
-  }
-
   event.waitUntil(
     self.registration.showNotification(data.title || "New notification", {
-      body,
+      body: data.body || "",
       tag: data.tag,
       icon: "/app-icon/192",
       data: { url: data.url || DEFAULT_NOTIFICATION_URL },

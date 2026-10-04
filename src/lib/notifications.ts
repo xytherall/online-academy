@@ -12,10 +12,7 @@ type StudentRef = Pick<Tables<"profiles">, "id" | "batch_id">;
 export type StudentNotification = Pick<
   Tables<"notifications">,
   "id" | "kind" | "title" | "body" | "assessment_id" | "question_id" | "read_at" | "created_at"
-> & {
-  /** Set for "New live class": its start time, shown in the student's own time zone. */
-  live_class: Pick<Tables<"live_classes">, "starts_at"> | null;
-};
+>;
 
 /** No preferences row yet means notifications are on (the default). */
 export async function getNotificationsEnabled(supabase: SupabaseServerClient, userId: string): Promise<boolean> {
@@ -67,7 +64,7 @@ export async function getRecentNotifications(
 ): Promise<{ notifications: StudentNotification[] | null; error: boolean }> {
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, kind, title, body, assessment_id, question_id, read_at, created_at, live_class:live_classes(starts_at)")
+    .select("id, kind, title, body, assessment_id, question_id, read_at, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT);
