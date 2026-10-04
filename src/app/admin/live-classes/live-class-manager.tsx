@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2Icon, VideoIcon } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
+import { LocalDateTime } from "@/components/local-date-time";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { formatSaudiDateTime } from "@/lib/live-classes-core";
 import type { Tables } from "@/lib/supabase/database.types";
 import { deleteLiveClass } from "./actions";
 import { LiveClassForm } from "./live-class-form";
@@ -128,7 +128,7 @@ function LiveClassRow({
             <Badge variant="outline">{batchLabel(liveClass, batches)}</Badge>
           </div>
           <p className={isPast ? "text-sm text-muted-foreground" : "text-sm"}>
-            {formatSaudiDateTime(liveClass.starts_at)} <span className="text-muted-foreground">(Saudi time)</span>
+            <LocalDateTime iso={liveClass.starts_at} />
           </p>
           <a
             href={liveClass.join_url}

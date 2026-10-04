@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { saudiLocalToIso } from "@/lib/live-classes-core";
 
 // Lengths must match the checks in
 // supabase/migrations/20261004191728_stage19_live_classes.sql.
@@ -9,17 +8,8 @@ export const EVERYONE_VALUE = "everyone";
 
 export const liveClassSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
-  // A datetime-local value, read as Saudi time and stored as UTC.
-  starts_at: z
-    .string()
-    .transform((value, ctx) => {
-      const iso = saudiLocalToIso(value);
-      if (!iso) {
-        ctx.addIssue({ code: "custom", message: "Choose the date and time" });
-        return z.NEVER;
-      }
-      return iso;
-    }),
+  // Converted to UTC client-side (toUtcIso) before this is parsed.
+  starts_at: z.iso.datetime({ offset: true, message: "Choose the date and time" }),
   join_url: z
     .string()
     .trim()

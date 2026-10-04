@@ -1,30 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { notificationHref } from "./notifications-core";
-import { formatSaudiDateTime, isoToSaudiLocal, isUpcoming, saudiLocalToIso, upcomingCutoffIso } from "./live-classes-core";
+import { isUpcoming, upcomingCutoffIso } from "./live-classes-core";
 import { liveClassSchema } from "./validation/live-classes";
-
-describe("Saudi time conversion", () => {
-  it("reads the admin's input as Saudi time (UTC+3)", () => {
-    expect(saudiLocalToIso("2026-10-05T19:30")).toBe("2026-10-05T16:30:00.000Z");
-    expect(saudiLocalToIso("2026-10-06T01:00")).toBe("2026-10-05T22:00:00.000Z");
-  });
-
-  it("round-trips back to the same input value", () => {
-    expect(isoToSaudiLocal("2026-10-05T16:30:00.000Z")).toBe("2026-10-05T19:30");
-    expect(isoToSaudiLocal(saudiLocalToIso("2026-12-31T23:59")!)).toBe("2026-12-31T23:59");
-  });
-
-  it("rejects incomplete or impossible dates", () => {
-    expect(saudiLocalToIso("")).toBeNull();
-    expect(saudiLocalToIso("2026-10-05")).toBeNull();
-    expect(saudiLocalToIso("2026-02-31T10:00")).toBeNull();
-    expect(saudiLocalToIso("2026-10-05T24:30")).toBeNull();
-  });
-
-  it("formats in Saudi time regardless of the server's zone", () => {
-    expect(formatSaudiDateTime("2026-10-05T16:30:00.000Z")).toContain("7:30");
-  });
-});
 
 describe("upcoming classes", () => {
   const now = new Date("2026-10-05T12:00:00Z");
@@ -40,17 +17,17 @@ describe("upcoming classes", () => {
 describe("liveClassSchema", () => {
   const valid = {
     title: "Physics revision",
-    starts_at: "2026-10-05T19:30",
+    starts_at: "2026-10-05T14:30:00.000Z",
     join_url: "https://zoom.us/j/123",
     note: "",
     batch_id: "everyone",
   };
 
-  it("accepts a class for everyone and stores UTC", () => {
+  it("accepts a class for everyone", () => {
     const parsed = liveClassSchema.parse(valid);
     expect(parsed).toEqual({
       title: "Physics revision",
-      starts_at: "2026-10-05T16:30:00.000Z",
+      starts_at: "2026-10-05T14:30:00.000Z",
       join_url: "https://zoom.us/j/123",
       note: null,
       batch_id: null,
@@ -72,6 +49,7 @@ describe("liveClassSchema", () => {
   it("requires a title and a real time", () => {
     expect(liveClassSchema.safeParse({ ...valid, title: "  " }).success).toBe(false);
     expect(liveClassSchema.safeParse({ ...valid, starts_at: "" }).success).toBe(false);
+    expect(liveClassSchema.safeParse({ ...valid, starts_at: "2026-10-05T19:30" }).success).toBe(false);
   });
 });
 

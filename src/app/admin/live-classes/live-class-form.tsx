@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { isoToSaudiLocal } from "@/lib/live-classes-core";
+import { toDatetimeLocalValue, toUtcIso } from "@/lib/format-date";
 import type { Tables } from "@/lib/supabase/database.types";
+import { useIsClient } from "@/lib/use-is-client";
 import { EVERYONE_VALUE, liveClassSchema } from "@/lib/validation/live-classes";
 import { createLiveClass, updateLiveClass, type LiveClassFormState } from "./actions";
 
@@ -30,12 +31,18 @@ export function LiveClassForm(
   const router = useRouter();
 
   const [title, setTitle] = useState(liveClass?.title ?? "");
-  // Saudi time is a fixed zone, so this is the same on the server and in the browser.
-  const [startsAt, setStartsAt] = useState(liveClass ? isoToSaudiLocal(liveClass.starts_at) : "");
   const [joinUrl, setJoinUrl] = useState(liveClass?.join_url ?? "");
   const [note, setNote] = useState(liveClass?.note ?? "");
   const [batchId, setBatchId] = useState<string>(liveClass?.batch_id ?? EVERYONE_VALUE);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // The time is entered in the admin's own (device) time zone, like
+  // assessment due dates. That zone is only known client-side, so the edit
+  // value stays blank until after hydration; a typed value always wins.
+  const isClient = useIsClient();
+  const [userEditedStartsAt, setUserEditedStartsAt] = useState<string | null>(null);
+  const startsAtLocal =
+    userEditedStartsAt ?? (isClient && liveClass ? toDatetimeLocalValue(liveClass.starts_at) : "");
 
   useEffect(() => {
     if (state.success) {
@@ -47,6 +54,7 @@ export function LiveClassForm(
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);
+    formData.set("starts_at", startsAtLocal ? toUtcIso(startsAtLocal) : "");
 
     const parsed = liveClassSchema.safeParse({
       title: formData.get("title"),
@@ -76,6 +84,8 @@ export function LiveClassForm(
 
   return (
     <form action={formAction} onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <input type="hidden" name="starts_at" value={startsAtLocal ? toUtcIso(startsAtLocal) : ""} readOnly />
+
       <div className="space-y-2">
         <Label htmlFor="live-class-title">Title</Label>
         <Input
@@ -89,13 +99,12 @@ export function LiveClassForm(
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="live-class-starts-at">Date and time (Saudi time)</Label>
+        <Label htmlFor="live-class-starts-at">Date and time</Label>
         <Input
           id="live-class-starts-at"
-          name="starts_at"
           type="datetime-local"
-          value={startsAt}
-          onChange={(event) => setStartsAt(event.target.value)}
+          value={startsAtLocal}
+          onChange={(event) => setUserEditedStartsAt(event.target.value)}
           aria-invalid={Boolean(fieldErrors.starts_at)}
         />
         {fieldErrors.starts_at ? <FieldError>{fieldErrors.starts_at}</FieldError> : null}
