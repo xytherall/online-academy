@@ -9,6 +9,7 @@ import {
   MegaphoneIcon,
   MessageCircleQuestionMarkIcon,
   PenLineIcon,
+  VideoIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { LocalDateTime } from "@/components/local-date-time";
@@ -24,6 +25,7 @@ const KIND_ICONS: Record<StudentNotification["kind"], LucideIcon> = {
   announcement: MegaphoneIcon,
   marks: ClipboardCheckIcon,
   answer: MessageCircleQuestionMarkIcon,
+  live_class: VideoIcon,
 };
 
 function NotificationRow({ notification }: { notification: StudentNotification }) {

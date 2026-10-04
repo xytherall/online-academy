@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { CourseProgressCard } from "@/components/student/course-progress-card";
 import { DashboardBand } from "@/components/student/dashboard-band";
 import { InstallAppCard } from "@/components/student/install-app-card";
+import { LiveClassesCard } from "@/components/student/live-classes-card";
 import { PhoneNotificationsCard } from "@/components/student/phone-notifications-card";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { getAnnouncementSeenCutoff, getAnnouncementsForStudent } from "@/lib/announcements";
 import { isNew } from "@/lib/announcements-unread";
 import { requireStudent } from "@/lib/auth";
+import { getUpcomingLiveClasses } from "@/lib/live-classes";
 import { getNotificationsEnabled } from "@/lib/notifications";
 import { getBatchName, getDueSoonAssessments, getRecentlyMarked } from "@/lib/student";
 import { getStudentCourseReports } from "@/lib/progress-report";
@@ -29,6 +31,7 @@ export default async function StudentDashboard() {
     { announcements, error: announcementsError },
     announcementCutoff,
     notificationsEnabled,
+    { liveClasses, error: liveClassesError },
   ] = await Promise.all([
     getStudentCourseReports(supabase, profile.id, profile.batch_id),
     getBatchName(profile.batch_id),
@@ -37,10 +40,13 @@ export default async function StudentDashboard() {
     getAnnouncementsForStudent(3),
     getAnnouncementSeenCutoff(supabase, profile),
     getNotificationsEnabled(supabase, profile.id),
+    getUpcomingLiveClasses(),
   ]);
 
   return (
     <div className="space-y-8">
+      <LiveClassesCard liveClasses={liveClasses} error={liveClassesError} />
+
       <div>
         <DashboardBand name={profile.full_name?.trim() || null} batchName={batchName} />
 

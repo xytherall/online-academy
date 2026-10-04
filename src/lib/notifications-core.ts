@@ -30,6 +30,7 @@ export function notificationHref(
   if (notification.kind === "answer") {
     return notification.question_id ? `/student/questions/${notification.question_id}` : "/student/questions";
   }
+  if (notification.kind === "live_class") return "/student";
   if (notification.kind === "announcement" || !notification.assessment_id) return "/student/announcements";
   return `/student/assessments/${notification.assessment_id}`;
 }
