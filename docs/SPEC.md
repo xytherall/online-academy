@@ -829,7 +829,8 @@ Owner request (2026-10-04).
 - [x] Admin: "Questions" nav item with a waiting-count badge, list (waiting first, longest-waiting on top), detail with answer + optional file, edit answer (no re-notify), close without answering
 - [x] Answer notifies the student (bell + phone push), tapping opens `/student/questions/[id]`
 - [x] Checked against the live database: RLS (19 cases, rolled back), student asks with/without a file (image compressed), file opens via signed URL, answer → notification → opens the question, delete while waiting removes row + file
-- [ ] Admin pages checked in the browser by the owner (send/edit answer, close, badge) and a real phone push for an answer
+- [x] Admin pages checked in the browser: waiting badge (2 → 1 → none), waiting listed before answered, first line only, send answer with a file (notification created, student can open the file, other students can't), edit answer + remove file (no second notification, old file deleted, answer time kept), close (student sees Closed, no notification)
+- [ ] Confirm on the phone that the answer push arrives (sent without errors to the one device Ayesha turned on)
 
 ## 15. Decision log
 
