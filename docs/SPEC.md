@@ -824,11 +824,12 @@ Owner request (2026-10-04), after the installable app (Stage 15) was merged.
 Owner request (2026-10-04).
 
 - [x] Migration `stage18_questions`: `questions` table + RLS, private `questions` bucket + storage policies, `answer` notification kind, `notifications.question_id`, `notify_answer()`
-- [ ] Migration applied to the Supabase project
+- [x] Migration applied to the Supabase project (version `20261004181234`)
 - [x] Student: "Ask the teacher" nav item, ask form (course or General, optional one file, images compressed), own questions list with Waiting / Answered / Closed, detail page, delete while waiting (file deleted too)
 - [x] Admin: "Questions" nav item with a waiting-count badge, list (waiting first, longest-waiting on top), detail with answer + optional file, edit answer (no re-notify), close without answering
 - [x] Answer notifies the student (bell + phone push), tapping opens `/student/questions/[id]`
-- [ ] Manual end-to-end check against the database (ask with/without file, answer, notification, another student gets 404)
+- [x] Checked against the live database: RLS (19 cases, rolled back), student asks with/without a file (image compressed), file opens via signed URL, answer → notification → opens the question, delete while waiting removes row + file
+- [ ] Admin pages checked in the browser by the owner (send/edit answer, close, badge) and a real phone push for an answer
 
 ## 15. Decision log
 

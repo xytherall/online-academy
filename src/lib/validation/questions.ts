@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Must match the questions_body_length / questions_answer_length checks in
-// supabase/migrations/20261004180000_stage18_questions.sql.
+// supabase/migrations/20261004181234_stage18_questions.sql.
 export const MAX_QUESTION_LENGTH = 5000;
 
 /** Select value for a question that isn't about one course. */
