@@ -4,7 +4,9 @@ import { ProgressRing } from "@/components/progress-ring";
 /**
  * Static illustration of the student portal for the home hero (home page
  * redesign spec, point 2). The numbers below are sample content for the
- * illustration only — never real student data — hence the caption under it.
+ * illustration only — never real student data — hence the caption under it,
+ * which is screen-reader-only (hidden visually at the owner's request). The
+ * bottom padding keeps the gap the visible caption used to take up.
  *
  * Layout matches docs/design/home-mockup.html's `.preview`/`.window`/`.float`
  * exactly: a 940px-wide outer box holding a centred 720px window (leaving
@@ -14,7 +16,7 @@ import { ProgressRing } from "@/components/progress-ring";
  */
 export function PortalPreview() {
   return (
-    <div className="relative mx-auto mt-[72px] max-w-[940px] px-4 text-left sm:px-6">
+    <div className="relative mx-auto mt-[72px] max-w-[940px] px-4 pb-[60px] text-left sm:px-6">
       <div className="relative min-[961px]:pb-14">
         <div className="relative z-10 mx-auto max-w-[720px] overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-elevated)]">
           <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
@@ -84,7 +86,7 @@ export function PortalPreview() {
         </div>
       </div>
 
-      <p className="mt-[44px] text-center text-xs text-muted-foreground">Illustration of the student portal</p>
+      <p className="sr-only">Illustration of the student portal</p>
     </div>
   );
 }
