@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { notifyNewAnnouncement } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { announcementSchema } from "@/lib/validation/announcements";
 
@@ -30,11 +31,17 @@ export async function createAnnouncement(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("announcements").insert({ ...parsed.data, created_by: profile.id });
+  const { data: created, error } = await supabase
+    .from("announcements")
+    .insert({ ...parsed.data, created_by: profile.id })
+    .select("id")
+    .single();
 
   if (error) {
     return { error: "Could not create the announcement. Please try again.", success: false };
   }
+
+  await notifyNewAnnouncement(supabase, created.id);
 
   revalidatePath("/admin/announcements");
   revalidatePath("/student/announcements");

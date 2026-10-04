@@ -11,12 +11,15 @@ import { getSiteSettings } from "@/lib/get-site-settings";
  * which nav components they pass in.
  */
 export async function PortalShell({
+  headerActions,
   mobileNav,
   sidebar,
   userLabel,
   userName,
   children,
 }: {
+  /** Extra header buttons shown before the theme toggle (e.g. the student notifications bell). */
+  headerActions?: ReactNode;
   mobileNav: ReactNode;
   sidebar: ReactNode;
   userLabel: string;
@@ -39,6 +42,7 @@ export async function PortalShell({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {headerActions}
             <ThemeToggle />
             <span className="hidden text-sm text-muted-foreground md:inline">{userName}</span>
             <LogoutButton />

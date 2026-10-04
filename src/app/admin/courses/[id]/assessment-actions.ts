@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { notifyNewAssessment } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { assessmentSchema } from "@/lib/validation/assessments";
 
@@ -54,16 +55,20 @@ export async function createAssessment(
 
   const supabase = await createClient();
 
-  const { error } = await supabase.from("assessments").insert({
-    course_id: courseId,
-    batch_id: parsed.data.batch_id,
-    type: parsed.data.type,
-    title: parsed.data.title,
-    instructions: parsed.data.instructions,
-    attachment_path: parsed.data.attachment_path,
-    due_at: parsed.data.due_at,
-    total_marks: parsed.data.total_marks,
-  });
+  const { data: created, error } = await supabase
+    .from("assessments")
+    .insert({
+      course_id: courseId,
+      batch_id: parsed.data.batch_id,
+      type: parsed.data.type,
+      title: parsed.data.title,
+      instructions: parsed.data.instructions,
+      attachment_path: parsed.data.attachment_path,
+      due_at: parsed.data.due_at,
+      total_marks: parsed.data.total_marks,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     // The attachment (if any) already made it into storage; clean it up so a
@@ -74,6 +79,8 @@ export async function createAssessment(
       success: false,
     };
   }
+
+  await notifyNewAssessment(supabase, created.id);
 
   revalidatePath(`/admin/courses/${courseId}`);
   return { error: null, success: true };

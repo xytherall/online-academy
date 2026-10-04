@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireStudent } from "@/lib/auth";
+import { getNotificationsEnabled } from "@/lib/notifications";
 import { getBatchName } from "@/lib/student";
+import { createClient } from "@/lib/supabase/server";
 import { ChangePasswordForm } from "./change-password-form";
+import { NotificationsToggle } from "./notifications-toggle";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -18,7 +21,11 @@ function Field({ label, value }: { label: string; value: string | null }) {
 
 export default async function StudentAccountPage() {
   const profile = await requireStudent();
-  const batchName = await getBatchName(profile.batch_id);
+  const supabase = await createClient();
+  const [batchName, notificationsEnabled] = await Promise.all([
+    getBatchName(profile.batch_id),
+    getNotificationsEnabled(supabase, profile.id),
+  ]);
 
   return (
     <div className="max-w-xl space-y-8">
@@ -41,6 +48,15 @@ export default async function StudentAccountPage() {
             <Field label="Guardian phone" value={profile.guardian_phone} />
             <Field label="Guardian email" value={profile.guardian_email} />
           </dl>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NotificationsToggle initialEnabled={notificationsEnabled} />
         </CardContent>
       </Card>
 

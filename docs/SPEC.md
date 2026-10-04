@@ -196,6 +196,7 @@ Email-based "forgot password" and invites will be added once a domain and email 
 | `/student/report` | Progress report (see §9) |
 | `/student/announcements` | All announcements addressed to the student |
 | `/student/account` | View own details, change password |
+| `/student/notifications` | Notifications (opened from the header bell): work due within a day or overdue, and recent notifications; tap one to open it, "Mark all read". Turned on/off from `/student/account` |
 | `/change-password` | Forced password change on first login / after reset |
 
 ### Assessment statuses shown to students
@@ -407,6 +408,30 @@ Unique on (`assessment_id`, `student_id`).
 | `created_by` | |
 
 At most one of `course_id` / `batch_id` is set; both null means everyone.
+
+### `notifications`
+Student notifications. Created only by the admin-only `notify_new_assessment` / `notify_new_announcement` / `notify_marks` SQL functions, which work out the recipients themselves.
+
+| Field | Notes |
+|---|---|
+| `user_id` | FK → `profiles` (cascade) |
+| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` |
+| `title` | |
+| `body` | nullable (course title) |
+| `assessment_id` | nullable, FK → `assessments` (cascade) |
+| `announcement_id` | nullable, FK → `announcements` (cascade) |
+| `read_at` | nullable |
+
+Exactly one of `assessment_id` / `announcement_id` is set. RLS: a student can read their own rows and update only `read_at` on them; no insert/delete.
+
+### `notification_preferences`
+
+| Field | Notes |
+|---|---|
+| `user_id` | PK, FK → `profiles` (cascade) |
+| `enabled` | boolean, default true (no row = on) |
+
+RLS: a user can select/insert/update only their own row.
 
 ### `site_settings`
 Single row.
@@ -738,6 +763,16 @@ Owner request (2026-10-04): students can put the portal on their phone's home sc
 - [x] "Get the app on your phone" card on the student dashboard: the browser's install dialog on Android/Chrome, Share → Add to Home Screen steps on iPhone; hidden once installed or dismissed
 - [x] Minimal service worker (`public/sw.js`) that shows `/offline` when a page can't load; nothing else is cached
 
+### Stage 16 — Notifications bell
+
+Owner request (2026-10-04): an in-portal bell for students. Phone push notifications are not part of this stage.
+
+- [x] Migration `stage16_notifications`: `notifications` + `notification_preferences` tables with RLS, and admin-only `notify_*` functions that pick recipients (enrolled + batch-targeted + active + notifications on)
+- [x] Notifications created when the admin creates an assignment or test, posts an announcement, or enters/changes a student's marks or feedback (hooked into the existing Server Actions)
+- [x] Header bell with a count (unread + due within a day/overdue), `/student/notifications` page, tap to open and mark read, "Mark all read"
+- [x] Due-work reminders computed live from the dashboard's upcoming-work query (never stored, no scheduled job)
+- [x] On/off switch on `/student/account`
+
 ---
 
 ## 15. Decision log
@@ -895,3 +930,4 @@ Owner request (2026-10-04): students can put the portal on their phone's home sc
 | 2026-10-01 | **Decided: marks take precedence over submission state.** `computeAssessmentStatus()` previously marked an assignment "Missing" whenever `submission.submitted_at` was null and the due date had passed, even when an admin had entered marks for that student without an upload (e.g. work sent via WhatsApp). Fixed: `marks != null` now returns "Marked" unconditionally, checked before anything else — "Missing" is reached only for an assignment past due with neither a submission nor marks. One function, used everywhere a status, a "Missing" count, or the homework summary is shown (student course page, assessment page, dashboard Due soon/Overdue, progress report table/`missingCount`, homework donut), so they can never disagree again. `is_late` is untouched — it still reflects only what the admin/actual submission set, never recomputed by this precedence change |
 | 2026-10-04 | **Owner decision: tests accept student uploads, exactly like assignments** (superseding "Test: no upload" in §2/§4). The admin attaches the paper as the existing optional attachment; students download it and upload answers by the due date, with the same late flag and `counts_toward_report` default. No start time, timer or online quiz — "Quizzes / auto-graded tests" stays in §13. The admin can still enter marks for a test with no upload (owner confirmed), so a test with no upload is "Not yet marked" rather than "Missing", and the dashboard still drops a test from upcoming work once its due date passes. The homework donut stays assignments-only. `submit_assignment()` keeps its name to avoid an app-wide rename |
 | 2026-10-04 | **Owner decision: the portal is an installable web app (PWA), not Play Store / App Store apps.** Free, updates the moment the site deploys, same login, no store review or separate builds. It only installs from the live HTTPS site. Offline support is limited to a "You're offline" page: the service worker caches only `/offline` and its CSS/fonts, and every other request goes to the network so students never see stale data. The service worker is registered only in production builds. The install card is on the student dashboard only. `#12243F` (navy) lives in `src/lib/app-icon.tsx` as `APP_NAVY` because the manifest, `theme-color` and next/og images can't read CSS variables |
+| 2026-10-04 | **Owner decision: in-portal notifications bell for students** (no phone push yet). Notifications are created when the admin creates an assignment/test (there is no separate publish step, so creating it is publishing it), posts an announcement, or saves marks for a student (only that student; only when marks or feedback actually changed, and an older unread marks notification for the same assessment is replaced rather than stacked). Editing an assessment or announcement does not notify. Recipients are chosen in SQL by SECURITY DEFINER `notify_*` functions that re-check `is_admin()` and mirror the existing visibility rules (course enrollment, batch target, active student) — the app never passes a list of students. A failed notification is logged and never fails the admin's actual save. "Due work" (unsubmitted assignments due within 24 hours or overdue, and tests due within 24 hours) is computed live from `getDueSoonAssessments` and never stored. The bell opens a page (`/student/notifications`) rather than a dropdown, to avoid a new popover dependency and work well on phones. Turning notifications off (`notification_preferences.enabled = false`) stops new rows being created for that student and hides the badge and due list; older notifications stay readable |

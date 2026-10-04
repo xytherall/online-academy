@@ -406,6 +406,90 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          announcement_id: string | null
+          assessment_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id?: string | null
+          assessment_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string | null
+          assessment_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           batch_id: string | null
@@ -642,6 +726,18 @@ export type Database = {
         Args: { p_direction: string; p_faq_id: string }
         Returns: undefined
       }
+      notify_marks: {
+        Args: { p_assessment_id: string; p_student_id: string }
+        Returns: number
+      }
+      notify_new_announcement: {
+        Args: { p_announcement_id: string }
+        Returns: number
+      }
+      notify_new_assessment: {
+        Args: { p_assessment_id: string }
+        Returns: number
+      }
       submit_assignment: {
         Args: { p_assessment_id: string; p_file_paths: string[] }
         Returns: {
@@ -676,6 +772,7 @@ export type Database = {
         | "good"
         | "satisfactory"
         | "needs_improvement"
+      notification_kind: "assignment" | "test" | "announcement" | "marks"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
     }
@@ -817,6 +914,7 @@ export const Constants = {
         "satisfactory",
         "needs_improvement",
       ],
+      notification_kind: ["assignment", "test", "announcement", "marks"],
       resource_kind: ["file", "link"],
       user_role: ["admin", "teacher", "student"],
     },
