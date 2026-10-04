@@ -34,7 +34,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <PortalShell
-      headerActions={<NotificationBell count={bellCount} />}
+      headerActions={<NotificationBell initialCount={bellCount} />}
       mobileNav={<StudentMobileNav unreadAnnouncements={unreadAnnouncements} />}
       sidebar={<StudentSidebar unreadAnnouncements={unreadAnnouncements} />}
       userLabel="Portal"

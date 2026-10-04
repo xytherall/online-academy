@@ -5,6 +5,9 @@
 
 import type { Tables } from "@/lib/supabase/database.types";
 
+/** Window event fired after the student marks notifications read or changes the setting, so the header bell re-fetches its count. */
+export const NOTIFICATIONS_CHANGED_EVENT = "notifications:changed";
+
 /** Due-work reminders cover the next day only (owner decision, SPEC §15). */
 export const DUE_REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000;
 

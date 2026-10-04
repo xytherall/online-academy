@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Button } from "@/components/ui/button";
 import type { StudentNotification } from "@/lib/notifications";
+import { NOTIFICATIONS_CHANGED_EVENT } from "@/lib/notifications-core";
 import { cn } from "@/lib/utils";
 import { markAllNotificationsRead, openNotification } from "./actions";
 
@@ -90,7 +91,11 @@ export function MarkAllReadButton() {
       onClick={() =>
         startTransition(async () => {
           const result = await markAllNotificationsRead();
-          if (result.error) toast.error(result.error);
+          if (result.error) {
+            toast.error(result.error);
+            return;
+          }
+          window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
         })
       }
     >

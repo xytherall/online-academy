@@ -4,6 +4,7 @@ import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { NOTIFICATIONS_CHANGED_EVENT } from "@/lib/notifications-core";
 import { setNotificationsEnabled } from "../notifications/actions";
 
 export function NotificationsToggle({ initialEnabled }: { initialEnabled: boolean }) {
@@ -22,6 +23,7 @@ export function NotificationsToggle({ initialEnabled }: { initialEnabled: boolea
         toast.error(result.error);
         return;
       }
+      window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
       toast.success(next ? "Notifications turned on" : "Notifications turned off");
     });
   }
