@@ -266,6 +266,48 @@
   transition: transform 180ms ease;
 }
 
+/* Entrance motion (owner request, 2026-10-05): kept small and quiet.
+   `.rise` + `.rise-1..4` fade the home hero in on load with a short stagger;
+   `[data-reveal]` (src/components/public/reveal.tsx) fades a section in the
+   first time it scrolls into view. Nothing moves with reduced motion, and
+   content is never hidden without JavaScript. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .rise-1 {
+    animation-delay: 80ms;
+  }
+  .rise-2 {
+    animation-delay: 160ms;
+  }
+  .rise-3 {
+    animation-delay: 240ms;
+  }
+  .rise-4 {
+    animation-delay: 360ms;
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    transition:
+      opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-reveal="pending"] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hover-lift,
   .hover-arrow {

@@ -1,6 +1,7 @@
 import { Accordion } from "@base-ui/react/accordion";
 import { ChevronDownIcon } from "lucide-react";
 import { Eyebrow } from "@/components/eyebrow";
+import { Reveal } from "@/components/public/reveal";
 import type { PublicFaq } from "@/lib/faqs";
 
 /**
@@ -14,7 +15,7 @@ export function FaqSection({ faqs }: { faqs: PublicFaq[] }) {
 
   return (
     <section className="border-t border-border px-4 py-[72px] sm:px-6 sm:py-[104px]">
-      <div className="mx-auto max-w-3xl">
+      <Reveal className="mx-auto max-w-3xl">
         <div className="mb-12 max-w-xl space-y-3">
           <Eyebrow>FAQ</Eyebrow>
           <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">Frequently asked questions</h2>
@@ -38,7 +39,7 @@ export function FaqSection({ faqs }: { faqs: PublicFaq[] }) {
             </Accordion.Item>
           ))}
         </Accordion.Root>
-      </div>
+      </Reveal>
 
       <script
         type="application/ld+json"

@@ -1,4 +1,5 @@
 import { Eyebrow } from "@/components/eyebrow";
+import { Reveal } from "@/components/public/reveal";
 
 const STEPS = [
   {
@@ -34,7 +35,7 @@ export function HowToJoin() {
           backgroundSize: "44px 44px",
         }}
       />
-      <div className="relative mx-auto max-w-5xl">
+      <Reveal className="relative mx-auto max-w-5xl">
         <div className="mb-12 max-w-xl space-y-3">
           <Eyebrow>How to join</Eyebrow>
           <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">Three steps to your first class.</h2>
@@ -59,7 +60,7 @@ export function HowToJoin() {
             </li>
           ))}
         </ol>
-      </div>
+      </Reveal>
     </section>
   );
 }

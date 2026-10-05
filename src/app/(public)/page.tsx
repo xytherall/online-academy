@@ -8,6 +8,7 @@ import { HeroBackground } from "@/components/public/hero-background";
 import { HeroCurves } from "@/components/public/hero-curves";
 import { HowToJoin } from "@/components/public/how-to-join";
 import { PortalPreview } from "@/components/public/portal-preview";
+import { Reveal } from "@/components/public/reveal";
 import { SubjectCard } from "@/components/public/subject-card";
 import { excerpt } from "@/lib/excerpt";
 import { parseEmphasis } from "@/lib/parse-emphasis";
@@ -39,9 +40,9 @@ export default async function HomePage() {
         <HeroBackground />
         <HeroCurves />
         <div className="relative mx-auto max-w-3xl">
-          {offeredLevels ? <Eyebrow>{offeredLevels}</Eyebrow> : null}
+          {offeredLevels ? <Eyebrow className="rise">{offeredLevels}</Eyebrow> : null}
           {headline ? (
-            <h1 className="mx-auto mt-[18px] max-w-[15ch] text-[length:clamp(42px,6.6vw,80px)] leading-[1.02]">
+            <h1 className="rise rise-1 mx-auto mt-[18px] max-w-[15ch] text-[length:clamp(42px,6.6vw,80px)] leading-[1.02]">
               {parseEmphasis(headline).map((part, index) =>
                 part.type === "emphasis" ? (
                   <em key={index} className="text-primary italic">
@@ -54,9 +55,9 @@ export default async function HomePage() {
             </h1>
           ) : null}
           {subtext ? (
-            <p className="mx-auto mt-[22px] max-w-[52ch] text-[18px] text-muted-foreground">{subtext}</p>
+            <p className="rise rise-2 mx-auto mt-[22px] max-w-[52ch] text-[18px] text-muted-foreground">{subtext}</p>
           ) : null}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="rise rise-3 mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="marketing" render={<Link href="/apply" />} nativeButton={false}>
               Apply now
             </Button>
@@ -66,11 +67,13 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <PortalPreview />
+        <div className="rise rise-4">
+          <PortalPreview />
+        </div>
       </section>
 
       <section className="border-t border-border bg-background-alt px-4 py-[72px] sm:px-6 sm:py-[104px]">
-        <div className="mx-auto max-w-5xl">
+        <Reveal className="mx-auto max-w-5xl">
           <div className="mb-12 max-w-xl space-y-3">
             <Eyebrow>What you get</Eyebrow>
             <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">
@@ -82,11 +85,11 @@ export default async function HomePage() {
             </p>
           </div>
           <BentoGrid />
-        </div>
+        </Reveal>
       </section>
 
       <section className="border-t border-border px-4 py-[72px] sm:px-6 sm:py-[104px]">
-        <div className="mx-auto max-w-5xl">
+        <Reveal className="mx-auto max-w-5xl">
           <div className="mb-12 max-w-xl space-y-3">
             <Eyebrow>Subjects</Eyebrow>
             <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">What we teach</h2>
@@ -103,7 +106,7 @@ export default async function HomePage() {
               description="Check back soon — courses will appear here once they're published."
             />
           )}
-        </div>
+        </Reveal>
       </section>
 
       <HowToJoin />
@@ -111,7 +114,7 @@ export default async function HomePage() {
       <FaqSection faqs={faqs} />
 
       <section className="border-t border-border bg-background-alt px-4 py-[72px] text-center sm:px-6 sm:py-[104px]">
-        <div className="mx-auto max-w-2xl">
+        <Reveal className="mx-auto max-w-2xl">
           <h2 className="text-[length:clamp(40px,6vw,72px)] leading-[1.02]">Ready to start?</h2>
           <p className="mt-4 text-lg text-muted-foreground">Applications take a few minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -122,7 +125,7 @@ export default async function HomePage() {
               Contact us
             </Button>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );
