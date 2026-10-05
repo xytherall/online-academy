@@ -43,7 +43,7 @@ Create two users the same way (**Auto Confirm User** ticked each time), then run
 
 ```sql
 -- promote the test admin
-update public.profiles set role = 'admin', full_name = 'Test Admin'
+update public.profiles set role = 'admin', full_name = 'Test Admin'  
 where email = 'test-admin@example.com';
 
 -- the test student keeps role 'student'; force a password change on first login
