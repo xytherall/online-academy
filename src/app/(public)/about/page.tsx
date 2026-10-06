@@ -11,13 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     path: "/about",
     title: `About | ${academyName}`,
-    description: settings?.about_text?.trim()?.slice(0, 160) || `About ${academyName}.`,
+    description: settings?.about_page_text?.trim()?.slice(0, 160) || `About ${academyName}.`,
   });
 }
 
 export default async function AboutPage() {
   const settings = await getSiteSettings();
-  const aboutText = settings?.about_text?.trim();
+  const aboutText = settings?.about_page_text?.trim();
 
   return (
     <div className="flex flex-1 flex-col">

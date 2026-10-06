@@ -774,6 +774,7 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          about_page_text: string | null
           about_text: string | null
           academy_name: string | null
           address: string | null
@@ -788,6 +789,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          about_page_text?: string | null
           about_text?: string | null
           academy_name?: string | null
           address?: string | null
@@ -802,6 +804,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          about_page_text?: string | null
           about_text?: string | null
           academy_name?: string | null
           address?: string | null

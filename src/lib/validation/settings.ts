@@ -46,6 +46,7 @@ export const settingsSchema = z.object({
   academy_name: optionalText(200),
   tagline: optionalText(300),
   about_text: optionalText(5000),
+  about_page_text: optionalText(5000),
   contact_email: optionalEmail,
   contact_phone: optionalText(50),
   contact_whatsapp: optionalText(50),

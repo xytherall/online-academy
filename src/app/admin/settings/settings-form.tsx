@@ -41,6 +41,7 @@ function parseFormValues(formData: FormData) {
     academy_name: formData.get("academy_name"),
     tagline: formData.get("tagline"),
     about_text: formData.get("about_text"),
+    about_page_text: formData.get("about_page_text"),
     contact_email: formData.get("contact_email"),
     contact_phone: formData.get("contact_phone"),
     contact_whatsapp: formData.get("contact_whatsapp"),
@@ -84,7 +85,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings | null }) {
         <Field id="academy_name" label="Academy name" defaultValue={settings?.academy_name ?? ""} error={fieldErrors.academy_name} />
         <Field id="tagline" label="Tagline" defaultValue={settings?.tagline ?? ""} error={fieldErrors.tagline} />
         <div className="space-y-2">
-          <Label htmlFor="about_text">About</Label>
+          <Label htmlFor="about_text">Home page intro</Label>
           <Textarea
             id="about_text"
             name="about_text"
@@ -92,7 +93,20 @@ export function SettingsForm({ settings }: { settings: SiteSettings | null }) {
             defaultValue={settings?.about_text ?? ""}
             aria-invalid={Boolean(fieldErrors.about_text)}
           />
+          <p className="text-sm text-muted-foreground">Shown under the headline on the home page.</p>
           {fieldErrors.about_text ? <FieldError>{fieldErrors.about_text}</FieldError> : null}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="about_page_text">About page</Label>
+          <Textarea
+            id="about_page_text"
+            name="about_page_text"
+            rows={6}
+            defaultValue={settings?.about_page_text ?? ""}
+            aria-invalid={Boolean(fieldErrors.about_page_text)}
+          />
+          <p className="text-sm text-muted-foreground">Shown on the About page (/about).</p>
+          {fieldErrors.about_page_text ? <FieldError>{fieldErrors.about_page_text}</FieldError> : null}
         </div>
       </section>
 
