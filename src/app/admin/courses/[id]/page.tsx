@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import { CourseForm } from "../course-form";
+import type { QuizEditInfo } from "./assessment-form";
 import { AssessmentManager } from "./assessment-manager";
 import { ResourceManager } from "./resource-manager";
 
@@ -23,6 +24,35 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     supabase.from("assessments").select("*").eq("course_id", id).order("due_at", { ascending: true }),
     supabase.from("batches").select("id, name").order("name", { ascending: true }),
   ]);
+
+  // Quizzes: their saved questions (for editing) and whether anyone has
+  // submitted yet, which locks the questions.
+  const quizIds = (assessments ?? []).filter((a) => a.type === "quiz").map((a) => a.id);
+  const [{ data: quizQuestions, error: quizQuestionsError }, { data: quizSubmissions, error: quizSubmissionsError }] =
+    quizIds.length > 0
+      ? await Promise.all([
+          supabase
+            .from("quiz_questions")
+            .select("assessment_id, question, options, correct_index")
+            .in("assessment_id", quizIds)
+            .order("position", { ascending: true }),
+          supabase.from("submissions").select("assessment_id").in("assessment_id", quizIds),
+        ])
+      : [
+          { data: [], error: null },
+          { data: [], error: null },
+        ];
+
+  const quizzes: Record<string, QuizEditInfo> = {};
+  const submittedQuizIds = new Set((quizSubmissions ?? []).map((s) => s.assessment_id));
+  for (const id of quizIds) quizzes[id] = { questions: [], locked: submittedQuizIds.has(id) };
+  for (const q of quizQuestions ?? []) {
+    quizzes[q.assessment_id]?.questions.push({
+      question: q.question,
+      options: q.options,
+      correctIndex: q.correct_index,
+    });
+  }
 
   if (courseError) {
     return <p className="text-sm text-destructive">Could not load this course. Please refresh the page.</p>;
@@ -45,10 +75,15 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
       <Separator />
 
-      {assessmentsError || batchesError ? (
+      {assessmentsError || batchesError || quizQuestionsError || quizSubmissionsError ? (
         <p className="text-sm text-destructive">Could not load assessments. Please refresh the page.</p>
       ) : (
-        <AssessmentManager courseId={course.id} assessments={assessments ?? []} batches={batches ?? []} />
+        <AssessmentManager
+          courseId={course.id}
+          assessments={assessments ?? []}
+          quizzes={quizzes}
+          batches={batches ?? []}
+        />
       )}
     </div>
   );

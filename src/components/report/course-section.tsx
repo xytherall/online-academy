@@ -63,7 +63,11 @@ export function CourseSection({
         <div className="ml-auto flex flex-wrap gap-2.5">
           <ScoreBox label="Overall" pct={report.overallPct} overallPct={report.overallPct} />
           <ScoreBox label="Assignments" pct={report.assignmentsPct} overallPct={report.overallPct} />
-          <ScoreBox label="Tests" pct={report.testsPct} overallPct={report.overallPct} />
+          <ScoreBox
+            label={report.rows.some((row) => row.assessment.type === "quiz") ? "Tests & quizzes" : "Tests"}
+            pct={report.testsPct}
+            overallPct={report.overallPct}
+          />
         </div>
       </div>
 

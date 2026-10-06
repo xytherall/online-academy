@@ -18,10 +18,11 @@ export type DueSoonAssessment = {
 
 /**
  * Everything still ahead of the student (SPEC §7 dashboard), with no upper
- * date limit: every visible, unsubmitted assignment (overdue ones included)
- * plus every test whose date hasn't passed. A student can't submit a test,
- * so a past test is over rather than overdue and is left out. Any submission
- * row, including admin-entered marks, takes an item off the list.
+ * date limit: every visible, unsubmitted assignment or quiz (overdue ones
+ * included, since both can still be handed in late) plus every test whose
+ * date hasn't passed. A past test is over rather than overdue and is left
+ * out. Any submission row, including admin-entered marks, takes an item off
+ * the list.
  */
 export async function getDueSoonAssessments(
   studentId: string,
@@ -51,7 +52,7 @@ export async function getDueSoonAssessments(
     .from("assessments")
     .select("id, title, type, due_at, batch_id, course:courses(id, title)")
     .in("course_id", courseIds)
-    .or(`type.eq.assignment,due_at.gte.${now}`)
+    .or(`type.in.(assignment,quiz),due_at.gte.${now}`)
     .order("due_at", { ascending: true });
 
   if (error) return { assessments: null, error: true };

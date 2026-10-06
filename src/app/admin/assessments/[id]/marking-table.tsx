@@ -11,7 +11,17 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { QuizQuestionList } from "@/components/quiz-question-list";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { displayName } from "@/lib/display-name";
+import type { QuizQuestion } from "@/lib/quiz-format";
 import type { Tables } from "@/lib/supabase/database.types";
 import { saveMarks } from "./actions";
 
@@ -22,10 +32,13 @@ export function MarkingTable({
   assessmentId,
   totalMarks,
   entries,
+  quizQuestions = null,
 }: {
   assessmentId: string;
   totalMarks: number;
   entries: { student: Student; submission: Submission | null }[];
+  /** Set for a quiz, so each student's answers can be viewed. */
+  quizQuestions?: QuizQuestion[] | null;
 }) {
   if (entries.length === 0) {
     return (
@@ -47,7 +60,13 @@ export function MarkingTable({
         </TableHeader>
         <TableBody>
           {entries.map((entry) => (
-            <MarkingRow key={entry.student.id} assessmentId={assessmentId} totalMarks={totalMarks} {...entry} />
+            <MarkingRow
+              key={entry.student.id}
+              assessmentId={assessmentId}
+              totalMarks={totalMarks}
+              quizQuestions={quizQuestions}
+              {...entry}
+            />
           ))}
         </TableBody>
       </Table>
@@ -60,11 +79,13 @@ function MarkingRow({
   totalMarks,
   student,
   submission,
+  quizQuestions,
 }: {
   assessmentId: string;
   totalMarks: number;
   student: Student;
   submission: Submission | null;
+  quizQuestions: QuizQuestion[] | null;
 }) {
   const [marks, setMarks] = useState(submission?.marks != null ? String(submission.marks) : "");
   const [feedback, setFeedback] = useState(submission?.feedback ?? "");
@@ -107,8 +128,15 @@ function MarkingRow({
         </p>
         {submission?.marks != null ? (
           <Badge variant="success" className="mt-1">
-            Marked
+            {submission.quiz_answers && !submission.marked_by ? "Marked automatically" : "Marked"}
           </Badge>
+        ) : null}
+        {quizQuestions && submission?.quiz_answers ? (
+          <QuizAnswersDialog
+            studentName={displayName(student)}
+            questions={quizQuestions}
+            answers={submission.quiz_answers}
+          />
         ) : null}
         {submission && submission.file_paths.length > 0 ? (
           <div className="mt-1 flex flex-wrap gap-2">
@@ -174,5 +202,42 @@ function MarkingRow({
         {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
       </TableCell>
     </TableRow>
+  );
+}
+
+function QuizAnswersDialog({
+  studentName,
+  questions,
+  answers,
+}: {
+  studentName: string;
+  questions: QuizQuestion[];
+  answers: number[];
+}) {
+  const correct = questions.filter((q, index) => answers[index] === q.correctIndex).length;
+
+  return (
+    <Dialog>
+      <DialogTrigger render={<Button type="button" variant="link" size="sm" className="mt-1 h-auto px-0" />}>
+        View answers
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{studentName}&apos;s answers</DialogTitle>
+          <DialogDescription>
+            {correct} of {questions.length} correct. Correct answers are in green.
+          </DialogDescription>
+        </DialogHeader>
+        <QuizQuestionList
+          chosenLabel="Student's answer"
+          questions={questions.map((q, index) => ({
+            question: q.question,
+            options: q.options,
+            correctIndex: q.correctIndex,
+            chosenIndex: answers[index] ?? null,
+          }))}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

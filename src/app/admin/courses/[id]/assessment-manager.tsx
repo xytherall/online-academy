@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Tables } from "@/lib/supabase/database.types";
 import { deleteAssessment, getSignedAttachmentUrlByPath } from "./assessment-actions";
-import { AssessmentForm } from "./assessment-form";
+import { AssessmentForm, type QuizEditInfo } from "./assessment-form";
 import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 type Assessment = Tables<"assessments">;
@@ -30,10 +30,13 @@ type Batch = Pick<Tables<"batches">, "id" | "name">;
 export function AssessmentManager({
   courseId,
   assessments,
+  quizzes,
   batches,
 }: {
   courseId: string;
   assessments: Assessment[];
+  /** Saved questions and lock state for each quiz, by assessment id. */
+  quizzes: Record<string, QuizEditInfo>;
   batches: Batch[];
 }) {
   const [createOpen, setCreateOpen] = useState(false);
@@ -47,7 +50,7 @@ export function AssessmentManager({
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger render={<Button type="button" size="sm" />}>New assessment</DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>New assessment</DialogTitle>
             </DialogHeader>
@@ -70,6 +73,7 @@ export function AssessmentManager({
               key={assessment.id}
               courseId={courseId}
               assessment={assessment}
+              quiz={quizzes[assessment.id] ?? null}
               batches={batches}
               batchName={batches.find((b) => b.id === assessment.batch_id)?.name ?? null}
             />
@@ -83,11 +87,13 @@ export function AssessmentManager({
 function AssessmentRow({
   courseId,
   assessment,
+  quiz,
   batches,
   batchName,
 }: {
   courseId: string;
   assessment: Assessment;
+  quiz: QuizEditInfo | null;
   batches: Batch[];
   batchName: string | null;
 }) {
@@ -156,7 +162,7 @@ function AssessmentRow({
 
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
             <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>Edit</DialogTrigger>
-            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Edit &ldquo;{assessment.title}&rdquo;</DialogTitle>
               </DialogHeader>
@@ -164,6 +170,7 @@ function AssessmentRow({
                 mode="edit"
                 courseId={courseId}
                 assessment={assessment}
+                quiz={quiz}
                 batches={batches}
                 onDone={() => setEditOpen(false)}
               />

@@ -24,7 +24,9 @@ export type AssessmentStatus =
  * reached only for an assignment that is past due with neither a
  * submission nor marks. A test can take an upload too (Stage 14), but one
  * with no upload is "Not yet marked", never "Missing" — it may have been sat
- * on paper in class and marked directly. This is the single place this
+ * on paper in class and marked directly. A quiz follows the assignment rules:
+ * it is answered online and can still be submitted late, so an unanswered
+ * past-due quiz is "Missing". This is the single place this
  * precedence lives —
  * every page that shows a status, a "Missing" count, or the homework
  * summary goes through this function (directly or via
