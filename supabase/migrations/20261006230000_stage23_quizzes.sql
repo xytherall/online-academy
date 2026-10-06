@@ -1,4 +1,4 @@
--- Stage 22 — Multiple-choice quizzes
+-- Stage 23 — Multiple-choice quizzes
 --
 -- Owner decision (2026-10-06): a quiz is a third assessment type. The admin
 -- pastes the questions (2-6 options each, one correct); total_marks is the
