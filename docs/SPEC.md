@@ -911,13 +911,13 @@ Owner request (2026-10-06).
 Owner decision (2026-10-06).
 
 - [x] Migration `stage23_quizzes`: `quiz` assessment type and notification kind, `submissions.quiz_answers`, `quiz_questions` (admin-only RLS, locked once submitted), `save_quiz_questions()`, `get_quiz_questions()`, `get_quiz_result()`, `submit_quiz()`; `submit_assignment()` refuses quizzes; `notify_new_assessment()` says "New quiz: …"
-- [ ] Migration applied to the Supabase project
+- [x] Migration applied to the Supabase project (version `20261006230000`, run by the owner in the SQL Editor)
 - [x] Admin: Quiz type on the assessment form with one paste box, "Copy ChatGPT prompt" button, Preview (correct answers green, unreadable blocks red with the reason, never dropped), Publish only after a clean preview; questions read-only once submitted; a quiz can't change type
 - [x] Paste format parser (`src/lib/quiz-format.ts`), forgiving about `Q1.`/`1.`, `A.`, lower case, spacing and markdown bold; unit tested
 - [x] Marking page: each student's answers viewable; marks still editable by hand
 - [x] Student: questions on one page, picks kept on the device, confirm before the final submit, result with wrong answers and correct answers; revisiting shows the result
 - [x] Upcoming work includes unsubmitted quizzes (overdue included, like assignments); quizzes count with tests in the progress report ("Tests & quizzes" when a course has quizzes); creating a quiz notifies (bell + push), edits don't
-- [ ] Checked against the live database as a demo student, including that correct answers can't be read before submitting
+- [x] Checked against the live database as demo students (22 cases, [TEST] quiz deleted after): no student read of `quiz_questions`/`correct_index`, questions without answers, no result before submitting, not-enrolled and signed-out refused, bad answers refused, uploads refused for a quiz, correct score and result, one attempt, no self-marking, questions locked after a submission, type locked
 - [ ] Admin pages checked in the browser (owner)
 
 ## 15. Decision log
