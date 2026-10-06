@@ -32,14 +32,19 @@ export function AssessmentManager({
   assessments,
   quizzes,
   batches,
+  courseBatchIds,
 }: {
   courseId: string;
   assessments: Assessment[];
   /** Saved questions and lock state for each quiz, by assessment id. */
   quizzes: Record<string, QuizEditInfo>;
+  /** Every batch, for showing names. */
   batches: Batch[];
+  /** Batches with at least one student enrolled in this course: the ones that can be targeted. */
+  courseBatchIds: string[];
 }) {
   const [createOpen, setCreateOpen] = useState(false);
+  const targetBatches = batches.filter((b) => courseBatchIds.includes(b.id));
 
   return (
     <div className="space-y-6">
@@ -57,7 +62,7 @@ export function AssessmentManager({
             <AssessmentForm
               mode="create"
               courseId={courseId}
-              batches={batches}
+              batches={targetBatches}
               onDone={() => setCreateOpen(false)}
             />
           </DialogContent>
@@ -74,7 +79,8 @@ export function AssessmentManager({
               courseId={courseId}
               assessment={assessment}
               quiz={quizzes[assessment.id] ?? null}
-              batches={batches}
+              // Keep the batch it already targets, so saving never changes it silently.
+              batches={batches.filter((b) => courseBatchIds.includes(b.id) || b.id === assessment.batch_id)}
               batchName={batches.find((b) => b.id === assessment.batch_id)?.name ?? null}
             />
           ))}

@@ -66,6 +66,26 @@ async function cleanupUploadedAttachment(
   }
 }
 
+const BATCH_NOT_IN_COURSE = "That batch has no students in this course. Choose another batch or Whole course.";
+
+/**
+ * Batches aren't tied to a course (SPEC §2): a batch can be targeted only if
+ * at least one of its students is enrolled in this course, otherwise the
+ * assessment would reach nobody. Mirrors the course page's batch list.
+ */
+async function batchHasStudentsInCourse(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  courseId: string,
+  batchId: string,
+): Promise<boolean> {
+  const { count, error } = await supabase
+    .from("enrollments")
+    .select("id, student:profiles!inner(batch_id)", { count: "exact", head: true })
+    .eq("course_id", courseId)
+    .eq("student.batch_id", batchId);
+  return !error && (count ?? 0) > 0;
+}
+
 export async function createAssessment(
   courseId: string,
   _prevState: AssessmentFormState,
@@ -85,6 +105,11 @@ export async function createAssessment(
   }
 
   const supabase = await createClient();
+
+  if (parsed.data.batch_id && !(await batchHasStudentsInCourse(supabase, courseId, parsed.data.batch_id))) {
+    await cleanupUploadedAttachment(supabase, parsed.data.attachment_path);
+    return { error: BATCH_NOT_IN_COURSE, success: false };
+  }
 
   const { data: created, error } = await supabase
     .from("assessments")
@@ -142,7 +167,7 @@ export async function updateAssessment(
 
   const { data: existing, error: fetchError } = await supabase
     .from("assessments")
-    .select("type, due_at, attachment_path, total_marks")
+    .select("type, due_at, attachment_path, total_marks, batch_id")
     .eq("id", assessmentId)
     .eq("course_id", courseId)
     .maybeSingle();
@@ -187,6 +212,19 @@ export async function updateAssessment(
       error: parsed.error.issues[0]?.message ?? "Please check the form and try again.",
       success: false,
     };
+  }
+
+  // The batch it already targets may stay even if it no longer has students
+  // in this course; only a newly chosen batch is checked.
+  if (
+    parsed.data.batch_id &&
+    parsed.data.batch_id !== existing.batch_id &&
+    !(await batchHasStudentsInCourse(supabase, courseId, parsed.data.batch_id))
+  ) {
+    if (parsed.data.attachment_path && parsed.data.attachment_path !== existing.attachment_path) {
+      await cleanupUploadedAttachment(supabase, parsed.data.attachment_path);
+    }
+    return { error: BATCH_NOT_IN_COURSE, success: false };
   }
 
   if (quizQuestions) {

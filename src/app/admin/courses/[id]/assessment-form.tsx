@@ -242,7 +242,9 @@ export function AssessmentForm(
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          Leave as &ldquo;Whole course&rdquo; to show this to everyone enrolled.
+          {props.batches.length === 0
+            ? "No batches have students in this course yet."
+            : "Leave as “Whole course” to show this to everyone enrolled. Only batches with students in this course are listed."}
         </p>
       </div>
 

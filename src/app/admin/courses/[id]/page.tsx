@@ -18,12 +18,21 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     { data: resources, error: resourcesError },
     { data: assessments, error: assessmentsError },
     { data: batches, error: batchesError },
+    { data: enrolledStudents, error: enrolledError },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", id).maybeSingle(),
     supabase.from("resources").select("*").eq("course_id", id).order("sort_order", { ascending: true }),
     supabase.from("assessments").select("*").eq("course_id", id).order("due_at", { ascending: true }),
     supabase.from("batches").select("id, name").order("name", { ascending: true }),
+    supabase.from("enrollments").select("student:profiles(batch_id)").eq("course_id", id),
   ]);
+
+  // Batches aren't tied to a course (SPEC §2), so the target-batch choice is
+  // narrowed to batches with at least one student enrolled in this course.
+  // Targeting any other batch would reach nobody.
+  const courseBatchIds = [
+    ...new Set((enrolledStudents ?? []).flatMap((row) => (row.student?.batch_id ? [row.student.batch_id] : []))),
+  ];
 
   // Quizzes: their saved questions (for editing) and whether anyone has
   // submitted yet, which locks the questions.
@@ -75,7 +84,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
       <Separator />
 
-      {assessmentsError || batchesError || quizQuestionsError || quizSubmissionsError ? (
+      {assessmentsError || batchesError || enrolledError || quizQuestionsError || quizSubmissionsError ? (
         <p className="text-sm text-destructive">Could not load assessments. Please refresh the page.</p>
       ) : (
         <AssessmentManager
@@ -83,6 +92,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
           assessments={assessments ?? []}
           quizzes={quizzes}
           batches={batches ?? []}
+          courseBatchIds={courseBatchIds}
         />
       )}
     </div>
