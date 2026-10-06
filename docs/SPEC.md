@@ -124,14 +124,14 @@ Permissions are enforced **on the server and in the database (Supabase Row Level
 | `/` | Home: academy intro, offered courses, how to apply, link to login |
 | `/courses` | Published courses from the database, grouped by O/A Level |
 | `/courses/[slug]` | Course description, who it is for, "Apply" button |
-| `/about` | About text from Settings |
+| `/about` | About page text from Settings (`about_page_text`) |
 | `/contact` | Contact details from Settings |
 | `/apply` | Application form |
 | `/apply/success` | Confirmation after applying |
 | `/login` | Portal login |
 
 Rules:
-- Academy name, logo, tagline, about text and contact details come from `site_settings`.
+- Academy name, logo, tagline, home page intro, About page text and contact details come from `site_settings`.
 - Any section whose content is empty is hidden. No filler text.
 - If no courses are published, the courses page shows a proper empty state.
 - Logged-in users visiting `/login` are redirected to their dashboard.
@@ -233,7 +233,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
 | `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, all students or one batch. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
 | `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
-| `/admin/settings` | Academy name, logo, tagline, about text, contact details |
+| `/admin/settings` | Academy name, logo, tagline, home page intro, About page text, contact details |
 
 ### Business rules
 
@@ -485,7 +485,8 @@ Single row.
 | `academy_name` | |
 | `tagline` | |
 | `logo_path` | |
-| `about_text` | |
+| `about_text` | Home page intro (hero subtext) |
+| `about_page_text` | About page (`/about`) body text |
 | `contact_email` | |
 | `contact_phone` | |
 | `contact_whatsapp` | |
@@ -1025,3 +1026,4 @@ Owner decision (2026-10-04, "option 1").
 | 2026-10-04 | **Owner decision: live classes ("option 1")**, superseding the "no class schedule / meeting links" line of 2026-09-29 and narrowing the §13 item to weekly timetables. The admin adds one entry per class (title, start time in Saudi time, Zoom/Meet join link, optional note, all students or one batch, following the announcements targeting idea without the course option) and can edit or delete it. Students see their upcoming classes in a card at the top of the dashboard with a Join button; a class stays listed until an hour after it starts so a class in progress can still be joined, then drops off (rows are kept; the admin page lists the latest 20 past classes). Adding a class creates a bell notification + phone push via `notify_new_live_class()`; editing never re-notifies. Students read classes only while active, because the join link lets anyone holding it into the class. Saudi time is a fixed UTC+3 offset (no daylight saving), so the admin's entry is converted on the server regardless of their device's time zone; students see times in their own local time like every other date |
 | 2026-10-04 | **Owner request: live class times are not Saudi time** (superseding the Saudi-time part of the entry above). The admin enters the start time in their own device's time zone, exactly like assessment due dates (converted to UTC in the browser), with no time-zone label; the admin list and the student card show it in the viewer's local time. The "New live class" notification shows no time at all, only "New live class: <title>" (owner decision; the phone pop-up uses the usual "Tap to open." line). The time is shown only on the dashboard card, in the student's own time zone |
 | 2026-10-05 | **Owner request: a little subtle animation on the public site** (within §12's "no heavy animation"). CSS only plus one tiny client component, no new dependency: the home hero (eyebrow, headline, subtext, buttons, portal preview) and the other public pages' header fade in and rise 12px on load with an 80ms stagger (~0.5s total); each home section below the hero (What you get, Subjects, How to join, FAQ, closing CTA) fades in and rises 16px once, the first time it scrolls into view (`src/components/public/reveal.tsx`, IntersectionObserver). Existing card hover lifts are unchanged; no number count-ups (there are no stats). Nothing moves with `prefers-reduced-motion: reduce`, and content is only hidden while JavaScript is enabled (`@media (scripting: enabled)`), so it can never get stuck invisible. Portal and admin pages are not animated |
+| 2026-10-06 | **Separated the home page intro from the About page text**, which previously shared one `about_text` field (the home hero subtext and `/about`'s body were always identical). Added `about_page_text` (`supabase/migrations/20261006093000_stage20_about_page_text.sql`), backfilled from the existing `about_text` so nothing visible changed at migration time. `about_text` now controls only the home page intro; `/admin/settings` has two separate fields ("Home page intro" and "About page"); `/about` reads `about_page_text`|
