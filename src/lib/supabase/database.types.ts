@@ -847,6 +847,7 @@ export type Database = {
           created_at: string
           feedback: string | null
           file_paths: string[]
+          files_cleared_at: string | null
           id: string
           is_late: boolean
           marked_at: string | null
@@ -862,6 +863,7 @@ export type Database = {
           created_at?: string
           feedback?: string | null
           file_paths?: string[]
+          files_cleared_at?: string | null
           id?: string
           is_late?: boolean
           marked_at?: string | null
@@ -877,6 +879,7 @@ export type Database = {
           created_at?: string
           feedback?: string | null
           file_paths?: string[]
+          files_cleared_at?: string | null
           id?: string
           is_late?: boolean
           marked_at?: string | null
@@ -915,9 +918,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clear_marked_submission_files: { Args: never; Returns: string[] }
       complete_password_change: { Args: never; Returns: undefined }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      marked_submission_files_summary: {
+        Args: never
+        Returns: {
+          file_count: number
+          total_bytes: number
+        }[]
+      }
       move_faq: {
         Args: { p_direction: string; p_faq_id: string }
         Returns: undefined
@@ -951,6 +962,7 @@ export type Database = {
           created_at: string
           feedback: string | null
           file_paths: string[]
+          files_cleared_at: string | null
           id: string
           is_late: boolean
           marked_at: string | null

@@ -124,6 +124,8 @@ function MarkingRow({
               </a>
             ))}
           </div>
+        ) : submission?.files_cleared_at ? (
+          <p className="mt-1 text-xs text-muted-foreground">Files removed to free up space</p>
         ) : null}
       </TableCell>
       <TableCell className="align-top">
