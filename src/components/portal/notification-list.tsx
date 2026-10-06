@@ -8,6 +8,7 @@ import {
   ClockAlertIcon,
   FileTextIcon,
   InboxIcon,
+  ListChecksIcon,
   MegaphoneIcon,
   MessageCircleQuestionMarkIcon,
   PenLineIcon,
@@ -31,6 +32,7 @@ const KIND_ICONS: Record<PortalNotification["kind"], LucideIcon> = {
   new_application: InboxIcon,
   new_question: MessageCircleQuestionMarkIcon,
   late_submission: ClockAlertIcon,
+  quiz: ListChecksIcon,
 };
 
 function NotificationRow({ notification }: { notification: PortalNotification }) {

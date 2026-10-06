@@ -85,3 +85,20 @@ describe("computeAssessmentStatus", () => {
     expect(withLateFlag).toBe("Marked");
   });
 });
+
+describe("computeAssessmentStatus for quizzes", () => {
+  it("follows the assignment rules: Missing once past due with nothing submitted", () => {
+    expect(computeAssessmentStatus({ type: "quiz", due_at: PAST }, null, NOW)).toBe("Missing");
+    expect(computeAssessmentStatus({ type: "quiz", due_at: FUTURE }, null, NOW)).toBe("Not submitted");
+  });
+
+  it("is Marked once submitted, because the score is saved straight away", () => {
+    expect(
+      computeAssessmentStatus(
+        { type: "quiz", due_at: PAST },
+        { submitted_at: "2026-02-01T00:00:00Z", is_late: true, marks: 7 },
+        NOW,
+      ),
+    ).toBe("Marked");
+  });
+});

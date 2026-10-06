@@ -4,6 +4,7 @@ import { formatShortLocalDate } from "@/lib/format-date";
 import { useIsClient } from "@/lib/use-is-client";
 import { computeYDomain, pickDotRadius, pickLabelIndices, scaleY } from "./trend-chart-math";
 import type { TrendPoint } from "@/lib/progress-report";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 const WIDTH = 520;
 const HEIGHT = 160;
@@ -98,7 +99,7 @@ export function TrendChart({ points, averagePct }: { points: TrendPoint[]; avera
           strokeWidth={2}
         >
           <title>
-            {point.assessment.title}: {point.assessment.type === "test" ? "Test" : "Assignment"},{" "}
+            {point.assessment.title}: {assessmentTypeLabel(point.assessment.type)},{" "}
             {point.marks} / {point.assessment.total_marks} · {point.pct}%
             {point.hollow ? " (late, not counted)" : ""}
           </title>

@@ -792,6 +792,44 @@ export type Database = {
           },
         ]
       }
+      quiz_questions: {
+        Row: {
+          assessment_id: string
+          correct_index: number
+          created_at: string
+          id: string
+          options: string[]
+          position: number
+          question: string
+        }
+        Insert: {
+          assessment_id: string
+          correct_index: number
+          created_at?: string
+          id?: string
+          options: string[]
+          position: number
+          question: string
+        }
+        Update: {
+          assessment_id?: string
+          correct_index?: number
+          created_at?: string
+          id?: string
+          options?: string[]
+          position?: number
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           about_page_text: string | null
@@ -853,6 +891,7 @@ export type Database = {
           marked_at: string | null
           marked_by: string | null
           marks: number | null
+          quiz_answers: number[] | null
           student_id: string
           submitted_at: string | null
           updated_at: string
@@ -869,6 +908,7 @@ export type Database = {
           marked_at?: string | null
           marked_by?: string | null
           marks?: number | null
+          quiz_answers?: number[] | null
           student_id: string
           submitted_at?: string | null
           updated_at?: string
@@ -885,6 +925,7 @@ export type Database = {
           marked_at?: string | null
           marked_by?: string | null
           marks?: number | null
+          quiz_answers?: number[] | null
           student_id?: string
           submitted_at?: string | null
           updated_at?: string
@@ -920,6 +961,15 @@ export type Database = {
     Functions: {
       clear_marked_submission_files: { Args: never; Returns: string[] }
       complete_password_change: { Args: never; Returns: undefined }
+      get_quiz_questions: {
+        Args: { p_assessment_id: string }
+        Returns: {
+          options: string[]
+          question: string
+          question_position: number
+        }[]
+      }
+      get_quiz_result: { Args: { p_assessment_id: string }; Returns: Json }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       marked_submission_files_summary: {
@@ -954,6 +1004,10 @@ export type Database = {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined
       }
+      save_quiz_questions: {
+        Args: { p_assessment_id: string; p_questions: Json }
+        Returns: number
+      }
       submit_assignment: {
         Args: { p_assessment_id: string; p_file_paths: string[] }
         Returns: {
@@ -968,6 +1022,7 @@ export type Database = {
           marked_at: string | null
           marked_by: string | null
           marks: number | null
+          quiz_answers: number[] | null
           student_id: string
           submitted_at: string | null
           updated_at: string
@@ -979,10 +1034,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      submit_quiz: {
+        Args: { p_answers: number[]; p_assessment_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       application_status: "pending" | "accepted" | "rejected"
-      assessment_type: "assignment" | "test"
+      assessment_type: "assignment" | "test" | "quiz"
       course_level: "O" | "A"
       enrollment_rating:
         | "excellent"
@@ -999,6 +1058,7 @@ export type Database = {
         | "new_application"
         | "new_question"
         | "late_submission"
+        | "quiz"
       question_status: "waiting" | "answered" | "closed"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
@@ -1133,7 +1193,7 @@ export const Constants = {
   public: {
     Enums: {
       application_status: ["pending", "accepted", "rejected"],
-      assessment_type: ["assignment", "test"],
+      assessment_type: ["assignment", "test", "quiz"],
       course_level: ["O", "A"],
       enrollment_rating: [
         "excellent",
@@ -1151,6 +1211,7 @@ export const Constants = {
         "new_application",
         "new_question",
         "late_submission",
+        "quiz",
       ],
       question_status: ["waiting", "answered", "closed"],
       resource_kind: ["file", "link"],

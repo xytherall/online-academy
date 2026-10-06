@@ -58,6 +58,7 @@ export type CourseReport = {
   /** null means "No marked work yet" rather than 0%. */
   overallPct: number | null;
   assignmentsPct: number | null;
+  /** Tests and quizzes together (a quiz is a short test). */
   testsPct: number | null;
   markedCount: number;
   totalCount: number;
@@ -207,7 +208,7 @@ export function computeCourseReport(
 
   const counted = rows.filter((row) => row.counted);
   const countedAssignments = counted.filter((row) => row.assessment.type === "assignment");
-  const countedTests = counted.filter((row) => row.assessment.type === "test");
+  const countedTests = counted.filter((row) => row.assessment.type === "test" || row.assessment.type === "quiz");
 
   const sumMarks = (list: AssessmentReportRow[]) =>
     list.reduce((sum, row) => sum + row.submission!.marks!, 0);

@@ -9,6 +9,8 @@ import { getVisibleAssessmentForStudent, computeAssessmentStatus } from "@/lib/a
 import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
+import { QuizSection } from "./quiz-section";
 import { SubmissionUploadForm } from "./submission-upload-form";
 
 export const metadata: Metadata = { title: "Assessment" };
@@ -43,7 +45,7 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold">{assessment.title}</h1>
-          <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+          <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
           <Badge variant={assessmentStatusBadgeVariant(status)}>{status}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -71,14 +73,23 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         </div>
       ) : null}
 
-      {!submission ? (
+      {assessment.type === "quiz" ? (
+        <QuizSection
+          assessmentId={assessment.id}
+          studentId={profile.id}
+          dueAt={assessment.due_at}
+          submission={submission ?? null}
+        />
+      ) : null}
+
+      {!submission && assessment.type !== "quiz" ? (
         <div className="space-y-2">
           <h2 className="font-medium">Submit your work</h2>
           <SubmissionUploadForm assessmentId={assessment.id} studentId={profile.id} dueAt={assessment.due_at} />
         </div>
       ) : null}
 
-      {submission?.submitted_at ? (
+      {submission?.submitted_at && assessment.type !== "quiz" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Your submission</CardTitle>
@@ -113,7 +124,8 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         </Card>
       ) : null}
 
-      {submission?.marks != null ? (
+      {/* A quiz the student answered shows its marks in the result instead. */}
+      {submission?.marks != null && !submission.quiz_answers ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Marks</CardTitle>

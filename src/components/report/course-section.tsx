@@ -6,6 +6,7 @@ import { COURSE_LEVEL_LABELS } from "@/lib/group-courses";
 import { formatScoreValue, type CourseReport, type TeacherAssessment } from "@/lib/progress-report";
 import { reportRowBadge } from "@/lib/status-badge";
 import { TeacherAssessmentCard } from "./teacher-assessment";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 function ScoreBox({ label, pct, overallPct }: { label: string; pct: number | null; overallPct: number | null }) {
   const { value, caption } = formatScoreValue(pct, overallPct);
@@ -62,7 +63,11 @@ export function CourseSection({
         <div className="ml-auto flex flex-wrap gap-2.5">
           <ScoreBox label="Overall" pct={report.overallPct} overallPct={report.overallPct} />
           <ScoreBox label="Assignments" pct={report.assignmentsPct} overallPct={report.overallPct} />
-          <ScoreBox label="Tests" pct={report.testsPct} overallPct={report.overallPct} />
+          <ScoreBox
+            label={report.rows.some((row) => row.assessment.type === "quiz") ? "Tests & quizzes" : "Tests"}
+            pct={report.testsPct}
+            overallPct={report.overallPct}
+          />
         </div>
       </div>
 
@@ -125,7 +130,7 @@ export function CourseSection({
                     <td className="py-2.5 pr-3">
                       {row.assessment.title}
                       {row.lateAndUncounted ? <sup className="ml-0.5">*</sup> : null}
-                      <div className="text-xs text-muted-foreground capitalize">{row.assessment.type}</div>
+                      <div className="text-xs text-muted-foreground">{assessmentTypeLabel(row.assessment.type)}</div>
                     </td>
                     <td className="py-2.5 pr-3">
                       <LocalShortDate iso={row.assessment.due_at} />

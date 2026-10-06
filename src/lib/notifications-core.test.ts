@@ -24,6 +24,7 @@ describe("notificationHref", () => {
       "/student/assessments/a1",
     );
     expect(notificationHref({ kind: "test", assessment_id: "a2", question_id: null, application_id: null })).toBe("/student/assessments/a2");
+    expect(notificationHref({ kind: "quiz", assessment_id: "a3", question_id: null, application_id: null })).toBe("/student/assessments/a3");
     expect(notificationHref({ kind: "marks", assessment_id: "a3", question_id: null, application_id: null })).toBe("/student/assessments/a3");
   });
 

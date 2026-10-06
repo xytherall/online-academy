@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { displayName } from "@/lib/display-name";
 import type { Tables } from "@/lib/supabase/database.types";
 import { MarkingTable } from "./marking-table";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 type RosterStudent = { id: string; full_name: string | null; email: string };
 
@@ -21,7 +22,7 @@ export default async function AdminAssessmentMarkingPage({ params }: { params: P
   const { data: assessment } = await supabase.from("assessments").select("*").eq("id", id).maybeSingle();
   if (!assessment) notFound();
 
-  const [{ data: course }, { data: enrollmentRows }, { data: submissions }] = await Promise.all([
+  const [{ data: course }, { data: enrollmentRows }, { data: submissions }, { data: quizQuestions }] = await Promise.all([
     supabase.from("courses").select("id, title").eq("id", assessment.course_id).maybeSingle(),
     supabase
       .from("enrollments")
@@ -31,6 +32,13 @@ export default async function AdminAssessmentMarkingPage({ params }: { params: P
       .from("submissions")
       .select("*, student:profiles!submissions_student_id_fkey(id, full_name, email)")
       .eq("assessment_id", id),
+    assessment.type === "quiz"
+      ? supabase
+          .from("quiz_questions")
+          .select("question, options, correct_index")
+          .eq("assessment_id", id)
+          .order("position", { ascending: true })
+      : Promise.resolve({ data: null }),
   ]);
 
   // Every student the assessment applies to: enrolled + batch rule, plus
@@ -69,14 +77,27 @@ export default async function AdminAssessmentMarkingPage({ params }: { params: P
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold">{assessment.title}</h1>
-          <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+          <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
           Due <LocalDateTime iso={assessment.due_at} /> · {assessment.total_marks} marks
         </p>
+        {assessment.type === "quiz" ? (
+          <p className="text-sm text-muted-foreground">
+            Quizzes are marked automatically when a student submits. You can still change a mark here.
+          </p>
+        ) : null}
       </div>
 
-      <MarkingTable assessmentId={assessment.id} totalMarks={assessment.total_marks} entries={entries} />
+      <MarkingTable
+        assessmentId={assessment.id}
+        totalMarks={assessment.total_marks}
+        entries={entries}
+        quizQuestions={
+          quizQuestions?.map((q) => ({ question: q.question, options: q.options, correctIndex: q.correct_index })) ??
+          null
+        }
+      />
     </div>
   );
 }

@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/dialog";
 import type { Tables } from "@/lib/supabase/database.types";
 import { deleteAssessment, getSignedAttachmentUrlByPath } from "./assessment-actions";
-import { AssessmentForm } from "./assessment-form";
+import { AssessmentForm, type QuizEditInfo } from "./assessment-form";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 type Assessment = Tables<"assessments">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
@@ -29,13 +30,21 @@ type Batch = Pick<Tables<"batches">, "id" | "name">;
 export function AssessmentManager({
   courseId,
   assessments,
+  quizzes,
   batches,
+  courseBatchIds,
 }: {
   courseId: string;
   assessments: Assessment[];
+  /** Saved questions and lock state for each quiz, by assessment id. */
+  quizzes: Record<string, QuizEditInfo>;
+  /** Every batch, for showing names. */
   batches: Batch[];
+  /** Batches with at least one student enrolled in this course: the ones that can be targeted. */
+  courseBatchIds: string[];
 }) {
   const [createOpen, setCreateOpen] = useState(false);
+  const targetBatches = batches.filter((b) => courseBatchIds.includes(b.id));
 
   return (
     <div className="space-y-6">
@@ -46,14 +55,14 @@ export function AssessmentManager({
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger render={<Button type="button" size="sm" />}>New assessment</DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>New assessment</DialogTitle>
             </DialogHeader>
             <AssessmentForm
               mode="create"
               courseId={courseId}
-              batches={batches}
+              batches={targetBatches}
               onDone={() => setCreateOpen(false)}
             />
           </DialogContent>
@@ -69,7 +78,9 @@ export function AssessmentManager({
               key={assessment.id}
               courseId={courseId}
               assessment={assessment}
-              batches={batches}
+              quiz={quizzes[assessment.id] ?? null}
+              // Keep the batch it already targets, so saving never changes it silently.
+              batches={batches.filter((b) => courseBatchIds.includes(b.id) || b.id === assessment.batch_id)}
               batchName={batches.find((b) => b.id === assessment.batch_id)?.name ?? null}
             />
           ))}
@@ -82,11 +93,13 @@ export function AssessmentManager({
 function AssessmentRow({
   courseId,
   assessment,
+  quiz,
   batches,
   batchName,
 }: {
   courseId: string;
   assessment: Assessment;
+  quiz: QuizEditInfo | null;
   batches: Batch[];
   batchName: string | null;
 }) {
@@ -129,7 +142,7 @@ function AssessmentRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-medium">{assessment.title}</p>
-            <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+            <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
             <Badge variant="outline">{batchName ?? "Whole course"}</Badge>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -155,7 +168,7 @@ function AssessmentRow({
 
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
             <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>Edit</DialogTrigger>
-            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Edit &ldquo;{assessment.title}&rdquo;</DialogTitle>
               </DialogHeader>
@@ -163,6 +176,7 @@ function AssessmentRow({
                 mode="edit"
                 courseId={courseId}
                 assessment={assessment}
+                quiz={quiz}
                 batches={batches}
                 onDone={() => setEditOpen(false)}
               />

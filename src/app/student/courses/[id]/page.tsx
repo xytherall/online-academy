@@ -12,6 +12,7 @@ import { computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 export const metadata: Metadata = { title: "Course" };
 
@@ -129,7 +130,7 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="truncate font-medium hover:underline">{assessment.title}</p>
                         <Badge variant="secondary">
-                          {assessment.type === "assignment" ? "Assignment" : "Test"}
+                          {assessmentTypeLabel(assessment.type)}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
