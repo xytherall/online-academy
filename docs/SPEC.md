@@ -40,6 +40,7 @@ Everything else stays outside the website for now. Live classes happen on Zoom /
 | Assignments | Due dates set by the teacher. Late submissions are **accepted and flagged**. |
 | Late marks | Do **not** count toward the report by default. Admin can override per submission. |
 | Tests | Same as assignments: admin can attach the paper (PDF/image), students download it and upload their answers by the due date (late accepted and flagged). Admin can also enter marks directly with no upload (e.g. a test sat on paper in class). |
+| Quizzes | Multiple-choice quizzes (Stage 23): the admin pastes the questions, students answer once on the page and are marked automatically, 1 mark per question. Late accepted and flagged. No timer, text only. |
 | Remarks | Admin can write remarks per student per course |
 | Guardians | Guardian contact collected on the application. Progress shared via a printable report. No guardian accounts. |
 | Announcements | Target: everyone, one course, or one batch |
@@ -105,9 +106,10 @@ Permissions are enforced **on the server and in the database (Supabase Row Level
 **Assessment**
 - Anything that receives marks. Always belongs to a course.
 - Can optionally target one batch; otherwise it is visible to everyone enrolled in the course.
-- Two types:
+- Three types:
   - **Assignment**: students upload work (PDF or images) and admin marks it.
   - **Test**: students upload their answers exactly like an assignment, or the admin enters marks directly with no upload (e.g. sat on paper in class).
+  - **Quiz** (Stage 23): multiple-choice questions (2–6 options, one correct) answered on the page. One attempt; the database marks it on submit and the student sees their score, which answers were wrong, and the correct answers straight away. Total marks = number of questions. No attachment, no timer, text only.
 - Fields: title, instructions, optional attachment, due date, total marks.
 
 **Submission / Result**
@@ -193,7 +195,7 @@ Email-based "forgot password" and invites will be added once a domain and email 
 | `/student` | Dashboard: upcoming live classes for the student (card at the top with a Join button, hidden when there are none; a class drops off an hour after it starts), latest announcements, upcoming work (every unsubmitted assignment, overdue included, and every test not yet past, with no date limit), recently marked work |
 | `/student/courses` | Enrolled courses |
 | `/student/courses/[id]` | Course: resources, assessments with status and marks |
-| `/student/assessments/[id]` | Instructions, attachment, due date, upload/replace submission, marks and feedback once marked |
+| `/student/assessments/[id]` | Instructions, attachment, due date, upload/replace submission, marks and feedback once marked. For a quiz: all questions on one page (picks kept on the device until submitted), Submit with a "You can't change answers after this" confirmation, then the result ("You scored 7 / 10", wrong answers marked, correct answers shown); revisiting shows the result |
 | `/student/report` | Progress report (see §9) |
 | `/student/announcements` | All announcements addressed to the student |
 | `/student/questions` | "Ask the teacher": ask a question (an enrolled course or General, optional one file) and see their own questions (Waiting / Answered / Closed); `/student/questions/[id]` shows the question and answer |
@@ -229,7 +231,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/courses` | List of courses |
 | `/admin/courses/new` | Create course |
 | `/admin/courses/[id]` | Edit course, publish/unpublish, manage resources and assessments |
-| `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback and open uploaded files (assignments and tests). Marks can be entered for any targeted student, with or without an upload. |
+| `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback and open uploaded files (assignments and tests). Marks can be entered for any targeted student, with or without an upload. For a quiz, each student's answers can be viewed (correct answers in green); quiz marks are filled in automatically and can still be changed by hand. |
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
 | `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, all students or one batch. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
 | `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
@@ -376,7 +378,7 @@ Exactly one of `file_path` / `url` is set, matching `kind`.
 |---|---|
 | `course_id` | FK → `courses` |
 | `batch_id` | nullable; null means the whole course |
-| `type` | enum: `assignment` / `test` |
+| `type` | enum: `assignment` / `test` / `quiz` |
 | `title` | |
 | `instructions` | |
 | `attachment_path` | nullable |
@@ -389,7 +391,8 @@ Exactly one of `file_path` / `url` is set, matching `kind`.
 |---|---|
 | `assessment_id` | FK → `assessments` |
 | `student_id` | FK → `profiles` |
-| `file_paths` | text[]; empty for tests |
+| `file_paths` | text[]; empty for tests and quizzes |
+| `quiz_answers` | smallint[], nullable; a quiz's chosen options (0-based, in question order). Null for everything else |
 | `submitted_at` | nullable |
 | `is_late` | boolean |
 | `marks` | nullable numeric |
@@ -399,6 +402,18 @@ Exactly one of `file_path` / `url` is set, matching `kind`.
 | `marked_at` | nullable |
 
 Unique on (`assessment_id`, `student_id`).
+
+### `quiz_questions`
+
+| Field | Notes |
+|---|---|
+| `assessment_id` | FK → `assessments` (cascade; a quiz with submissions can't be deleted anyway) |
+| `position` | 1-based, unique per quiz |
+| `question` | text |
+| `options` | text[], 2–6 |
+| `correct_index` | 0-based index into `options` |
+
+Admin-only RLS; students have **no** access to this table. They read questions without answers through `get_quiz_questions()`, submit through `submit_quiz()` (checks active student, visibility, one attempt; computes the score, `is_late` and `counts_toward_report` itself) and read their own result through `get_quiz_result()`, which returns nothing until they have submitted. Questions can't be changed once any submission exists for the quiz.
 
 ### `announcements`
 
@@ -674,7 +689,6 @@ Future options, only if the academy asks:
 - Guardian accounts or automatic guardian emails
 - Email notifications, invites and "forgot password" (after domain + email provider)
 - Video hosting (recordings are links for now)
-- Quizzes / auto-graded tests
 - Certificates
 - Chat, forums, comments
 - Gamification
@@ -864,6 +878,20 @@ Owner decision (2026-10-04, "option 1").
 - [x] Owner request: no Saudi time. The admin enters the time in their own time zone (like due dates) and the admin list shows local time; the notification shows no time at all, just "New live class: <title>" (owner decision); migration `stage19b_live_class_local_time` stores no body, and the time is shown only on the dashboard card, in the student's own time zone
 - [x] Migration `stage19b` applied to the Supabase project (version `20261004213214`)
 
+### Stage 23 — Multiple-choice quizzes
+
+Owner decision (2026-10-06).
+
+- [x] Migration `stage23_quizzes`: `quiz` assessment type and notification kind, `submissions.quiz_answers`, `quiz_questions` (admin-only RLS, locked once submitted), `save_quiz_questions()`, `get_quiz_questions()`, `get_quiz_result()`, `submit_quiz()`; `submit_assignment()` refuses quizzes; `notify_new_assessment()` says "New quiz: …"
+- [ ] Migration applied to the Supabase project
+- [x] Admin: Quiz type on the assessment form with one paste box, "Copy ChatGPT prompt" button, Preview (correct answers green, unreadable blocks red with the reason, never dropped), Publish only after a clean preview; questions read-only once submitted; a quiz can't change type
+- [x] Paste format parser (`src/lib/quiz-format.ts`), forgiving about `Q1.`/`1.`, `A.`, lower case, spacing and markdown bold; unit tested
+- [x] Marking page: each student's answers viewable; marks still editable by hand
+- [x] Student: questions on one page, picks kept on the device, confirm before the final submit, result with wrong answers and correct answers; revisiting shows the result
+- [x] Upcoming work includes unsubmitted quizzes (overdue included, like assignments); quizzes count with tests in the progress report ("Tests & quizzes" when a course has quizzes); creating a quiz notifies (bell + push), edits don't
+- [ ] Checked against the live database as a demo student, including that correct answers can't be read before submitting
+- [ ] Admin pages checked in the browser (owner)
+
 ## 15. Decision log
 
 | Date | Decision |
@@ -1027,3 +1055,4 @@ Owner decision (2026-10-04, "option 1").
 | 2026-10-04 | **Owner request: live class times are not Saudi time** (superseding the Saudi-time part of the entry above). The admin enters the start time in their own device's time zone, exactly like assessment due dates (converted to UTC in the browser), with no time-zone label; the admin list and the student card show it in the viewer's local time. The "New live class" notification shows no time at all, only "New live class: <title>" (owner decision; the phone pop-up uses the usual "Tap to open." line). The time is shown only on the dashboard card, in the student's own time zone |
 | 2026-10-05 | **Owner request: a little subtle animation on the public site** (within §12's "no heavy animation"). CSS only plus one tiny client component, no new dependency: the home hero (eyebrow, headline, subtext, buttons, portal preview) and the other public pages' header fade in and rise 12px on load with an 80ms stagger (~0.5s total); each home section below the hero (What you get, Subjects, How to join, FAQ, closing CTA) fades in and rises 16px once, the first time it scrolls into view (`src/components/public/reveal.tsx`, IntersectionObserver). Existing card hover lifts are unchanged; no number count-ups (there are no stats). Nothing moves with `prefers-reduced-motion: reduce`, and content is only hidden while JavaScript is enabled (`@media (scripting: enabled)`), so it can never get stuck invisible. Portal and admin pages are not animated |
 | 2026-10-06 | **Separated the home page intro from the About page text**, which previously shared one `about_text` field (the home hero subtext and `/about`'s body were always identical). Added `about_page_text` (`supabase/migrations/20261006093000_stage20_about_page_text.sql`), backfilled from the existing `about_text` so nothing visible changed at migration time. `about_text` now controls only the home page intro; `/admin/settings` has two separate fields ("Home page intro" and "About page"); `/about` reads `about_page_text`|
+| 2026-10-06 | **Owner decision: multiple-choice quizzes** (Stage 23), removing "Quizzes / auto-graded tests" from §13. A quiz is a third assessment type: the admin pastes questions in a fixed text format (2–6 options, `Answer:` letter), previews them, and publishes; a "Copy ChatGPT prompt" button gives the teacher a prompt that makes ChatGPT reply in that format. 1 mark per question, one attempt, no timer, text only. Students never get the correct answers before submitting (no table access; questions come from a function that leaves them out) and see their score, wrong answers and the correct answers straight after (owner decision). The submission is an ordinary `submissions` row with `marks` = score, so marking, reports and the late flag work as before: late quizzes are accepted and flagged, an unanswered past-due quiz is Missing (like an assignment), and quizzes count with tests in the report. Questions lock once anyone has submitted; title, instructions, batch and due date stay editable; a quiz can't change type |
