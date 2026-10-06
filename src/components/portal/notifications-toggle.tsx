@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { NOTIFICATIONS_CHANGED_EVENT } from "@/lib/notifications-core";
-import { setNotificationsEnabled } from "../notifications/actions";
+import { setNotificationsEnabled } from "@/lib/notification-actions";
 
-export function NotificationsToggle({ initialEnabled }: { initialEnabled: boolean }) {
+export function NotificationsToggle({ initialEnabled, description }: { initialEnabled: boolean; description: string }) {
   const id = useId();
   const labelId = `${id}-label`;
   const descriptionId = `${id}-description`;
@@ -33,8 +33,7 @@ export function NotificationsToggle({ initialEnabled }: { initialEnabled: boolea
       <div className="space-y-1">
         <Label id={labelId}>Show notifications</Label>
         <p id={descriptionId} className="text-sm text-muted-foreground">
-          New assignments, tests, announcements, your marks, and work due within a day. When off, you won&apos;t
-          get new notifications and the bell shows no count.
+          {description}
         </p>
       </div>
       <Switch

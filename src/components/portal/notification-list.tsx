@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import {
   BellIcon,
   ClipboardCheckIcon,
+  ClockAlertIcon,
   FileTextIcon,
+  InboxIcon,
   MegaphoneIcon,
   MessageCircleQuestionMarkIcon,
   PenLineIcon,
@@ -14,21 +16,24 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Button } from "@/components/ui/button";
-import type { StudentNotification } from "@/lib/notifications";
+import { markAllNotificationsRead, openNotification } from "@/lib/notification-actions";
+import type { PortalNotification } from "@/lib/notifications";
 import { NOTIFICATIONS_CHANGED_EVENT } from "@/lib/notifications-core";
 import { cn } from "@/lib/utils";
-import { markAllNotificationsRead, openNotification } from "./actions";
 
-const KIND_ICONS: Record<StudentNotification["kind"], LucideIcon> = {
+const KIND_ICONS: Record<PortalNotification["kind"], LucideIcon> = {
   assignment: FileTextIcon,
   test: PenLineIcon,
   announcement: MegaphoneIcon,
   marks: ClipboardCheckIcon,
   answer: MessageCircleQuestionMarkIcon,
   live_class: VideoIcon,
+  new_application: InboxIcon,
+  new_question: MessageCircleQuestionMarkIcon,
+  late_submission: ClockAlertIcon,
 };
 
-function NotificationRow({ notification }: { notification: StudentNotification }) {
+function NotificationRow({ notification }: { notification: PortalNotification }) {
   const [isPending, startTransition] = useTransition();
   const isUnread = notification.read_at === null;
   const Icon = KIND_ICONS[notification.kind] ?? BellIcon;
@@ -79,7 +84,7 @@ function NotificationRow({ notification }: { notification: StudentNotification }
   );
 }
 
-export function NotificationList({ notifications }: { notifications: StudentNotification[] }) {
+export function NotificationList({ notifications }: { notifications: PortalNotification[] }) {
   return (
     <ul className="space-y-2">
       {notifications.map((notification) => (

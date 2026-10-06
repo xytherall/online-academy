@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { buildDueReminderMessages } from "@/lib/due-reminders";
 import { DUE_REMINDER_WINDOW_MS } from "@/lib/notifications-core";
-import { sendPushToStudents } from "@/lib/push";
+import { sendPushToUsers } from "@/lib/push";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     dayKey: now.toISOString().slice(0, 10),
   });
 
-  await sendPushToStudents(messages);
+  await sendPushToUsers(messages);
   return NextResponse.json({ sent: messages.length });
 }
 

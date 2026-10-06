@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { NotificationsToggle } from "@/components/portal/notifications-toggle";
+import { PhoneNotifications } from "@/components/portal/phone-notifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireStudent } from "@/lib/auth";
@@ -6,8 +8,6 @@ import { getNotificationsEnabled } from "@/lib/notifications";
 import { getBatchName } from "@/lib/student";
 import { createClient } from "@/lib/supabase/server";
 import { ChangePasswordForm } from "./change-password-form";
-import { NotificationsToggle } from "./notifications-toggle";
-import { PhoneNotifications } from "./phone-notifications";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -57,7 +57,10 @@ export default async function StudentAccountPage() {
           <CardTitle>Notifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <NotificationsToggle initialEnabled={notificationsEnabled} />
+          <NotificationsToggle
+            initialEnabled={notificationsEnabled}
+            description="New assignments, tests, announcements, your marks, and work due within a day. When off, you won't get new notifications and the bell shows no count."
+          />
           <PhoneNotifications notificationsEnabled={notificationsEnabled} />
         </CardContent>
       </Card>

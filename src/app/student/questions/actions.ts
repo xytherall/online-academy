@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireStudent } from "@/lib/auth";
+import { pushAdminAlerts } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { askQuestionSchema, type AskQuestionInput } from "@/lib/validation/questions";
 
@@ -39,6 +40,8 @@ export async function askQuestion(input: AskQuestionInput): Promise<ActionResult
     if (attachment_path) await supabase.storage.from("questions").remove([attachment_path]);
     return { error: "Could not send your question. Please try again." };
   }
+
+  pushAdminAlerts({ questionId: data.id });
 
   revalidatePath("/student/questions");
   revalidatePath("/admin", "layout");

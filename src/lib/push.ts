@@ -4,11 +4,15 @@ import { notificationHref } from "@/lib/notifications-core";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Phone notifications (Web Push). Sending needs other students'
+ * Phone notifications (Web Push). Sending needs other users'
  * subscriptions, which RLS rightly hides from everyone but their owner, so
  * this module uses the secret-key client. It is only ever called from
- * (a) admin Server Actions, after requireAdmin(), and (b) the daily
- * due-work reminder route, after it has checked CRON_SECRET.
+ * (a) admin Server Actions, after requireAdmin(), (b) the daily due-work
+ * reminder route, after it has checked CRON_SECRET, and (c) the apply form,
+ * ask-a-question and submit actions, right after their own insert succeeded,
+ * to push the admin alerts that insert created (sendPushForAdminAlerts). In
+ * (c) the caller only names the row it just created; who receives what was
+ * already decided by the database trigger.
  */
 
 export type PushMessage = { title: string; body: string; url: string; tag: string };
@@ -39,7 +43,7 @@ function isGone(error: unknown): boolean {
  * Sends each message to every phone/browser its student turned on, and
  * deletes subscriptions the push service reports as gone.
  */
-export async function sendPushToStudents(messages: { userId: string; message: PushMessage }[]): Promise<void> {
+export async function sendPushToUsers(messages: { userId: string; message: PushMessage }[]): Promise<void> {
   if (messages.length === 0 || !configureWebPush()) return;
 
   const admin = createAdminClient();
@@ -81,6 +85,49 @@ export async function sendPushToStudents(messages: { userId: string; message: Pu
   }
 }
 
+/** The row whose insert just created admin alerts (see the stage 21 migration). */
+export type AdminAlertSubject =
+  | { applicationEmail: string }
+  | { questionId: string }
+  | { submissionId: string };
+
+/**
+ * Sends the phone version of the admin alerts a trigger created for one new
+ * row. The apply form can't read its own application back (anon has no
+ * select), so an application is found by its email: there is at most one
+ * pending application per email.
+ */
+export async function sendPushForAdminAlerts(subject: AdminAlertSubject): Promise<void> {
+  if (!configureWebPush()) return;
+  const admin = createAdminClient();
+
+  let query = admin.from("notifications").select("id");
+  if ("applicationEmail" in subject) {
+    const { data: application, error } = await admin
+      .from("applications")
+      .select("id")
+      .ilike("email", subject.applicationEmail.replace(/[\\%_]/g, "\\$&"))
+      .eq("status", "pending")
+      .maybeSingle();
+    if (error || !application) {
+      if (error) console.error("Could not find the new application to push:", error.message);
+      return;
+    }
+    query = query.eq("kind", "new_application").eq("application_id", application.id);
+  } else if ("questionId" in subject) {
+    query = query.eq("kind", "new_question").eq("question_id", subject.questionId);
+  } else {
+    query = query.eq("kind", "late_submission").eq("submission_id", subject.submissionId);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Could not load admin alerts to push:", error.message);
+    return;
+  }
+  await sendPushForNotifications(data.map((n) => n.id));
+}
+
 /** Sends the phone version of bell notifications that were just created. */
 export async function sendPushForNotifications(notificationIds: string[]): Promise<void> {
   if (notificationIds.length === 0 || !configureWebPush()) return;
@@ -88,7 +135,7 @@ export async function sendPushForNotifications(notificationIds: string[]): Promi
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("notifications")
-    .select("id, user_id, kind, title, body, assessment_id, question_id")
+    .select("id, user_id, kind, title, body, assessment_id, question_id, application_id")
     .in("id", notificationIds);
 
   if (error) {
@@ -96,7 +143,7 @@ export async function sendPushForNotifications(notificationIds: string[]): Promi
     return;
   }
 
-  await sendPushToStudents(
+  await sendPushToUsers(
     data.map((n) => ({
       userId: n.user_id,
       message: {

@@ -1,7 +1,7 @@
 import "server-only";
 import { after } from "next/server";
 import { bellCount, isDueForReminder } from "@/lib/notifications-core";
-import { sendPushForNotifications } from "@/lib/push";
+import { sendPushForAdminAlerts, sendPushForNotifications, type AdminAlertSubject } from "@/lib/push";
 import { getDueSoonAssessments, type DueSoonAssessment } from "@/lib/student";
 import type { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
@@ -9,9 +9,9 @@ import type { Tables } from "@/lib/supabase/database.types";
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type StudentRef = Pick<Tables<"profiles">, "id" | "batch_id">;
 
-export type StudentNotification = Pick<
+export type PortalNotification = Pick<
   Tables<"notifications">,
-  "id" | "kind" | "title" | "body" | "assessment_id" | "question_id" | "read_at" | "created_at"
+  "id" | "kind" | "title" | "body" | "assessment_id" | "question_id" | "application_id" | "read_at" | "created_at"
 >;
 
 /** No preferences row yet means notifications are on (the default). */
@@ -55,16 +55,30 @@ export async function getBellCount(supabase: SupabaseServerClient, student: Stud
   return bellCount(enabled, count ?? 0, reminders?.length ?? 0);
 }
 
+/** Admin header bell: unread alerts only (admins have no due-work reminders). */
+export async function getAdminBellCount(supabase: SupabaseServerClient, adminId: string): Promise<number> {
+  const enabled = await getNotificationsEnabled(supabase, adminId);
+  if (!enabled) return 0;
+
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", adminId)
+    .is("read_at", null);
+
+  return bellCount(enabled, count ?? 0, 0);
+}
+
 const FEED_LIMIT = 50;
 
 /** Most recent notifications for the notifications page (RLS: own rows only). */
 export async function getRecentNotifications(
   supabase: SupabaseServerClient,
   userId: string,
-): Promise<{ notifications: StudentNotification[] | null; error: boolean }> {
+): Promise<{ notifications: PortalNotification[] | null; error: boolean }> {
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, kind, title, body, assessment_id, question_id, read_at, created_at")
+    .select("id, kind, title, body, assessment_id, question_id, application_id, read_at, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT);
@@ -113,4 +127,14 @@ export function notifyMarks(supabase: SupabaseServerClient, assessmentId: string
 
 export function notifyAnswer(supabase: SupabaseServerClient, questionId: string) {
   return createAndPush("answer", supabase.rpc("notify_answer", { p_question_id: questionId }));
+}
+
+/**
+ * Admin alerts (new application, new question, late submission) are created
+ * by database triggers when the row is inserted, so they can never be
+ * skipped or duplicated. This only sends their phone version, after the
+ * response. Called once, right after the insert succeeded.
+ */
+export function pushAdminAlerts(subject: AdminAlertSubject) {
+  after(() => sendPushForAdminAlerts(subject));
 }
