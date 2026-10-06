@@ -10,6 +10,7 @@ import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { SubmissionUploadForm } from "./submission-upload-form";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 export const metadata: Metadata = { title: "Assessment" };
 
@@ -43,7 +44,7 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold">{assessment.title}</h1>
-          <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+          <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
           <Badge variant={assessmentStatusBadgeVariant(status)}>{status}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">

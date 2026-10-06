@@ -24,7 +24,7 @@ const marksSchema = z
   .refine((value) => Math.round(value * 10) === value * 10, "Use at most one decimal place");
 
 export const assessmentSchema = z.object({
-  type: z.enum(["assignment", "test"], { error: "Choose a type" }),
+  type: z.enum(["assignment", "test", "quiz"], { error: "Choose a type" }),
   title: titleSchema,
   instructions: instructionsSchema,
   // Converted to UTC client-side (toUtcIso) before this is parsed.

@@ -6,6 +6,7 @@ import {
   BellIcon,
   ClipboardCheckIcon,
   FileTextIcon,
+  ListChecksIcon,
   MegaphoneIcon,
   MessageCircleQuestionMarkIcon,
   PenLineIcon,
@@ -26,6 +27,7 @@ const KIND_ICONS: Record<StudentNotification["kind"], LucideIcon> = {
   marks: ClipboardCheckIcon,
   answer: MessageCircleQuestionMarkIcon,
   live_class: VideoIcon,
+  quiz: ListChecksIcon,
 };
 
 function NotificationRow({ notification }: { notification: StudentNotification }) {

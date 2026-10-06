@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { displayName } from "@/lib/display-name";
 import type { Tables } from "@/lib/supabase/database.types";
 import { MarkingTable } from "./marking-table";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 type RosterStudent = { id: string; full_name: string | null; email: string };
 
@@ -69,7 +70,7 @@ export default async function AdminAssessmentMarkingPage({ params }: { params: P
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold">{assessment.title}</h1>
-          <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+          <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
           Due <LocalDateTime iso={assessment.due_at} /> · {assessment.total_marks} marks

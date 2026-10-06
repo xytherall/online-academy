@@ -22,6 +22,7 @@ import {
 import type { Tables } from "@/lib/supabase/database.types";
 import { deleteAssessment, getSignedAttachmentUrlByPath } from "./assessment-actions";
 import { AssessmentForm } from "./assessment-form";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 type Assessment = Tables<"assessments">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
@@ -129,7 +130,7 @@ function AssessmentRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-medium">{assessment.title}</p>
-            <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+            <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
             <Badge variant="outline">{batchName ?? "Whole course"}</Badge>
           </div>
           <p className="text-xs text-muted-foreground">

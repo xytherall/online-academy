@@ -3,21 +3,49 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { notifyNewAssessment } from "@/lib/notifications";
+import { parseQuizText, quizTextProblem, type QuizQuestion } from "@/lib/quiz-format";
 import { createClient } from "@/lib/supabase/server";
 import { assessmentSchema } from "@/lib/validation/assessments";
 
 export type AssessmentFormState = { error: string | null; success: boolean };
 export type AssessmentActionResult = { error: string | null };
 
-function parseAssessmentForm(formData: FormData) {
+/**
+ * A quiz has no attachment and its total marks is its question count
+ * (1 mark each), so neither is taken from the form for a quiz.
+ */
+function parseAssessmentForm(formData: FormData, quizQuestionCount: number | null) {
+  const isQuiz = formData.get("type") === "quiz";
   return assessmentSchema.safeParse({
     type: formData.get("type"),
     title: formData.get("title"),
     instructions: formData.get("instructions"),
     due_at: formData.get("due_at"),
-    total_marks: formData.get("total_marks"),
+    total_marks: isQuiz ? quizQuestionCount : formData.get("total_marks"),
     batch_id: formData.get("batch_id"),
-    attachment_path: formData.get("attachment_path"),
+    attachment_path: isQuiz ? null : formData.get("attachment_path"),
+  });
+}
+
+/** Re-parses the pasted questions on the server; the client's preview is never trusted. */
+function parseQuizForm(formData: FormData): { questions: QuizQuestion[]; error: string | null } {
+  const text = formData.get("quiz_text");
+  const parsed = parseQuizText(typeof text === "string" ? text : "");
+  return { questions: parsed.questions, error: quizTextProblem(parsed) };
+}
+
+function saveQuizQuestions(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  assessmentId: string,
+  questions: QuizQuestion[],
+) {
+  return supabase.rpc("save_quiz_questions", {
+    p_assessment_id: assessmentId,
+    p_questions: questions.map((q) => ({
+      question: q.question,
+      options: q.options,
+      correct_index: q.correctIndex,
+    })),
   });
 }
 
@@ -45,7 +73,10 @@ export async function createAssessment(
 ): Promise<AssessmentFormState> {
   await requireAdmin();
 
-  const parsed = parseAssessmentForm(formData);
+  const quiz = formData.get("type") === "quiz" ? parseQuizForm(formData) : null;
+  if (quiz?.error) return { error: quiz.error, success: false };
+
+  const parsed = parseAssessmentForm(formData, quiz ? quiz.questions.length : null);
   if (!parsed.success) {
     return {
       error: parsed.error.issues[0]?.message ?? "Please check the form and try again.",
@@ -80,6 +111,19 @@ export async function createAssessment(
     };
   }
 
+  if (quiz) {
+    const { error: questionsError } = await saveQuizQuestions(supabase, created.id, quiz.questions);
+    if (questionsError) {
+      // Nobody has been notified yet and nobody can have submitted, so the
+      // half-made quiz is simply removed.
+      await supabase.from("assessments").delete().eq("id", created.id);
+      return {
+        error: friendlyDbError(questionsError, "Could not save the questions. Please try again."),
+        success: false,
+      };
+    }
+  }
+
   await notifyNewAssessment(supabase, created.id);
 
   revalidatePath(`/admin/courses/${courseId}`);
@@ -94,7 +138,50 @@ export async function updateAssessment(
 ): Promise<AssessmentFormState> {
   await requireAdmin();
 
-  const parsed = parseAssessmentForm(formData);
+  const supabase = await createClient();
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("assessments")
+    .select("type, due_at, attachment_path, total_marks")
+    .eq("id", assessmentId)
+    .eq("course_id", courseId)
+    .maybeSingle();
+
+  const submittedType = formData.get("type");
+  const isQuiz = existing?.type === "quiz";
+
+  if (fetchError || !existing || isQuiz !== (submittedType === "quiz")) {
+    const uploaded = formData.get("attachment_path");
+    if (typeof uploaded === "string" && uploaded && uploaded !== existing?.attachment_path) {
+      await cleanupUploadedAttachment(supabase, uploaded);
+    }
+    return {
+      error: !existing ? "Assessment not found." : "A quiz can't be changed to another type, or another type to a quiz.",
+      success: false,
+    };
+  }
+
+  // Questions are locked once anyone has a submission (the database enforces
+  // this too); title, instructions, batch and due date stay editable.
+  let quizQuestions: QuizQuestion[] | null = null;
+  if (isQuiz) {
+    const { count, error: countError } = await supabase
+      .from("submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("assessment_id", assessmentId);
+    if (countError) return { error: "Could not save the assessment. Please try again.", success: false };
+
+    if (!count) {
+      const quiz = parseQuizForm(formData);
+      if (quiz.error) return { error: quiz.error, success: false };
+      quizQuestions = quiz.questions;
+    }
+  }
+
+  const parsed = parseAssessmentForm(
+    formData,
+    isQuiz ? (quizQuestions?.length ?? existing.total_marks) : null,
+  );
   if (!parsed.success) {
     return {
       error: parsed.error.issues[0]?.message ?? "Please check the form and try again.",
@@ -102,18 +189,14 @@ export async function updateAssessment(
     };
   }
 
-  const supabase = await createClient();
-
-  const { data: existing, error: fetchError } = await supabase
-    .from("assessments")
-    .select("due_at, attachment_path")
-    .eq("id", assessmentId)
-    .eq("course_id", courseId)
-    .maybeSingle();
-
-  if (fetchError || !existing) {
-    await cleanupUploadedAttachment(supabase, parsed.data.attachment_path);
-    return { error: "Assessment not found.", success: false };
+  if (quizQuestions) {
+    const { error: questionsError } = await saveQuizQuestions(supabase, assessmentId, quizQuestions);
+    if (questionsError) {
+      return {
+        error: friendlyDbError(questionsError, "Could not save the questions. Please try again."),
+        success: false,
+      };
+    }
   }
 
   const { error } = await supabase
@@ -152,12 +235,16 @@ export async function updateAssessment(
   // the admin's existing choice. No submissions exist yet in 6A, so this is
   // a no-op today but needs no rework once 6B starts creating them.
   if (existing.due_at !== parsed.data.due_at) {
-    const { data: unmarkedSubmissions } = await supabase
+    // A quiz is scored automatically on submit (marked_at set, marked_by
+    // null), so its submissions are re-flagged too unless an admin has
+    // since entered a mark themselves.
+    let unmarkedQuery = supabase
       .from("submissions")
       .select("id, submitted_at")
       .eq("assessment_id", assessmentId)
-      .is("marked_at", null)
       .not("submitted_at", "is", null);
+    unmarkedQuery = isQuiz ? unmarkedQuery.is("marked_by", null) : unmarkedQuery.is("marked_at", null);
+    const { data: unmarkedSubmissions } = await unmarkedQuery;
 
     const newDueAt = new Date(parsed.data.due_at);
     for (const submission of unmarkedSubmissions ?? []) {

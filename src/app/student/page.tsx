@@ -19,6 +19,7 @@ import { getBatchName, getDueSoonAssessments, getRecentlyMarked } from "@/lib/st
 import { getStudentCourseReports } from "@/lib/progress-report";
 import { createClient } from "@/lib/supabase/server";
 import { dueDateBadge } from "@/lib/status-badge";
+import { assessmentTypeLabel } from "@/lib/assessment-type";
 
 export default async function StudentDashboard() {
   const profile = await requireStudent();
@@ -98,7 +99,7 @@ export default async function StudentDashboard() {
                           <span className="text-sm text-muted-foreground"> · {assessment.course.title}</span>
                         ) : null}
                       </span>
-                      <Badge variant="secondary">{assessment.type === "assignment" ? "Assignment" : "Test"}</Badge>
+                      <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
                     </span>
                     <span className="flex items-center gap-2 text-sm text-muted-foreground">
                       Due <LocalDateTime iso={assessment.due_at} />
