@@ -1,5 +1,5 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { isCronAuthorized } from "@/lib/cron-auth";
 import { buildDueReminderMessages } from "@/lib/due-reminders";
 import { DUE_REMINDER_WINDOW_MS } from "@/lib/notifications-core";
 import { sendPushToUsers } from "@/lib/push";
@@ -14,20 +14,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * never turned phone notifications on, get nothing.
  */
 
-function isAuthorized(request: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const given = Buffer.from(request.headers.get("authorization") ?? "");
-  const expected = Buffer.from(`Bearer ${secret}`);
-  return given.length === expected.length && timingSafeEqual(given, expected);
-}
-
 export async function POST(request: Request) {
   if (!process.env.CRON_SECRET) {
     console.error("CRON_SECRET is not set; refusing to run due-work reminders.");
     return NextResponse.json({ error: "Not configured" }, { status: 500 });
   }
-  if (!isAuthorized(request)) return NextResponse.json({ error: "Not allowed" }, { status: 401 });
+  if (!isCronAuthorized(request)) return NextResponse.json({ error: "Not allowed" }, { status: 401 });
 
   const admin = createAdminClient();
   const now = new Date();

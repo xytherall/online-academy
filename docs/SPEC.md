@@ -233,7 +233,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
 | `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, all students or one batch. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
 | `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
-| `/admin/settings` | Academy name, logo, tagline, home page intro, About page text, contact details |
+| `/admin/settings` | Academy name, logo, tagline, home page intro, About page text, contact details. Storage: "Clear uploaded files" removes uploaded files of already-marked work only, after a confirmation showing how many files and MB (never automatic; marks, feedback and reports unchanged) |
 | `/admin/notifications` | Admin alerts (opened from the header bell): new applications, new student questions, work handed in after the due date; tap one to open it, "Mark all read". The on/off switch and phone notifications for this admin are on the same page |
 
 ### Business rules
@@ -396,6 +396,7 @@ Exactly one of `file_path` / `url` is set, matching `kind`.
 | `marks` | nullable numeric |
 | `feedback` | nullable |
 | `counts_toward_report` | boolean |
+| `files_cleared_at` | nullable; set when the admin cleared the files of this (marked) submission |
 | `marked_by` | nullable |
 | `marked_at` | nullable |
 
@@ -538,7 +539,7 @@ All fields are nullable.
 
 ### Free-tier notes
 - The Supabase free plan has no automatic backups. Set up a regular database export before launch.
-- Free projects pause after about a week with no database activity. They can be restored from the dashboard.
+- Free projects pause after about a week with no database activity. They can be restored from the dashboard. A keep-alive scheduled function (`netlify/functions/keep-alive.mjs`, Mon/Wed/Fri 06:00 UTC) makes one tiny read through `POST /api/cron/keep-alive` (needs `CRON_SECRET`) so this never happens.
 - Storage is limited to about 1 GB, which is why images are compressed and files size-limited.
 
 ---
@@ -777,7 +778,7 @@ Verified in-browser this session (1440px/375px, light/dark) using `TEST_ADMIN_EM
 - [ ] RLS and permissions review (try to access other students' data and admin routes as a student)
 - [ ] Error pages (404, error boundary)
 - [ ] Database backup procedure
-- [ ] Keep-alive check (free Supabase projects pause after ~1 week with no activity)
+- [x] Keep-alive check (free Supabase projects pause after ~1 week with no activity): `netlify/functions/keep-alive.mjs` → `POST /api/cron/keep-alive`, Mon/Wed/Fri
 - [ ] Production Supabase project set up
 - [ ] Deploy to Netlify with environment variables (including `APPLY_FORM_SECRET`)
 - [ ] Add the ~10 existing students
@@ -878,6 +879,17 @@ Owner request (2026-10-06).
 - [x] Checked against the live database (rolled back): one alert per event for the one admin, none after edits, none for on-time or admin-created rows, students can't read admin alerts
 - [ ] Admin pages checked in the browser (needs an admin sign-in)
 - [ ] Confirm the phone push arrives on an admin's phone once live on HTTPS
+### Stage 22 — Housekeeping (free tier)
+
+Owner request (2026-10-06).
+
+- [x] Keep-alive: Netlify scheduled function (Mon/Wed/Fri 06:00 UTC) calls `POST /api/cron/keep-alive` (`CRON_SECRET`), which reads one row of `site_settings` with the publishable key; checked locally (401 without the secret, 200 with it)
+- [x] Migration `stage22_clear_marked_files`: `submissions.files_cleared_at`, admin-only `marked_submission_files_summary()` and `clear_marked_submission_files()` (empties `file_paths` on marked rows only, in one statement, and returns the paths)
+- [x] Migration applied to the Supabase project (version `20261006103102`)
+- [x] Settings → Storage: "Clear uploaded files" with a confirmation showing the number of files and MB; the files are then deleted from Storage. Student and admin assessment pages say the files were removed
+- [x] Checked against the live database (rolled back): only marked submissions cleared, unmarked files and all marks unchanged, students can call neither function
+- [ ] On Netlify at deploy: check the keep-alive function appears under Functions
+- [ ] Settings page checked in the browser (needs an admin sign-in)
 
 ## 15. Decision log
 

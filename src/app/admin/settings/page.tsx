@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
+import { ClearFilesCard } from "./clear-files-card";
 import { LogoUploader } from "./logo-uploader";
 import { SettingsForm } from "./settings-form";
 
@@ -8,11 +9,10 @@ export const metadata: Metadata = { title: "Settings" };
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient();
-  const { data: settings, error } = await supabase
-    .from("site_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
+  const [{ data: settings, error }, { data: filesSummary, error: filesSummaryError }] = await Promise.all([
+    supabase.from("site_settings").select("*").eq("id", 1).maybeSingle(),
+    supabase.rpc("marked_submission_files_summary").single(),
+  ]);
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -33,6 +33,14 @@ export default async function AdminSettingsPage() {
           <SettingsForm settings={settings} />
         </>
       )}
+
+      <ClearFilesCard
+        summary={
+          filesSummaryError || !filesSummary
+            ? null
+            : { fileCount: filesSummary.file_count, totalBytes: filesSummary.total_bytes }
+        }
+      />
     </div>
   );
 }
