@@ -879,6 +879,7 @@ Owner request (2026-10-06).
 - [x] Checked against the live database (rolled back): one alert per event for the one admin, none after edits, none for on-time or admin-created rows, students can't read admin alerts
 - [ ] Admin pages checked in the browser (needs an admin sign-in)
 - [ ] Confirm the phone push arrives on an admin's phone once live on HTTPS
+
 ### Stage 22 — Housekeeping (free tier)
 
 Owner request (2026-10-06).
