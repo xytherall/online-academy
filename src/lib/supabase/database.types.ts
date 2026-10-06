@@ -486,6 +486,7 @@ export type Database = {
       notifications: {
         Row: {
           announcement_id: string | null
+          application_id: string | null
           assessment_id: string | null
           body: string | null
           created_at: string
@@ -494,11 +495,13 @@ export type Database = {
           live_class_id: string | null
           question_id: string | null
           read_at: string | null
+          submission_id: string | null
           title: string
           user_id: string
         }
         Insert: {
           announcement_id?: string | null
+          application_id?: string | null
           assessment_id?: string | null
           body?: string | null
           created_at?: string
@@ -507,11 +510,13 @@ export type Database = {
           live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
+          submission_id?: string | null
           title: string
           user_id: string
         }
         Update: {
           announcement_id?: string | null
+          application_id?: string | null
           assessment_id?: string | null
           body?: string | null
           created_at?: string
@@ -520,6 +525,7 @@ export type Database = {
           live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
+          submission_id?: string | null
           title?: string
           user_id?: string
         }
@@ -529,6 +535,13 @@ export type Database = {
             columns: ["announcement_id"]
             isOneToOne: false
             referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
           {
@@ -550,6 +563,13 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
           {
@@ -865,6 +885,7 @@ export type Database = {
           created_at: string
           feedback: string | null
           file_paths: string[]
+          files_cleared_at: string | null
           id: string
           is_late: boolean
           marked_at: string | null
@@ -881,6 +902,7 @@ export type Database = {
           created_at?: string
           feedback?: string | null
           file_paths?: string[]
+          files_cleared_at?: string | null
           id?: string
           is_late?: boolean
           marked_at?: string | null
@@ -897,6 +919,7 @@ export type Database = {
           created_at?: string
           feedback?: string | null
           file_paths?: string[]
+          files_cleared_at?: string | null
           id?: string
           is_late?: boolean
           marked_at?: string | null
@@ -936,6 +959,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clear_marked_submission_files: { Args: never; Returns: string[] }
       complete_password_change: { Args: never; Returns: undefined }
       get_quiz_questions: {
         Args: { p_assessment_id: string }
@@ -948,6 +972,13 @@ export type Database = {
       get_quiz_result: { Args: { p_assessment_id: string }; Returns: Json }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      marked_submission_files_summary: {
+        Args: never
+        Returns: {
+          file_count: number
+          total_bytes: number
+        }[]
+      }
       move_faq: {
         Args: { p_direction: string; p_faq_id: string }
         Returns: undefined
@@ -985,6 +1016,7 @@ export type Database = {
           created_at: string
           feedback: string | null
           file_paths: string[]
+          files_cleared_at: string | null
           id: string
           is_late: boolean
           marked_at: string | null
@@ -1023,6 +1055,9 @@ export type Database = {
         | "marks"
         | "answer"
         | "live_class"
+        | "new_application"
+        | "new_question"
+        | "late_submission"
         | "quiz"
       question_status: "waiting" | "answered" | "closed"
       resource_kind: "file" | "link"
@@ -1173,6 +1208,9 @@ export const Constants = {
         "marks",
         "answer",
         "live_class",
+        "new_application",
+        "new_question",
+        "late_submission",
         "quiz",
       ],
       question_status: ["waiting", "answered", "closed"],

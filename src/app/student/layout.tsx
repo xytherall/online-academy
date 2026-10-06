@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PortalShell } from "@/components/portal/portal-shell";
-import { NotificationBell } from "@/components/student/notification-bell";
+import { NotificationBell } from "@/components/portal/notification-bell";
 import { StudentMobileNav } from "@/components/student/student-mobile-nav";
 import { StudentSidebar } from "@/components/student/student-sidebar";
 import { countUnreadAnnouncements } from "@/lib/announcements";
@@ -34,7 +34,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <PortalShell
-      headerActions={<NotificationBell initialCount={bellCount} />}
+      headerActions={<NotificationBell initialCount={bellCount} href="/student/notifications" countUrl="/student/notifications/count" />}
       mobileNav={<StudentMobileNav unreadAnnouncements={unreadAnnouncements} />}
       sidebar={<StudentSidebar unreadAnnouncements={unreadAnnouncements} />}
       userLabel="Portal"

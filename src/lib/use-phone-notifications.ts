@@ -6,7 +6,7 @@ import {
   hasPushSubscription,
   removePushSubscription,
   savePushSubscription,
-} from "@/app/student/notifications/actions";
+} from "@/lib/notification-actions";
 
 /**
  * Phone notifications (Web Push) for this device: detects whether they're

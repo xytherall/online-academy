@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { NotificationBell } from "@/components/portal/notification-bell";
 import { PortalShell } from "@/components/portal/portal-shell";
 import { getPendingApplicationCount } from "@/lib/applications";
 import { requireAdmin } from "@/lib/auth";
 import { displayName } from "@/lib/display-name";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { getAdminBellCount } from "@/lib/notifications";
 import { getWaitingQuestionCount } from "@/lib/questions";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { createClient } from "@/lib/supabase/server";
@@ -27,14 +29,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const profile = await requireAdmin();
 
   const supabase = await createClient();
-  const [pendingApplications, waitingQuestions] = await Promise.all([
+  const [pendingApplications, waitingQuestions, bellCount] = await Promise.all([
     getPendingApplicationCount(supabase),
     getWaitingQuestionCount(supabase),
+    getAdminBellCount(supabase, profile.id),
   ]);
   const counts = { pendingApplications, waitingQuestions };
 
   return (
     <PortalShell
+      headerActions={<NotificationBell initialCount={bellCount} href="/admin/notifications" countUrl="/admin/notifications/count" />}
       mobileNav={<AdminMobileNav counts={counts} />}
       sidebar={<AdminSidebar counts={counts} />}
       userLabel="Admin"

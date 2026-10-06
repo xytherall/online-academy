@@ -115,6 +115,10 @@ export default async function StudentAssessmentPage({ params }: { params: Promis
                   </li>
                 ))}
               </ul>
+            ) : submission.files_cleared_at ? (
+              <p className="text-sm text-muted-foreground">
+                Your files were removed after marking to free up space. Your marks and feedback are kept.
+              </p>
             ) : null}
           </CardContent>
         </Card>

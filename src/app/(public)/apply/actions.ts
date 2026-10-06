@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { verifyApplyToken } from "@/lib/apply-token";
+import { pushAdminAlerts } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { applicationSchema } from "@/lib/validation/applications";
 import { HONEYPOT_FIELD } from "./honeypot";
@@ -106,6 +107,10 @@ export async function submitApplication(
     if (error.code === "23514") return { error: COURSE_MISMATCH_ERROR };
     return { error: GENERIC_ERROR };
   }
+
+  // The insert trigger already created the admins' bell alerts; this sends
+  // their phone version after the response.
+  pushAdminAlerts({ applicationEmail: data.email });
 
   revalidatePath("/admin/applications");
   revalidatePath("/admin");
