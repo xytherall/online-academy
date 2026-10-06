@@ -9,9 +9,9 @@ import { formatUnreadBadge } from "@/lib/announcements-unread";
 import { NOTIFICATIONS_CHANGED_EVENT } from "@/lib/notifications-core";
 import { cn } from "@/lib/utils";
 
-async function fetchBellCount(): Promise<number | null> {
+async function fetchBellCount(countUrl: string): Promise<number | null> {
   try {
-    const response = await fetch("/student/notifications/count", { cache: "no-store" });
+    const response = await fetch(countUrl, { cache: "no-store" });
     if (!response.ok) return null;
     const data: unknown = await response.json();
     if (data && typeof data === "object" && "count" in data && typeof data.count === "number") return data.count;
@@ -24,15 +24,25 @@ async function fetchBellCount(): Promise<number | null> {
 }
 
 /**
- * Header bell for the student portal: unread notifications plus live
- * due-work reminders, or 0 while notifications are off.
+ * Header bell for the portal. Students: unread notifications plus live
+ * due-work reminders. Admins: unread alerts. 0 while notifications are off.
  *
- * The first count comes from StudentLayout, but a layout is not re-rendered
+ * The first count comes from the layout, but a layout is not re-rendered
  * on client-side navigation, so on its own it would go stale. The bell
  * therefore re-fetches its count whenever the page changes, when the tab
  * regains focus, and when a notification is marked read.
  */
-export function NotificationBell({ initialCount }: { initialCount: number }) {
+export function NotificationBell({
+  initialCount,
+  href,
+  countUrl,
+}: {
+  initialCount: number;
+  /** The notifications page. */
+  href: string;
+  /** Returns `{ count }` for the signed-in user. */
+  countUrl: string;
+}) {
   const pathname = usePathname();
   const [count, setCount] = useState(initialCount);
   const [prevInitialCount, setPrevInitialCount] = useState(initialCount);
@@ -46,7 +56,7 @@ export function NotificationBell({ initialCount }: { initialCount: number }) {
   useEffect(() => {
     let cancelled = false;
     const update = () => {
-      void fetchBellCount().then((next) => {
+      void fetchBellCount(countUrl).then((next) => {
         if (!cancelled && next !== null) setCount(next);
       });
     };
@@ -63,13 +73,13 @@ export function NotificationBell({ initialCount }: { initialCount: number }) {
       window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, update);
     };
     // Re-run on every page change, since the layout holding the bell is not re-rendered.
-  }, [pathname]);
+  }, [pathname, countUrl]);
 
   const label = count > 0 ? `Notifications, ${count} new` : "Notifications";
 
   return (
     <Link
-      href="/student/notifications"
+      href={href}
       aria-label={label}
       className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative rounded-full")}
     >

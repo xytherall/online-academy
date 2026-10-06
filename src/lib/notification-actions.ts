@@ -3,23 +3,28 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireStudent } from "@/lib/auth";
+import { dashboardPathFor, requirePortalUser, type Profile } from "@/lib/auth";
 import { notificationHref } from "@/lib/notifications-core";
 import { createClient } from "@/lib/supabase/server";
 import { pushEndpointSchema, pushSubscriptionSchema } from "@/lib/validation/push";
 
 export type NotificationActionResult = { error: string | null };
 
+/** Notifications, the bell and phone notifications work the same for students and admins (own rows only, RLS). */
+function revalidatePortal(profile: Profile) {
+  revalidatePath(dashboardPathFor(profile.role) ?? "/", "layout");
+}
+
 const notificationIdSchema = z.uuid();
 const preferenceSchema = z.boolean();
 
 /**
  * Marks one notification read and opens the page it's about. The target is
- * worked out from the stored row (RLS: the student's own rows only), never
+ * worked out from the stored row (RLS: the user's own rows only), never
  * from anything the client sends.
  */
 export async function openNotification(notificationId: string): Promise<NotificationActionResult> {
-  const profile = await requireStudent();
+  const profile = await requirePortalUser();
 
   const parsed = notificationIdSchema.safeParse(notificationId);
   if (!parsed.success) return { error: "Notification not found." };
@@ -27,7 +32,7 @@ export async function openNotification(notificationId: string): Promise<Notifica
   const supabase = await createClient();
   const { data: notification, error } = await supabase
     .from("notifications")
-    .select("id, kind, assessment_id, question_id, read_at")
+    .select("id, kind, assessment_id, question_id, application_id, read_at")
     .eq("id", parsed.data)
     .eq("user_id", profile.id)
     .maybeSingle();
@@ -43,12 +48,12 @@ export async function openNotification(notificationId: string): Promise<Notifica
     if (updateError) return { error: "Could not open the notification. Please try again." };
   }
 
-  revalidatePath("/student", "layout");
+  revalidatePortal(profile);
   redirect(notificationHref(notification));
 }
 
 export async function markAllNotificationsRead(): Promise<NotificationActionResult> {
-  const profile = await requireStudent();
+  const profile = await requirePortalUser();
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -59,16 +64,16 @@ export async function markAllNotificationsRead(): Promise<NotificationActionResu
 
   if (error) return { error: "Could not mark notifications as read. Please try again." };
 
-  revalidatePath("/student", "layout");
+  revalidatePortal(profile);
   return { error: null };
 }
 
 /**
- * Turning notifications off stops new ones being created for this student
- * (the notify_* SQL functions skip them) and hides the bell badge.
+ * Turning notifications off stops new ones being created for this user
+ * (the notify_* SQL functions and admin alert triggers skip them) and hides the bell badge.
  */
 export async function setNotificationsEnabled(enabled: boolean): Promise<NotificationActionResult> {
-  const profile = await requireStudent();
+  const profile = await requirePortalUser();
 
   const parsed = preferenceSchema.safeParse(enabled);
   if (!parsed.success) return { error: "Please try again." };
@@ -80,17 +85,17 @@ export async function setNotificationsEnabled(enabled: boolean): Promise<Notific
 
   if (error) return { error: "Could not save your setting. Please try again." };
 
-  revalidatePath("/student", "layout");
+  revalidatePortal(profile);
   return { error: null };
 }
 
 /**
  * Saves this phone/browser so it gets phone notifications. Goes through
  * save_push_subscription(), which re-checks the caller is an active student
- * and takes the row over if another student used this browser before.
+ * or admin and takes the row over if someone else used this browser before.
  */
 export async function savePushSubscription(subscription: unknown): Promise<NotificationActionResult> {
-  await requireStudent();
+  await requirePortalUser();
 
   const parsed = pushSubscriptionSchema.safeParse(subscription);
   if (!parsed.success) return { error: "This browser gave an invalid subscription. Please try again." };
@@ -108,7 +113,7 @@ export async function savePushSubscription(subscription: unknown): Promise<Notif
 
 /** Stops phone notifications on this phone/browser (RLS: own rows only). */
 export async function removePushSubscription(endpoint: string): Promise<NotificationActionResult> {
-  const profile = await requireStudent();
+  const profile = await requirePortalUser();
 
   const parsed = pushEndpointSchema.safeParse(endpoint);
   if (!parsed.success) return { error: null };
@@ -124,9 +129,9 @@ export async function removePushSubscription(endpoint: string): Promise<Notifica
   return { error: null };
 }
 
-/** Whether this browser's subscription is saved for the signed-in student. */
+/** Whether this browser's subscription is saved for the signed-in user. */
 export async function hasPushSubscription(endpoint: string): Promise<boolean> {
-  const profile = await requireStudent();
+  const profile = await requirePortalUser();
   const parsed = pushEndpointSchema.safeParse(endpoint);
   if (!parsed.success) return false;
 

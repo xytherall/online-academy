@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireStudent } from "@/lib/auth";
+import { pushAdminAlerts } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { MAX_SUBMISSION_FILES } from "@/lib/validation/submissions";
 
@@ -21,7 +22,7 @@ export async function submitAssignment(
     return { error: "Invalid file selection. Please try again." };
   }
 
-  const { error } = await supabase.rpc("submit_assignment", {
+  const { data: submission, error } = await supabase.rpc("submit_assignment", {
     p_assessment_id: assessmentId,
     p_file_paths: filePaths,
   });
@@ -34,6 +35,10 @@ export async function submitAssignment(
     await supabase.storage.from("submissions").remove(filePaths);
     return { error: error.message || "Could not submit. Please try again." };
   }
+
+  // A late hand-in has already alerted the admins (insert trigger); this
+  // sends the phone version.
+  if (submission.is_late) pushAdminAlerts({ submissionId: submission.id });
 
   revalidatePath(`/student/assessments/${assessmentId}`);
   return { error: null };

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BellIcon, BellOffIcon, CalendarClockIcon } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { MarkAllReadButton, NotificationList } from "@/components/portal/notification-list";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,6 @@ import { requireStudent } from "@/lib/auth";
 import { getDueReminders, getNotificationsEnabled, getRecentNotifications } from "@/lib/notifications";
 import { dueDateBadge } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
-import { MarkAllReadButton, NotificationList } from "./notification-list";
 
 export const metadata: Metadata = { title: "Notifications" };
 

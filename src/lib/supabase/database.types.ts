@@ -486,6 +486,7 @@ export type Database = {
       notifications: {
         Row: {
           announcement_id: string | null
+          application_id: string | null
           assessment_id: string | null
           body: string | null
           created_at: string
@@ -494,11 +495,13 @@ export type Database = {
           live_class_id: string | null
           question_id: string | null
           read_at: string | null
+          submission_id: string | null
           title: string
           user_id: string
         }
         Insert: {
           announcement_id?: string | null
+          application_id?: string | null
           assessment_id?: string | null
           body?: string | null
           created_at?: string
@@ -507,11 +510,13 @@ export type Database = {
           live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
+          submission_id?: string | null
           title: string
           user_id: string
         }
         Update: {
           announcement_id?: string | null
+          application_id?: string | null
           assessment_id?: string | null
           body?: string | null
           created_at?: string
@@ -520,6 +525,7 @@ export type Database = {
           live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
+          submission_id?: string | null
           title?: string
           user_id?: string
         }
@@ -529,6 +535,13 @@ export type Database = {
             columns: ["announcement_id"]
             isOneToOne: false
             referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
           {
@@ -550,6 +563,13 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
           {
@@ -964,6 +984,9 @@ export type Database = {
         | "marks"
         | "answer"
         | "live_class"
+        | "new_application"
+        | "new_question"
+        | "late_submission"
       question_status: "waiting" | "answered" | "closed"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
@@ -1113,6 +1136,9 @@ export const Constants = {
         "marks",
         "answer",
         "live_class",
+        "new_application",
+        "new_question",
+        "late_submission",
       ],
       question_status: ["waiting", "answered", "closed"],
       resource_kind: ["file", "link"],

@@ -22,11 +22,21 @@ export function isDueForReminder(dueAtIso: string, now: Date = new Date()): bool
 
 /**
  * Where tapping a notification goes. Built only from the row's own ids, never
- * from a stored URL, so it can only ever point inside the student portal.
+ * from a stored URL, so it can only ever point inside the portal. The admin
+ * alert kinds go to the admin area; every other kind is a student's.
  */
 export function notificationHref(
-  notification: Pick<Tables<"notifications">, "kind" | "assessment_id" | "question_id">,
+  notification: Pick<Tables<"notifications">, "kind" | "assessment_id" | "question_id" | "application_id">,
 ): string {
+  if (notification.kind === "new_application") {
+    return notification.application_id ? `/admin/applications/${notification.application_id}` : "/admin/applications";
+  }
+  if (notification.kind === "new_question") {
+    return notification.question_id ? `/admin/questions/${notification.question_id}` : "/admin/questions";
+  }
+  if (notification.kind === "late_submission") {
+    return notification.assessment_id ? `/admin/assessments/${notification.assessment_id}` : "/admin/marking";
+  }
   if (notification.kind === "answer") {
     return notification.question_id ? `/student/questions/${notification.question_id}` : "/student/questions";
   }

@@ -234,6 +234,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, all students or one batch. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
 | `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
 | `/admin/settings` | Academy name, logo, tagline, home page intro, About page text, contact details |
+| `/admin/notifications` | Admin alerts (opened from the header bell): new applications, new student questions, work handed in after the due date; tap one to open it, "Mark all read". The on/off switch and phone notifications for this admin are on the same page |
 
 ### Business rules
 
@@ -413,16 +414,18 @@ Unique on (`assessment_id`, `student_id`).
 At most one of `course_id` / `batch_id` is set; both null means everyone.
 
 ### `notifications`
-Student notifications. Created only by the admin-only `notify_new_assessment` / `notify_new_announcement` / `notify_marks` SQL functions, which work out the recipients themselves.
+Student notifications and admin alerts. Student ones are created only by the admin-only `notify_*` SQL functions; admin alerts only by `AFTER INSERT` triggers on `applications`, `questions` and `submissions` (late, student-submitted only). Both work out the recipients themselves.
 
 | Field | Notes |
 |---|---|
 | `user_id` | FK → `profiles` (cascade) |
-| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` / `live_class` |
+| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` / `live_class` (students); `new_application` / `new_question` / `late_submission` (admins) |
 | `title` | |
 | `body` | nullable (course title) |
 | `assessment_id` | nullable, FK → `assessments` (cascade) |
 | `announcement_id` | nullable, FK → `announcements` (cascade) |
+| `application_id` | nullable, FK → `applications` (cascade) |
+| `submission_id` | nullable, FK → `submissions` (cascade); a late-submission alert also keeps `assessment_id` |
 | `read_at` | nullable |
 
 Exactly one of `assessment_id` / `announcement_id` is set. RLS: a student can read their own rows and update only `read_at` on them; no insert/delete.
@@ -445,7 +448,7 @@ One row per phone/browser that turned on phone notifications.
 | `endpoint` | unique, https |
 | `p256dh`, `auth` | the browser's push keys |
 
-RLS: a user can read and delete only their own rows. Rows are saved only through `save_push_subscription()` (active students only; takes the row over if another student used the same browser). Sending uses the secret key on the server.
+RLS: a user can read and delete only their own rows. Rows are saved only through `save_push_subscription()` (active students and admins; takes the row over if someone else used the same browser). Sending uses the secret key on the server.
 
 ### `questions`
 "Ask the teacher". One answer per question, no back-and-forth.
@@ -863,6 +866,18 @@ Owner decision (2026-10-04, "option 1").
 - [x] Admin pages checked in the browser (owner)
 - [x] Owner request: no Saudi time. The admin enters the time in their own time zone (like due dates) and the admin list shows local time; the notification shows no time at all, just "New live class: <title>" (owner decision); migration `stage19b_live_class_local_time` stores no body, and the time is shown only on the dashboard card, in the student's own time zone
 - [x] Migration `stage19b` applied to the Supabase project (version `20261004213214`)
+### Stage 21 — Admin alerts
+
+Owner request (2026-10-06).
+
+- [x] Migration `stage21_admin_alerts`: `new_application` / `new_question` / `late_submission` kinds, `notifications.application_id` + `submission_id`, `AFTER INSERT` triggers that alert every active admin with notifications on, `save_push_subscription()` accepts admins
+- [x] Migration applied to the Supabase project (version `20261006102132`)
+- [x] One alert per event: inserts only, so reviewing, answering, marking or a due-date change never re-notifies; admin-created submission rows (marks without an upload) and on-time hand-ins never alert
+- [x] Admin header bell (unread count) and `/admin/notifications` with the on/off switch and phone notifications
+- [x] Phone push for each alert, sent after the response by the apply / ask / submit actions for the row they just inserted
+- [x] Checked against the live database (rolled back): one alert per event for the one admin, none after edits, none for on-time or admin-created rows, students can't read admin alerts
+- [ ] Admin pages checked in the browser (needs an admin sign-in)
+- [ ] Confirm the phone push arrives on an admin's phone once live on HTTPS
 
 ## 15. Decision log
 

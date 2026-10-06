@@ -55,6 +55,6 @@ describe("liveClassSchema", () => {
 
 describe("notificationHref", () => {
   it("opens the dashboard for a new live class", () => {
-    expect(notificationHref({ kind: "live_class", assessment_id: null, question_id: null })).toBe("/student");
+    expect(notificationHref({ kind: "live_class", assessment_id: null, question_id: null, application_id: null })).toBe("/student");
   });
 });
