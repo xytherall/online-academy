@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/dialog";
 import { clearMarkedSubmissionFiles } from "./storage-actions";
 
-function formatMegabytes(bytes: number): string {
+/** KB below 1 MB (small test files would otherwise show as "0.0 MB"), then MB. */
+function formatSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   const mb = bytes / (1024 * 1024);
   return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
 }
@@ -63,7 +65,7 @@ export function ClearFilesCard({ summary }: { summary: { fileCount: number; tota
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              Marked work currently has {filesLabel(summary.fileCount)} ({formatMegabytes(summary.totalBytes)}).
+              Marked work currently has {filesLabel(summary.fileCount)} ({formatSize(summary.totalBytes)}).
             </p>
             <Dialog
               open={open}
@@ -77,7 +79,7 @@ export function ClearFilesCard({ summary }: { summary: { fileCount: number; tota
                 <DialogHeader>
                   <DialogTitle>Remove {filesLabel(summary.fileCount)}?</DialogTitle>
                   <DialogDescription>
-                    This permanently deletes {filesLabel(summary.fileCount)} ({formatMegabytes(summary.totalBytes)})
+                    This permanently deletes {filesLabel(summary.fileCount)} ({formatSize(summary.totalBytes)})
                     uploaded for work that has already been marked. Students and admins will no longer be able to
                     open them. Marks and feedback are kept. This cannot be undone.
                   </DialogDescription>
