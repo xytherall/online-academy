@@ -87,7 +87,7 @@ Suggested length: 20 to 25 minutes, then questions. Lines in *italics* are thing
 ### Part 3: Admin handles the application (3 minutes), window A as admin
 
 7. **Admin overview** `/admin`. *"Real counts only: pending applications, work waiting to be marked, active students."* Point out the bell: new applications, questions and late work create an alert.
-8. **Applications** → open **Usman Tariq** (a demo applicant). Show **Accept**: choose a batch and a temporary password. *"Accepting creates the account, copies the details, enrols them in the courses they chose, and they must set their own password on first login. You share the login on WhatsApp."* You can accept it: the email ends `@demo.test`, so the reset removes the account afterwards.
+8. **Applications** → open **Usman Tariq** (a demo applicant). Show **Accept**: choose a batch and a temporary password. *"Accepting creates the account, copies the details, enrols them in the courses they chose, and they must set their own password on first login. You share the login on WhatsApp."* You can accept it: the email ends `@demo.test`, so the reset removes the account afterwards. Click **Generate** for the password, then **Accept and create account**. The page shows a ready-made login message with a **Copy** button for WhatsApp. (Until the site is live, the link in that message says `localhost`; it will show the real address once deployed.)
 
 ### Part 4: The student's portal (6 minutes), window B as `fatima@demo.test`
 
