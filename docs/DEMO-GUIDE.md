@@ -28,12 +28,15 @@ What the seed creates:
 
 | Thing | Details |
 |---|---|
-| 5 demo students | Ayesha, Hamza, Zainab (O Level Maths, evening batch); Bilal, Fatima (A Level Physics + Maths, weekend batch) |
-| Assignments and tests | Marked, submitted, late and missing work, so the statuses and report have something real to show |
-| 2 quizzes | "Quick Quiz: Percentages" (already answered by Ayesha and Hamza); "Quick Quiz: Differentiation Rules" (not answered yet, so you can take it live as Fatima or Bilal) |
+| 8 demo students | O Level Maths, evening batch: Ayesha, Hamza, Zainab (Pakistan), Omar (Saudi Arabia), Daniyal (UK). A Level Physics + Maths, weekend batch: Bilal, Fatima (Pakistan), Maryam (UAE) |
+| Assignments and tests | Marked, submitted, late and missing work, so the statuses and report have something real to show. Every student has a teacher assessment on their report |
+| 3 quizzes | "Quick Quiz: Percentages" (already answered, so you can show a result); "Quick Quiz: Angles and Polygons" (O Level, open, take it live as Ayesha); "Quick Quiz: Differentiation Rules" (A Level, open, take it live as Fatima) |
 | 4 live classes | One starting about 2 hours after you run the seed, two in the next couple of days, one in the past |
 | Ask the teacher | Two answered questions and one waiting (from Hamza) for you to answer live |
-| 3 announcements, 4 link resources, 2 pending applications | |
+| Notifications | Every student's bell has new work, new quiz, marks, announcements, live classes (older ones already read). The admin bell has new applications, a new question and late hand-ins |
+| 4 announcements, 4 link resources, 2 pending applications | |
+
+Good students to show: **Ayesha** (strong O Level student), **Daniyal** (struggling, with missing work, to show how the report flags it), **Fatima** (A Level, two subjects).
 
 Demo logins: every demo student signs in with their first name `@demo.test` (for example `fatima@demo.test`). The shared demo password is `DEMO_PASSWORD` in `scripts/demo-data.mjs`. Your own admin login is used for the admin part.
 
@@ -52,17 +55,13 @@ Open `http://localhost:3000`. Click through the home page and log in once as adm
 
 This lets you switch between "teacher" and "student" without logging out. If you show it on a phone, use the student side there: most students will use phones.
 
-### 1.4 Fix these before showing (data only, no code)
+### 1.4 Optional: things the owner might ask about
 
-These are in the live database and will be seen during the demo. I did not change them, because they are your entries. Each is a few clicks in the admin area.
+The random-named test items ("iii", "djvnd", "ejfnejhd cjjcdjc") were deleted on 2026-10-11. Everything else is left as it is. A few things they may notice, and an easy answer for each:
 
-1. **Settings → contact details** still show `contact@example.com` and `+92 300 1234567`. Put in real ones or clear them (empty fields are hidden).
-2. **Settings → Home page intro** is "JOIN NOW!". Either write one or two real sentences, or clear it.
-3. **Courses** are titled "O levels Maths", "A levels physics", "A levels maths". Suggest "O Level Mathematics", "A Level Physics", "A Level Mathematics".
-4. **Old test items in O Level Maths** visible to every student in that course: the quizzes "iii" and "djvnd" and the test "ejfnejhd cjjcdjc". They show as overdue on the dashboard. None of them has any submissions now, so they can be deleted from the course page.
-5. **Applications**: an old pending one for "Ayesha Khan" with `test-student@example.com`. Reject it.
-6. **FAQ** (Admin → FAQ): two answers make claims I can't verify: a free trial class, and students from Pakistan, Saudi Arabia, the UAE, the UK, the US and Canada. Keep them only if the academy confirms they are true.
-7. **Resources**: "Cover image" on one of the courses looks like a leftover upload.
+- **Contact details** (`contact@example.com`, `+92 300 1234567`) and the home page intro are placeholders. *"These are filled in from Settings once we have your real details."*
+- **Course names** ("O levels Maths" and so on) can be renamed from Admin → Courses at any time.
+- **FAQ answers** mention a free trial class and students from six countries. *"These are examples; you tell me what's true and I'll change them."*
 
 ---
 
@@ -115,6 +114,7 @@ Suggested length: 20 to 25 minutes, then questions. Lines in *italics* are thing
 20. **Announcements** → show targeting: everyone, one course, or one batch.
 21. **Students** → open **Ayesha Khan**. Details, guardian info, batch, courses, teacher assessment (effort, participation, strengths, areas to improve), then **Progress report → Print / Save as PDF**.
     *"This is the report you'd send a parent. It prints cleanly on A4."*
+    Then open **Daniyal Shah**'s report for contrast: lower scores, missing homework and a teacher comment. *"It makes it obvious who needs attention."*
 22. **Batches** and **Courses**: briefly. *"Batches are groups like country or timing. Courses hold resources and assessments; you add quizzes by pasting questions."*
 23. **Settings**: show that the name, tagline, About text and contact details are editable. **Don't save changes unless you mean them.**
 
