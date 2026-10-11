@@ -1,7 +1,9 @@
 // Fills the database with clearly-labelled demo data for presenting the app:
 // demo students (emails ending @demo.test), two batches, assessments with a
-// mix of marked / submitted / late / missing work, announcements, a few link
-// resources and two pending applications. Existing courses are reused and
+// mix of marked / submitted / late / missing work, two quizzes, live classes,
+// "Ask the teacher" questions, a few notifications, announcements, a few link
+// resources and two pending applications. Due dates and class times are set
+// relative to today, so re-run it (cleanup first) shortly before a demo. Existing courses are reused and
 // nothing that already exists is modified.
 //
 // Run:    node --env-file=.env.local scripts/seed-demo.mjs
@@ -30,7 +32,8 @@ if ((await listDemoUsers(sb)).length) {
 
 // --- Existing courses and admin -------------------------------------------
 
-const courses = check(await sb.from("courses").select("id, slug"), "load courses");
+const courses = check(await sb.from("courses").select("id, slug, title"), "load courses");
+const courseTitle = (id) => courses.find((c) => c.id === id).title;
 const courseId = (slug) => {
   const c = courses.find((x) => x.slug === slug);
   if (!c) throw new Error(`Course "${slug}" not found`);
@@ -70,6 +73,9 @@ const STUDENTS = [
   { key: "zainab", name: "Zainab Raza", batch: batchO, courses: [oMaths], school: "Lahore Grammar School", guardian: "Nadia Raza" },
   { key: "bilal", name: "Bilal Ahmed", batch: batchA, courses: [aPhysics, aMaths], school: "Roots International", guardian: "Tariq Ahmed" },
   { key: "fatima", name: "Fatima Noor", batch: batchA, courses: [aPhysics, aMaths], school: "Karachi Grammar School", guardian: "Rehana Noor" },
+  { key: "omar", name: "Omar Siddiqui", batch: batchO, courses: [oMaths], school: "Pakistan International School Jeddah", guardian: "Kamran Siddiqui", country: "Saudi Arabia", code: "+966 50" },
+  { key: "daniyal", name: "Daniyal Shah", batch: batchO, courses: [oMaths], school: "Manchester Grammar School", guardian: "Asma Shah", country: "United Kingdom", code: "+44 7700" },
+  { key: "maryam", name: "Maryam Iqbal", batch: batchA, courses: [aPhysics, aMaths], school: "Delhi Private School Dubai", guardian: "Javed Iqbal", country: "United Arab Emirates", code: "+971 50" },
 ];
 
 const studentId = {};
@@ -91,12 +97,12 @@ for (const [i, s] of STUDENTS.entries()) {
       .update({
         full_name: s.name,
         batch_id: s.batch,
-        phone: `+92 300 000000${i}`,
-        whatsapp: `+92 300 000000${i}`,
-        country: "Pakistan",
+        phone: `${s.code ?? "+92 300"} 000000${i}`,
+        whatsapp: `${s.code ?? "+92 300"} 000000${i}`,
+        country: s.country ?? "Pakistan",
         school: s.school,
         guardian_name: s.guardian,
-        guardian_phone: `+92 321 000000${i}`,
+        guardian_phone: `${s.code ?? "+92 321"} 100000${i}`,
       })
       .eq("id", id),
     `update profile ${email}`,
@@ -113,6 +119,13 @@ const TEACHER_NOTES = [
   { key: "hamza", course: oMaths, effort_rating: "satisfactory", participation_rating: "good", strengths: "Asks good questions in class.", areas_to_improve: "Hand homework in on time." },
   { key: "fatima", course: aPhysics, effort_rating: "excellent", participation_rating: "excellent", strengths: "Strong grasp of mechanics.", areas_to_improve: "Check units in final answers." },
   { key: "bilal", course: aMaths, effort_rating: "good", participation_rating: "satisfactory", strengths: "Quick with differentiation rules.", areas_to_improve: "Submit work before the deadline." },
+  { key: "bilal", course: aPhysics, effort_rating: "good", participation_rating: "good", strengths: "Good at setting up force diagrams.", areas_to_improve: "Revise projectile motion." },
+  { key: "fatima", course: aMaths, effort_rating: "excellent", participation_rating: "good", strengths: "Neat, accurate working.", areas_to_improve: "Attempt the harder extension questions.", remarks: "On track for a top grade." },
+  { key: "zainab", course: oMaths, effort_rating: "good", participation_rating: "satisfactory", strengths: "Strong in number work.", areas_to_improve: "Submit homework by the deadline so it counts.", remarks: "Capable of more. Late work is holding her score back." },
+  { key: "omar", course: oMaths, effort_rating: "good", participation_rating: "excellent", strengths: "Confident with algebra and explains his answers well.", areas_to_improve: "Accuracy with angle facts." },
+  { key: "daniyal", course: oMaths, effort_rating: "needs_improvement", participation_rating: "satisfactory", strengths: "Understands new topics quickly in class.", areas_to_improve: "Complete every homework; two pieces are missing.", remarks: "We will catch up on the missing work together." },
+  { key: "maryam", course: aPhysics, effort_rating: "excellent", participation_rating: "good", strengths: "Careful, well-explained solutions.", areas_to_improve: "Speed in timed tests." },
+  { key: "maryam", course: aMaths, effort_rating: "good", participation_rating: "good", strengths: "Solid differentiation.", areas_to_improve: "Practise integration techniques." },
 ];
 for (const { key, course, ...fields } of TEACHER_NOTES) {
   check(
@@ -130,22 +143,22 @@ const ASSESSMENTS = [
   {
     course: oMaths, batch: batchO, type: "assignment", title: "Algebra: Linear Equations", due: -21, total: 20,
     instructions: "Solve questions 1–15 from the worksheet. Show all working.",
-    work: { ayesha: ["on", 18, "Excellent work."], hamza: ["on", 14, "Good, check your signs in Q9."], zainab: ["late", 12, "Mostly correct but submitted late."] },
+    work: { ayesha: ["on", 18, "Excellent work."], hamza: ["on", 14, "Good, check your signs in Q9."], zainab: ["late", 12, "Mostly correct but submitted late."], omar: ["on", 17, "Very good."], daniyal: ["on", 11, "Revise how to rearrange equations."] },
   },
   {
     course: oMaths, batch: batchO, type: "test", title: "Test 1: Algebra and Number", due: -14, total: 50,
     instructions: "Timed test in class (45 minutes).",
-    work: { ayesha: ["test", 44], hamza: ["test", 31], zainab: ["test", 38] },
+    work: { ayesha: ["test", 44], hamza: ["test", 31], zainab: ["test", 38], omar: ["test", 40], daniyal: ["test", 27] },
   },
   {
     course: oMaths, batch: batchO, type: "assignment", title: "Geometry: Angles and Polygons", due: -7, total: 20,
     instructions: "Complete exercise 7B. Label every diagram.",
-    work: { ayesha: ["on", 16, "Well done, one slip in Q4."], hamza: ["on"] },
+    work: { ayesha: ["on", 16, "Well done, one slip in Q4."], hamza: ["on"], omar: ["on", 13, "Check your angle facts for polygons."] },
   },
   {
     course: oMaths, batch: batchO, type: "assignment", title: "Trigonometry Practice Set", due: -2, total: 25,
     instructions: "Questions 1–10 on SOH CAH TOA. Give answers to 3 significant figures.",
-    work: { ayesha: ["on"], zainab: ["late"] },
+    work: { ayesha: ["on"], zainab: ["late"], omar: ["on"] },
   },
   {
     course: oMaths, batch: batchO, type: "assignment", title: "Statistics: Mean, Median and Mode", due: 6, total: 20,
@@ -160,17 +173,17 @@ const ASSESSMENTS = [
   {
     course: aPhysics, batch: batchA, type: "assignment", title: "Kinematics Problem Sheet", due: -18, total: 30,
     instructions: "Answer all questions on the SUVAT problem sheet.",
-    work: { bilal: ["on", 24, "Good. Revise projectile motion."], fatima: ["on", 27, "Very thorough."] },
+    work: { bilal: ["on", 24, "Good. Revise projectile motion."], fatima: ["on", 27, "Very thorough."], maryam: ["on", 25, "Clear working throughout."] },
   },
   {
     course: aPhysics, batch: batchA, type: "test", title: "Test 1: Mechanics", due: -10, total: 60,
     instructions: "Paper-style test on forces and motion (1 hour).",
-    work: { bilal: ["test", 41], fatima: ["test", 52] },
+    work: { bilal: ["test", 41], fatima: ["test", 52], maryam: ["test", 47] },
   },
   {
     course: aPhysics, batch: batchA, type: "assignment", title: "Electric Circuits Worksheet", due: -4, total: 30,
     instructions: "Series and parallel circuits, questions 1–12.",
-    work: { fatima: ["on"] },
+    work: { fatima: ["on"], maryam: ["late"] },
   },
   {
     course: aPhysics, batch: batchA, type: "assignment", title: "Waves and Superposition", due: 7, total: 30,
@@ -180,12 +193,12 @@ const ASSESSMENTS = [
   {
     course: aMaths, batch: batchA, type: "assignment", title: "Differentiation Basics", due: -12, total: 25,
     instructions: "Exercise 3A, all parts.",
-    work: { bilal: ["late", 19, "Correct, but late."], fatima: ["on", 22, "Neat and accurate."] },
+    work: { bilal: ["late", 19, "Correct, but late."], fatima: ["on", 22, "Neat and accurate."], maryam: ["on", 21, "Good. Watch the chain rule in 3A(f)."] },
   },
   {
-    course: aMaths, batch: batchA, type: "test", title: "Pure Maths Quiz 1", due: -5, total: 40,
-    instructions: "30-minute quiz on functions and differentiation.",
-    work: { bilal: ["test", 30], fatima: ["test", 35] },
+    course: aMaths, batch: batchA, type: "test", title: "Test 1: Functions and Differentiation", due: -5, total: 40,
+    instructions: "30-minute test in class on functions and differentiation.",
+    work: { bilal: ["test", 30], fatima: ["test", 35], maryam: ["test", 33] },
   },
   {
     course: aMaths, batch: batchA, type: "assignment", title: "Integration Practice", due: 9, total: 25,
@@ -247,6 +260,187 @@ for (const a of ASSESSMENTS) {
   }
 }
 
+// --- Quizzes ---------------------------------------------------------------
+// answers: per student, the picked option index for each question (0-based).
+// Scored here exactly like submit_quiz(): 1 mark per correct answer.
+
+const QUIZZES = [
+  {
+    course: oMaths, batch: batchO, title: "Quick Quiz: Percentages", due: -3,
+    instructions: "Five quick questions. You get one attempt, so check each answer before you submit.",
+    questions: [
+      ["What is 25% of 80?", ["15", "20", "25", "32"], 1],
+      ["Write 0.35 as a percentage.", ["3.5%", "35%", "0.35%", "350%"], 1],
+      ["A price of 200 rises by 10%. What is the new price?", ["210", "220", "202", "240"], 1],
+      ["Which fraction is equal to 40%?", ["2/5", "4/5", "1/4", "3/5"], 0],
+      ["A shirt costing 500 is reduced by 20%. What is the sale price?", ["480", "400", "300", "450"], 1],
+    ],
+    answers: { ayesha: [1, 1, 1, 0, 0], hamza: [1, 0, 1, 0, 1], omar: [1, 1, 1, 0, 1], daniyal: [0, 1, 1, 2, 1] },
+  },
+  {
+    course: aMaths, batch: batchA, title: "Quick Quiz: Differentiation Rules", due: 5,
+    instructions: "Five questions on the rules covered in Exercise 3A. One attempt only.",
+    questions: [
+      ["What is the derivative of x³?", ["x²", "3x²", "3x", "x³/3"], 1],
+      ["What is the derivative of 5x?", ["5", "x", "5x", "0"], 0],
+      ["What is the derivative of a constant, e.g. 7?", ["7", "1", "0", "7x"], 2],
+      ["If y = 4x² + 3x, what is dy/dx?", ["8x + 3", "4x + 3", "8x", "2x + 3"], 0],
+      ["What is the gradient of y = x² at x = 3?", ["3", "9", "6", "2"], 2],
+    ],
+    answers: {},
+  },
+  {
+    course: oMaths, batch: batchO, title: "Quick Quiz: Angles and Polygons", due: 4,
+    instructions: "Six questions on exercise 7B. One attempt only.",
+    questions: [
+      ["What do the angles in a triangle add up to?", ["90°", "180°", "270°", "360°"], 1],
+      ["What do the exterior angles of any polygon add up to?", ["180°", "270°", "360°", "540°"], 2],
+      ["What is the sum of the interior angles of a pentagon?", ["360°", "480°", "540°", "720°"], 2],
+      ["Each interior angle of a regular hexagon is:", ["108°", "120°", "135°", "144°"], 1],
+      ["Two angles on a straight line are 65° and x. What is x?", ["25°", "105°", "115°", "295°"], 2],
+      ["A regular polygon has exterior angles of 40°. How many sides does it have?", ["6", "8", "9", "10"], 2],
+    ],
+    answers: {},
+  },
+];
+
+let quizCount = 0;
+for (const q of QUIZZES) {
+  const quiz = check(
+    await sb
+      .from("assessments")
+      .insert({
+        course_id: q.course,
+        batch_id: q.batch,
+        type: "quiz",
+        title: q.title,
+        instructions: q.instructions,
+        due_at: daysFromNow(q.due),
+        total_marks: q.questions.length,
+      })
+      .select("id")
+      .single(),
+    `create quiz ${q.title}`,
+  );
+  check(
+    await sb.from("quiz_questions").insert(
+      q.questions.map(([question, options, correct_index], i) => ({
+        assessment_id: quiz.id,
+        position: i + 1,
+        question,
+        options,
+        correct_index,
+      })),
+    ),
+    `quiz questions ${q.title}`,
+  );
+  for (const [key, picks] of Object.entries(q.answers)) {
+    const score = picks.filter((p, i) => p === q.questions[i][2]).length;
+    const at = daysFromNow(q.due - 1);
+    check(
+      await sb.from("submissions").insert({
+        assessment_id: quiz.id,
+        student_id: studentId[key],
+        file_paths: [],
+        submitted_at: at,
+        is_late: false,
+        counts_toward_report: true,
+        marks: score,
+        marked_at: at,
+        quiz_answers: picks,
+      }),
+      `quiz answers ${q.title}`,
+    );
+    submissionCount++;
+  }
+  quizCount++;
+}
+
+// --- Live classes ----------------------------------------------------------
+// Zoom's public test-meeting page stands in for a real class link.
+
+const HOUR = 60 * 60 * 1000;
+const nextAt = (days, hourUtc) => {
+  const d = new Date(now + days * DAY);
+  d.setUTCHours(hourUtc, 0, 0, 0);
+  return d.toISOString();
+};
+const DEMO_JOIN_URL = "https://zoom.us/test";
+check(
+  await sb.from("live_classes").insert([
+    {
+      title: "O Level Maths: Trigonometry revision",
+      starts_at: new Date(now + 2 * HOUR).toISOString(),
+      join_url: DEMO_JOIN_URL,
+      note: "Bring your trigonometry practice set and a calculator.",
+      batch_id: batchO,
+      created_by: markedBy,
+    },
+    {
+      title: "O Level Maths: Test 2 preparation",
+      starts_at: nextAt(2, 13),
+      join_url: DEMO_JOIN_URL,
+      batch_id: batchO,
+      created_by: markedBy,
+    },
+    {
+      title: "A Level Physics: Waves and superposition",
+      starts_at: nextAt(1, 5),
+      join_url: DEMO_JOIN_URL,
+      note: "Read chapter 14 before class.",
+      batch_id: batchA,
+      created_by: markedBy,
+    },
+    {
+      title: "A Level Maths: Integration",
+      starts_at: nextAt(-3, 5),
+      join_url: DEMO_JOIN_URL,
+      batch_id: batchA,
+      created_by: markedBy,
+    },
+  ]),
+  "create live classes",
+);
+
+// --- Ask the teacher -------------------------------------------------------
+
+const questionRows = check(
+  await sb
+    .from("questions")
+    .insert([
+      {
+        student_id: studentId.ayesha,
+        course_id: oMaths,
+        body: "In Q7 of the trigonometry set, how do I know whether to use sin or cos?",
+        status: "answered",
+        answer:
+          "Label the sides first: opposite, adjacent and hypotenuse, from the angle you are given. If the question uses the opposite side and the hypotenuse, use sin. If it uses the adjacent side and the hypotenuse, use cos.",
+        answered_by: markedBy,
+        answered_at: daysFromNow(-1),
+        created_at: daysFromNow(-2),
+      },
+      {
+        student_id: studentId.hamza,
+        course_id: oMaths,
+        body: "Will Test 2 include the polygon angle formula, or only triangles?",
+        status: "waiting",
+        created_at: daysFromNow(-0.2),
+      },
+      {
+        student_id: studentId.fatima,
+        course_id: aPhysics,
+        body: "For the kinematics sheet, should we take g as 9.8 or 9.81?",
+        status: "answered",
+        answer: "Use 9.81 m/s² unless the question gives a different value.",
+        answered_by: markedBy,
+        answered_at: daysFromNow(-15),
+        created_at: daysFromNow(-16),
+      },
+    ])
+    .select("id, student_id, course_id, status"),
+  "create questions",
+);
+
 // --- Announcements, resources, applications --------------------------------
 
 check(
@@ -268,9 +462,92 @@ check(
       batch_id: batchA,
       created_at: daysFromNow(-3),
     },
+    {
+      title: "Mock exams next month",
+      body: "Mock exams for Physics and Maths start next month. A revision plan and past papers will be shared in class. Keep up with the weekly assignments, they are the best preparation.",
+      batch_id: batchA,
+      created_at: daysFromNow(-0.3),
+    },
   ]),
   "create announcements",
 );
+
+// --- Student notifications -------------------------------------------------
+// The app creates these as the admin sets and marks work, posts announcements
+// and live classes, and answers questions. The seed adds the same kinds so
+// every demo student's bell has a realistic mix (older ones already read).
+
+const demoAssessments = check(
+  await sb.from("assessments").select("id, title, type, course_id, batch_id, due_at").in("batch_id", [batchO, batchA]),
+  "load demo assessments",
+);
+const demoAnnouncements = check(
+  await sb.from("announcements").select("id, title, batch_id, created_at").in("batch_id", [batchO, batchA]),
+  "load demo announcements",
+);
+const demoClasses = check(
+  await sb.from("live_classes").select("id, title, starts_at, batch_id").in("batch_id", [batchO, batchA]),
+  "load demo live classes",
+);
+const demoMarks = check(
+  await sb
+    .from("submissions")
+    .select("student_id, assessment_id, marked_at")
+    .in("assessment_id", demoAssessments.map((a) => a.id))
+    .not("marks", "is", null),
+  "load demo marks",
+);
+// Same wording as the app's live class notification.
+const saudiTime = (iso) => {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Riyadh", weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true,
+    }).formatToParts(new Date(iso)).map((x) => [x.type, x.value]),
+  );
+  return `${parts.weekday} ${parts.day} ${parts.month}, ${parts.hour}:${parts.minute} ${parts.dayPeriod.toUpperCase()} (Saudi time)`;
+};
+const KIND_PREFIX = { assignment: "New assignment: ", test: "New test: ", quiz: "New quiz: " };
+
+const notifications = [];
+for (const st of STUDENTS) {
+  const uid = studentId[st.key];
+  const mine = demoAssessments.filter((a) => a.batch_id === st.batch && st.courses.includes(a.course_id));
+  for (const a of mine.filter((x) => new Date(x.due_at).getTime() > now)) {
+    notifications.push({
+      user_id: uid, kind: a.type, title: KIND_PREFIX[a.type] + a.title, body: courseTitle(a.course_id),
+      assessment_id: a.id, created_at: daysFromNow(-1.5),
+    });
+  }
+  // Quizzes mark themselves, so they get no "Marked" notification.
+  for (const m of demoMarks.filter((x) => x.student_id === uid)) {
+    const a = mine.find((x) => x.id === m.assessment_id);
+    if (!a || a.type === "quiz") continue;
+    notifications.push({
+      user_id: uid, kind: "marks", title: "Marked: " + a.title, body: courseTitle(a.course_id),
+      assessment_id: a.id, created_at: m.marked_at, read_at: m.marked_at,
+    });
+  }
+  for (const an of demoAnnouncements.filter((x) => x.batch_id === st.batch)) {
+    const old = new Date(an.created_at).getTime() < now - 2 * DAY;
+    notifications.push({
+      user_id: uid, kind: "announcement", title: "New announcement: " + an.title, announcement_id: an.id,
+      created_at: an.created_at, read_at: old ? an.created_at : null,
+    });
+  }
+  for (const lc of demoClasses.filter((x) => x.batch_id === st.batch && new Date(x.starts_at).getTime() > now)) {
+    notifications.push({
+      user_id: uid, kind: "live_class", title: "New live class: " + lc.title, body: saudiTime(lc.starts_at),
+      live_class_id: lc.id, created_at: daysFromNow(-0.4),
+    });
+  }
+}
+for (const q of questionRows.filter((x) => x.status === "answered")) {
+  notifications.push({
+    user_id: q.student_id, kind: "answer", title: "Your question was answered", body: courseTitle(q.course_id),
+    question_id: q.id, created_at: daysFromNow(-1),
+  });
+}
+check(await sb.from("notifications").insert(notifications), "create notifications");
 
 for (const [i, r] of DEMO_RESOURCES.entries()) {
   check(
@@ -296,7 +573,7 @@ check(
 
 console.log(
   `Seeded ${STUDENTS.length} students, 2 batches, ${ASSESSMENTS.length} assessments, ` +
-    `${submissionCount} submissions/marks, 3 announcements, ${DEMO_RESOURCES.length} resources, 2 applications.`,
+    `${quizCount} quizzes, ${submissionCount} submissions/marks, 4 live classes, ${questionRows.length} questions, ${notifications.length} notifications, 4 announcements, ${DEMO_RESOURCES.length} resources, 2 applications.`,
 );
 
 // A minimal one-page PDF so uploaded submission files open in the viewer.

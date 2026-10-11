@@ -27,3 +27,11 @@ export function parseEmphasis(text: string): EmphasisPart[] {
 
   return parts;
 }
+
+// The same text with the *emphasis* markers removed, for places that show the
+// tagline as plain text (footer, page descriptions, the share image).
+export function stripEmphasis(text: string): string {
+  return parseEmphasis(text)
+    .map((part) => part.value)
+    .join("");
+}

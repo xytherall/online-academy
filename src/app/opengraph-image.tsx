@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { stripEmphasis } from "@/lib/parse-emphasis";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 export const alt = "Academy";
@@ -11,7 +12,7 @@ export default async function Image() {
   // render an image — a broken OG image is worse than a generic one.
   const settings = await getSiteSettings().catch(() => null);
   const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  const headline = settings?.tagline?.trim().replace(/\*/g, "") || "Online O Level / A Level academy";
+  const headline = stripEmphasis(settings?.tagline ?? "").trim() || "Online O Level / A Level academy";
 
   return new ImageResponse(
     (
