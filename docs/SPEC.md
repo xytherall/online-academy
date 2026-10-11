@@ -944,14 +944,15 @@ Owner decision (2026-10-06).
 Owner decision (2026-10-11).
 
 - [x] Migration `stage24_lectures`: `lectures` table + RLS, `lecture` notification kind, `notifications.lecture_id`, `notify_new_lecture()` (once per lecture, via `published_at`)
-- [ ] Migration applied to the Supabase project (owner runs it in the SQL Editor)
+- [x] Migration applied to the Supabase project (owner ran it in the SQL Editor, 2026-10-11)
 - [x] Admin: "Recorded lectures" section on the course page between Resources and Assessments; add/edit with title, Vimeo link (vimeo.com/ID, vimeo.com/ID/HASH, player.vimeo.com/video/ID?h=HASH), optional note, "Show to students"; length and thumbnail from Vimeo oEmbed when it answers, saved without them when it doesn't; Shown/Hidden, move up/down, delete with confirmation
 - [x] A course with lectures can't be deleted (same as resources)
 - [x] Student: "Recorded lectures" list above Resources on the course page with an empty state; `/student/lectures/[id]` with the responsive Vimeo player; hidden, other-course and unknown lectures are not found
 - [x] First show notifies the course's active students (bell + phone push, respects the notifications switch): "New lecture: <title>"; edits and showing again never re-notify; tapping opens the lecture
 - [x] Vimeo link parsing, stored id, player address, length format and form validation unit tested
-- [ ] Checked against the live database after the migration: RLS (admin full access; enrolled active student sees shown lectures only; hidden, not-enrolled, deactivated and anon refused; no student writes or notify calls), notification sent once only
-- [ ] Checked in the browser: admin adds a lecture, student (Ayesha) watches it
+- [x] Checked against the live database (24 cases, rolled back): admin sees all; Ayesha sees only the shown O Level Maths lecture, Bilal only the Physics one; hidden, other-course, deactivated and anon refused; no student insert/update/delete or notify; bad Vimeo id, http thumbnail and blank title rejected; first show notifies the 7 active Maths students ("New lecture: <title>", course title as body), a second call, a hidden lecture and hide → show → edit notify nobody; students read their own lecture notifications; deleting a lecture removes its notifications
+- [x] Admin section checked in the browser: list with thumbnail, length, Shown/Hidden and placeholder; non-Vimeo link shows the error; adding a hidden lecture with a link Vimeo's oEmbed refuses saves without length/thumbnail and sends nothing; editing it to a working link fills both in; delete with confirmation. All [TEST] rows removed afterwards
+- [ ] Student pages checked in the browser as Ayesha (the browser was signed in as admin, not signed out)
 
 ## 15. Decision log
 
