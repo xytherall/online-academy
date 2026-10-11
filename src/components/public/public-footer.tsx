@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { AcademyBrand } from "@/components/academy-brand";
 import { PublicNavLinks } from "@/components/public/public-nav-links";
+import { stripEmphasis } from "@/lib/parse-emphasis";
 import { buildWhatsAppUrl, FALLBACK_SITE_LABEL, type SiteSettings } from "@/lib/settings";
 
 export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
-  const tagline = settings?.tagline?.trim();
+  const tagline = stripEmphasis(settings?.tagline ?? "").trim();
   const email = settings?.contact_email?.trim();
   const whatsappUrl = settings?.contact_whatsapp ? buildWhatsAppUrl(settings.contact_whatsapp) : null;
   const hasContact = Boolean(email || whatsappUrl);

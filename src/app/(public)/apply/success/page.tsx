@@ -47,7 +47,7 @@ export default async function ApplySuccessPage() {
           </li>
         </ol>
         <p className="text-sm text-muted-foreground">
-          Class times and joining links are arranged with you directly, not through this website.
+          Class times are arranged with you directly. Once you are enrolled, upcoming live classes and their join links appear in your student portal.
         </p>
       </div>
 

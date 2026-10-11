@@ -4,6 +4,7 @@ import { AppInstallSetup } from "@/components/app-install-setup";
 import { AppToaster } from "@/components/app-toaster";
 import { APP_NAVY } from "@/lib/app-icon";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { stripEmphasis } from "@/lib/parse-emphasis";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { getSiteUrl } from "@/lib/site-url";
 import { figtree, fraunces } from "@/lib/fonts";
@@ -13,7 +14,7 @@ import "./globals.css";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const title = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  const description = settings?.tagline?.trim() || "Online O Level / A Level academy";
+  const description = stripEmphasis(settings?.tagline ?? "").trim() || "Online O Level / A Level academy";
   return {
     metadataBase: new URL(getSiteUrl()),
     title,

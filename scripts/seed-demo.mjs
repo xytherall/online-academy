@@ -1,7 +1,9 @@
 // Fills the database with clearly-labelled demo data for presenting the app:
 // demo students (emails ending @demo.test), two batches, assessments with a
-// mix of marked / submitted / late / missing work, announcements, a few link
-// resources and two pending applications. Existing courses are reused and
+// mix of marked / submitted / late / missing work, two quizzes, live classes,
+// "Ask the teacher" questions, a few notifications, announcements, a few link
+// resources and two pending applications. Due dates and class times are set
+// relative to today, so re-run it (cleanup first) shortly before a demo. Existing courses are reused and
 // nothing that already exists is modified.
 //
 // Run:    node --env-file=.env.local scripts/seed-demo.mjs
@@ -30,7 +32,8 @@ if ((await listDemoUsers(sb)).length) {
 
 // --- Existing courses and admin -------------------------------------------
 
-const courses = check(await sb.from("courses").select("id, slug"), "load courses");
+const courses = check(await sb.from("courses").select("id, slug, title"), "load courses");
+const courseTitle = (id) => courses.find((c) => c.id === id).title;
 const courseId = (slug) => {
   const c = courses.find((x) => x.slug === slug);
   if (!c) throw new Error(`Course "${slug}" not found`);
@@ -183,8 +186,8 @@ const ASSESSMENTS = [
     work: { bilal: ["late", 19, "Correct, but late."], fatima: ["on", 22, "Neat and accurate."] },
   },
   {
-    course: aMaths, batch: batchA, type: "test", title: "Pure Maths Quiz 1", due: -5, total: 40,
-    instructions: "30-minute quiz on functions and differentiation.",
+    course: aMaths, batch: batchA, type: "test", title: "Test 1: Functions and Differentiation", due: -5, total: 40,
+    instructions: "30-minute test in class on functions and differentiation.",
     work: { bilal: ["test", 30], fatima: ["test", 35] },
   },
   {
@@ -247,6 +250,199 @@ for (const a of ASSESSMENTS) {
   }
 }
 
+// --- Quizzes ---------------------------------------------------------------
+// answers: per student, the picked option index for each question (0-based).
+// Scored here exactly like submit_quiz(): 1 mark per correct answer.
+
+const QUIZZES = [
+  {
+    course: oMaths, batch: batchO, title: "Quick Quiz: Percentages", due: -3,
+    instructions: "Five quick questions. You get one attempt, so check each answer before you submit.",
+    questions: [
+      ["What is 25% of 80?", ["15", "20", "25", "32"], 1],
+      ["Write 0.35 as a percentage.", ["3.5%", "35%", "0.35%", "350%"], 1],
+      ["A price of 200 rises by 10%. What is the new price?", ["210", "220", "202", "240"], 1],
+      ["Which fraction is equal to 40%?", ["2/5", "4/5", "1/4", "3/5"], 0],
+      ["A shirt costing 500 is reduced by 20%. What is the sale price?", ["480", "400", "300", "450"], 1],
+    ],
+    answers: { ayesha: [1, 1, 1, 0, 0], hamza: [1, 0, 1, 0, 1] },
+  },
+  {
+    course: aMaths, batch: batchA, title: "Quick Quiz: Differentiation Rules", due: 5,
+    instructions: "Five questions on the rules covered in Exercise 3A. One attempt only.",
+    questions: [
+      ["What is the derivative of x³?", ["x²", "3x²", "3x", "x³/3"], 1],
+      ["What is the derivative of 5x?", ["5", "x", "5x", "0"], 0],
+      ["What is the derivative of a constant, e.g. 7?", ["7", "1", "0", "7x"], 2],
+      ["If y = 4x² + 3x, what is dy/dx?", ["8x + 3", "4x + 3", "8x", "2x + 3"], 0],
+      ["What is the gradient of y = x² at x = 3?", ["3", "9", "6", "2"], 2],
+    ],
+    answers: {},
+  },
+];
+
+let quizCount = 0;
+for (const q of QUIZZES) {
+  const quiz = check(
+    await sb
+      .from("assessments")
+      .insert({
+        course_id: q.course,
+        batch_id: q.batch,
+        type: "quiz",
+        title: q.title,
+        instructions: q.instructions,
+        due_at: daysFromNow(q.due),
+        total_marks: q.questions.length,
+      })
+      .select("id")
+      .single(),
+    `create quiz ${q.title}`,
+  );
+  check(
+    await sb.from("quiz_questions").insert(
+      q.questions.map(([question, options, correct_index], i) => ({
+        assessment_id: quiz.id,
+        position: i + 1,
+        question,
+        options,
+        correct_index,
+      })),
+    ),
+    `quiz questions ${q.title}`,
+  );
+  for (const [key, picks] of Object.entries(q.answers)) {
+    const score = picks.filter((p, i) => p === q.questions[i][2]).length;
+    const at = daysFromNow(q.due - 1);
+    check(
+      await sb.from("submissions").insert({
+        assessment_id: quiz.id,
+        student_id: studentId[key],
+        file_paths: [],
+        submitted_at: at,
+        is_late: false,
+        counts_toward_report: true,
+        marks: score,
+        marked_at: at,
+        quiz_answers: picks,
+      }),
+      `quiz answers ${q.title}`,
+    );
+    submissionCount++;
+  }
+  quizCount++;
+}
+
+// --- Live classes ----------------------------------------------------------
+// Zoom's public test-meeting page stands in for a real class link.
+
+const HOUR = 60 * 60 * 1000;
+const nextAt = (days, hourUtc) => {
+  const d = new Date(now + days * DAY);
+  d.setUTCHours(hourUtc, 0, 0, 0);
+  return d.toISOString();
+};
+const DEMO_JOIN_URL = "https://zoom.us/test";
+check(
+  await sb.from("live_classes").insert([
+    {
+      title: "O Level Maths: Trigonometry revision",
+      starts_at: new Date(now + 2 * HOUR).toISOString(),
+      join_url: DEMO_JOIN_URL,
+      note: "Bring your trigonometry practice set and a calculator.",
+      batch_id: batchO,
+      created_by: markedBy,
+    },
+    {
+      title: "O Level Maths: Test 2 preparation",
+      starts_at: nextAt(2, 13),
+      join_url: DEMO_JOIN_URL,
+      batch_id: batchO,
+      created_by: markedBy,
+    },
+    {
+      title: "A Level Physics: Waves and superposition",
+      starts_at: nextAt(1, 5),
+      join_url: DEMO_JOIN_URL,
+      note: "Read chapter 14 before class.",
+      batch_id: batchA,
+      created_by: markedBy,
+    },
+    {
+      title: "A Level Maths: Integration",
+      starts_at: nextAt(-3, 5),
+      join_url: DEMO_JOIN_URL,
+      batch_id: batchA,
+      created_by: markedBy,
+    },
+  ]),
+  "create live classes",
+);
+
+// --- Ask the teacher -------------------------------------------------------
+
+const questionRows = check(
+  await sb
+    .from("questions")
+    .insert([
+      {
+        student_id: studentId.ayesha,
+        course_id: oMaths,
+        body: "In Q7 of the trigonometry set, how do I know whether to use sin or cos?",
+        status: "answered",
+        answer:
+          "Label the sides first: opposite, adjacent and hypotenuse, from the angle you are given. If the question uses the opposite side and the hypotenuse, use sin. If it uses the adjacent side and the hypotenuse, use cos.",
+        answered_by: markedBy,
+        answered_at: daysFromNow(-1),
+        created_at: daysFromNow(-2),
+      },
+      {
+        student_id: studentId.hamza,
+        course_id: oMaths,
+        body: "Will Test 2 include the polygon angle formula, or only triangles?",
+        status: "waiting",
+        created_at: daysFromNow(-0.2),
+      },
+      {
+        student_id: studentId.fatima,
+        course_id: aPhysics,
+        body: "For the kinematics sheet, should we take g as 9.8 or 9.81?",
+        status: "answered",
+        answer: "Use 9.81 m/s² unless the question gives a different value.",
+        answered_by: markedBy,
+        answered_at: daysFromNow(-15),
+        created_at: daysFromNow(-16),
+      },
+    ])
+    .select("id, student_id, status"),
+  "create questions",
+);
+
+// --- Student notifications -------------------------------------------------
+// The app creates these when the admin adds work or answers a question; the
+// seed adds a few so the bell has something to show.
+
+const quizIds = check(
+  await sb.from("assessments").select("id, title").eq("type", "quiz").in("batch_id", [batchO, batchA]),
+  "load demo quizzes",
+);
+const quizId = (title) => quizIds.find((x) => x.title === title).id;
+const ayeshaAnswer = questionRows.find((x) => x.student_id === studentId.ayesha);
+check(
+  await sb.from("notifications").insert([
+    { user_id: studentId.ayesha, kind: "answer", title: "Your question was answered", body: courseTitle(oMaths), question_id: ayeshaAnswer.id, created_at: daysFromNow(-1) },
+    ...["bilal", "fatima"].map((key) => ({
+      user_id: studentId[key],
+      kind: "quiz",
+      title: "New quiz: Quick Quiz: Differentiation Rules",
+      body: courseTitle(aMaths),
+      assessment_id: quizId("Quick Quiz: Differentiation Rules"),
+      created_at: daysFromNow(-0.5),
+    })),
+  ]),
+  "create notifications",
+);
+
 // --- Announcements, resources, applications --------------------------------
 
 check(
@@ -296,7 +492,7 @@ check(
 
 console.log(
   `Seeded ${STUDENTS.length} students, 2 batches, ${ASSESSMENTS.length} assessments, ` +
-    `${submissionCount} submissions/marks, 3 announcements, ${DEMO_RESOURCES.length} resources, 2 applications.`,
+    `${quizCount} quizzes, ${submissionCount} submissions/marks, 4 live classes, ${questionRows.length} questions, 3 announcements, ${DEMO_RESOURCES.length} resources, 2 applications.`,
 );
 
 // A minimal one-page PDF so uploaded submission files open in the viewer.

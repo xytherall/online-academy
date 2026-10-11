@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseEmphasis } from "./parse-emphasis";
+import { parseEmphasis, stripEmphasis } from "./parse-emphasis";
 
 describe("parseEmphasis", () => {
   it("returns a single text part when there are no asterisks", () => {
@@ -45,5 +45,15 @@ describe("parseEmphasis", () => {
       { type: "text", value: "small batches, " },
       { type: "emphasis", value: "taught live" },
     ]);
+  });
+});
+
+describe("stripEmphasis", () => {
+  it("removes the markers and keeps the words", () => {
+    expect(stripEmphasis("Maths and Physics taught *live* and *properly*")).toBe("Maths and Physics taught live and properly");
+  });
+
+  it("leaves an unmatched asterisk as written", () => {
+    expect(stripEmphasis("5 * 3 is fifteen")).toBe("5 * 3 is fifteen");
   });
 });
