@@ -11,6 +11,7 @@ import {
   ListChecksIcon,
   MegaphoneIcon,
   MessageCircleQuestionMarkIcon,
+  MonitorPlayIcon,
   PenLineIcon,
   VideoIcon,
 } from "lucide-react";
@@ -33,6 +34,7 @@ const KIND_ICONS: Record<PortalNotification["kind"], LucideIcon> = {
   new_question: MessageCircleQuestionMarkIcon,
   late_submission: ClockAlertIcon,
   quiz: ListChecksIcon,
+  lecture: MonitorPlayIcon,
 };
 
 function NotificationRow({ notification }: { notification: PortalNotification }) {

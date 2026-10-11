@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileTextIcon, LinkIcon } from "lucide-react";
+import { LectureThumbnail } from "@/components/lecture-thumbnail";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { assessmentTypeLabel } from "@/lib/assessment-type";
+import { formatDuration } from "@/lib/vimeo";
 
 export const metadata: Metadata = { title: "Course" };
 
@@ -36,11 +38,19 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
 
   const [
     { data: course, error: courseError },
+    { data: lectures, error: lecturesError },
     { data: resources, error: resourcesError },
     { data: assessments, error: assessmentsError },
     { data: submissions, error: submissionsError },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", id).maybeSingle(),
+    // RLS only returns lectures the admin has shown to students.
+    supabase
+      .from("lectures")
+      .select("id, title, duration_seconds, thumbnail_url")
+      .eq("course_id", id)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
     supabase.from("resources").select("*").eq("course_id", id).order("sort_order", { ascending: true }),
     // RLS ("Students can read visible assessments") already restricts this to
     // course-wide/matching-batch assessments plus any the student already
@@ -65,6 +75,40 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
         {course.description ? (
           <p className="whitespace-pre-line text-sm text-muted-foreground">{course.description}</p>
         ) : null}
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <h2 className="font-medium">Recorded lectures</h2>
+
+        {lecturesError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Could not load recorded lectures. Please refresh the page.</AlertDescription>
+          </Alert>
+        ) : lectures && lectures.length > 0 ? (
+          <ul className="space-y-2">
+            {lectures.map((lecture) => {
+              const duration = formatDuration(lecture.duration_seconds);
+              return (
+                <li key={lecture.id} className="rounded-lg border border-border bg-card p-2">
+                  <Link href={`/student/lectures/${lecture.id}`} className="group flex items-center gap-3">
+                    <LectureThumbnail url={lecture.thumbnail_url} className="w-28" />
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 font-medium group-hover:underline">{lecture.title}</p>
+                      {duration ? <p className="text-xs text-muted-foreground">{duration}</p> : null}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <EmptyState
+            title="No recorded lectures yet"
+            description="Your teacher hasn't added any recorded lectures for this course yet."
+          />
+        )}
       </div>
 
       <Separator />

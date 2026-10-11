@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CourseForm } from "../course-form";
 import type { QuizEditInfo } from "./assessment-form";
 import { AssessmentManager } from "./assessment-manager";
+import { LectureManager } from "./lecture-manager";
 import { ResourceManager } from "./resource-manager";
 
 export const metadata: Metadata = { title: "Edit course" };
@@ -16,12 +17,19 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   const [
     { data: course, error: courseError },
     { data: resources, error: resourcesError },
+    { data: lectures, error: lecturesError },
     { data: assessments, error: assessmentsError },
     { data: batches, error: batchesError },
     { data: enrolledStudents, error: enrolledError },
   ] = await Promise.all([
     supabase.from("courses").select("*").eq("id", id).maybeSingle(),
     supabase.from("resources").select("*").eq("course_id", id).order("sort_order", { ascending: true }),
+    supabase
+      .from("lectures")
+      .select("*")
+      .eq("course_id", id)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
     supabase.from("assessments").select("*").eq("course_id", id).order("due_at", { ascending: true }),
     supabase.from("batches").select("id, name").order("name", { ascending: true }),
     supabase.from("enrollments").select("student:profiles(batch_id)").eq("course_id", id),
@@ -80,6 +88,14 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
         <p className="text-sm text-destructive">Could not load resources. Please refresh the page.</p>
       ) : (
         <ResourceManager courseId={course.id} resources={resources ?? []} />
+      )}
+
+      <Separator />
+
+      {lecturesError ? (
+        <p className="text-sm text-destructive">Could not load recorded lectures. Please refresh the page.</p>
+      ) : (
+        <LectureManager courseId={course.id} lectures={lectures ?? []} />
       )}
 
       <Separator />

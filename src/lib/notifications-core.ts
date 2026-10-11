@@ -26,7 +26,8 @@ export function isDueForReminder(dueAtIso: string, now: Date = new Date()): bool
  * alert kinds go to the admin area; every other kind is a student's.
  */
 export function notificationHref(
-  notification: Pick<Tables<"notifications">, "kind" | "assessment_id" | "question_id" | "application_id">,
+  notification: Pick<Tables<"notifications">, "kind" | "assessment_id" | "question_id" | "application_id"> &
+    Partial<Pick<Tables<"notifications">, "lecture_id">>,
 ): string {
   if (notification.kind === "new_application") {
     return notification.application_id ? `/admin/applications/${notification.application_id}` : "/admin/applications";
@@ -41,6 +42,9 @@ export function notificationHref(
     return notification.question_id ? `/student/questions/${notification.question_id}` : "/student/questions";
   }
   if (notification.kind === "live_class") return "/student";
+  if (notification.kind === "lecture") {
+    return notification.lecture_id ? `/student/lectures/${notification.lecture_id}` : "/student/courses";
+  }
   if (notification.kind === "announcement" || !notification.assessment_id) return "/student/announcements";
   return `/student/assessments/${notification.assessment_id}`;
 }
