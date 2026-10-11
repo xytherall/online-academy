@@ -952,7 +952,7 @@ Owner decision (2026-10-11).
 - [x] Vimeo link parsing, stored id, player address, length format and form validation unit tested
 - [x] Checked against the live database (24 cases, rolled back): admin sees all; Ayesha sees only the shown O Level Maths lecture, Bilal only the Physics one; hidden, other-course, deactivated and anon refused; no student insert/update/delete or notify; bad Vimeo id, http thumbnail and blank title rejected; first show notifies the 7 active Maths students ("New lecture: <title>", course title as body), a second call, a hidden lecture and hide → show → edit notify nobody; students read their own lecture notifications; deleting a lecture removes its notifications
 - [x] Admin section checked in the browser: list with thumbnail, length, Shown/Hidden and placeholder; non-Vimeo link shows the error; adding a hidden lecture with a link Vimeo's oEmbed refuses saves without length/thumbnail and sends nothing; editing it to a working link fills both in; delete with confirmation. All [TEST] rows removed afterwards
-- [ ] Student pages checked in the browser as Ayesha (the browser was signed in as admin, not signed out)
+- [x] Student pages checked in the browser as Ayesha: "Recorded lectures" above Resources with thumbnail and length, hidden lecture not listed; the lecture page plays the Vimeo player in 16:9 (desktop and 375px phone width, no sideways scroll) with title, length, note and back link; the hidden lecture and a bad id show Not found; tapping the "New lecture" notification opens the lecture. [TEST] rows removed afterwards
 
 ## 15. Decision log
 
