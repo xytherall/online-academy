@@ -11,6 +11,8 @@ export type CourseFormState = { error: string | null; success?: boolean };
 const DUPLICATE_SLUG_ERROR = "A course with this slug already exists. Choose a different slug.";
 const HAS_RESOURCES_ERROR =
   "This course has resources. Delete them first, or unpublish the course instead.";
+const HAS_LECTURES_ERROR =
+  "This course has recorded lectures. Delete them first, or unpublish the course instead.";
 const HAS_ENROLLMENTS_ERROR =
   "This course has enrolled students. Remove their enrollments first, or unpublish the course instead.";
 const HAS_ASSESSMENTS_ERROR =
@@ -125,6 +127,13 @@ export async function deleteCourse(courseId: string): Promise<{ error: string | 
     .eq("course_id", courseId);
 
   if (resourceCount && resourceCount > 0) return { error: HAS_RESOURCES_ERROR };
+
+  const { count: lectureCount } = await supabase
+    .from("lectures")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId);
+
+  if (lectureCount && lectureCount > 0) return { error: HAS_LECTURES_ERROR };
 
   const { count: enrollmentCount } = await supabase
     .from("enrollments")

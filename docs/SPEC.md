@@ -194,7 +194,8 @@ Email-based "forgot password" and invites will be added once a domain and email 
 |---|---|
 | `/student` | Dashboard: upcoming live classes for the student (card at the top with a Join button, hidden when there are none; a class drops off an hour after it starts), latest announcements, upcoming work (every unsubmitted assignment, overdue included, and every test not yet past, with no date limit), recently marked work |
 | `/student/courses` | Enrolled courses |
-| `/student/courses/[id]` | Course: resources, assessments with status and marks |
+| `/student/courses/[id]` | Course: recorded lectures (thumbnail, title, length), resources, assessments with status and marks |
+| `/student/lectures/[id]` | One recorded lecture: the Vimeo player (16:9, fullscreen allowed), title, length, note, back link to the course. Only shown lectures of the student's own courses |
 | `/student/assessments/[id]` | Instructions, attachment, due date, upload/replace submission, marks and feedback once marked. For a quiz: all questions on one page (picks kept on the device until submitted), Submit with a "You can't change answers after this" confirmation, then the result ("You scored 7 / 10", wrong answers marked, correct answers shown); revisiting shows the result |
 | `/student/report` | Progress report (see §9) |
 | `/student/announcements` | All announcements addressed to the student |
@@ -230,7 +231,7 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/batches` | Create, rename, delete batches; assign and remove students |
 | `/admin/courses` | List of courses |
 | `/admin/courses/new` | Create course |
-| `/admin/courses/[id]` | Edit course, publish/unpublish, manage resources and assessments |
+| `/admin/courses/[id]` | Edit course, publish/unpublish, manage resources, recorded lectures and assessments. Recorded lectures: add/edit (title, Vimeo link, optional note, "Show to students"), move up/down, delete from the site (the video stays on Vimeo). The first time a lecture is shown, its students are notified |
 | `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback and open uploaded files (assignments and tests). Marks can be entered for any targeted student, with or without an upload. For a quiz, each student's answers can be viewed (correct answers in green); quiz marks are filled in automatically and can still be changed by hand. |
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
 | `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, all students or one batch. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
@@ -435,13 +436,14 @@ Student notifications and admin alerts. Student ones are created only by the adm
 | Field | Notes |
 |---|---|
 | `user_id` | FK → `profiles` (cascade) |
-| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` / `live_class` (students); `new_application` / `new_question` / `late_submission` (admins) |
+| `kind` | enum `notification_kind`: `assignment` / `test` / `announcement` / `marks` / `answer` / `live_class` / `quiz` / `lecture` (students); `new_application` / `new_question` / `late_submission` (admins) |
 | `title` | |
 | `body` | nullable (course title) |
 | `assessment_id` | nullable, FK → `assessments` (cascade) |
 | `announcement_id` | nullable, FK → `announcements` (cascade) |
 | `application_id` | nullable, FK → `applications` (cascade) |
 | `submission_id` | nullable, FK → `submissions` (cascade); a late-submission alert also keeps `assessment_id` |
+| `lecture_id` | nullable, FK → `lectures` (cascade) |
 | `read_at` | nullable |
 
 Exactly one of `assessment_id` / `announcement_id` is set. RLS: a student can read their own rows and update only `read_at` on them; no insert/delete.
@@ -495,6 +497,23 @@ One upcoming (or past) live class. No recurring schedule.
 | `created_by` | FK → `profiles` (set null) |
 
 RLS: admins can read, insert, update and delete all. An active user can read classes for all students or for their own batch; no student writes. `notifications.live_class_id` (cascade) + kind `live_class` link the "New live class" notification, created by the admin-only `notify_new_live_class()`.
+
+### `lectures`
+Recorded lectures: Vimeo videos attached to a course. The video stays on Vimeo.
+
+| Field | Notes |
+|---|---|
+| `course_id` | FK → `courses` (restrict, like resources) |
+| `title` | 1–200 characters |
+| `description` | nullable note, up to 1,000 characters |
+| `vimeo_id` | the video id, plus `:hash` for an unlisted link (`123456789` or `123456789:abcdef`) |
+| `duration_seconds` | nullable, from Vimeo oEmbed |
+| `thumbnail_url` | nullable, https only, from Vimeo oEmbed |
+| `is_published` | "Show to students", default false |
+| `sort_order` | |
+| `published_at` | nullable; first time shown to students, set once by `notify_new_lecture()` |
+
+RLS: admins can read, insert, update and delete all. An active student can read shown lectures of courses they are enrolled in; no student writes. `notifications.lecture_id` (cascade) + kind `lecture` link the "New lecture" notification, created by the admin-only `notify_new_lecture()`, which only does anything the first time a shown lecture is saved.
 
 ### `site_settings`
 Single row.
@@ -920,6 +939,20 @@ Owner decision (2026-10-06).
 - [x] Checked against the live database as demo students (22 cases, [TEST] quiz deleted after): no student read of `quiz_questions`/`correct_index`, questions without answers, no result before submitting, not-enrolled and signed-out refused, bad answers refused, uploads refused for a quiz, correct score and result, one attempt, no self-marking, questions locked after a submission, type locked
 - [ ] Admin pages checked in the browser (owner)
 
+### Stage 24 — Recorded lectures (Vimeo)
+
+Owner decision (2026-10-11).
+
+- [x] Migration `stage24_lectures`: `lectures` table + RLS, `lecture` notification kind, `notifications.lecture_id`, `notify_new_lecture()` (once per lecture, via `published_at`)
+- [ ] Migration applied to the Supabase project (owner runs it in the SQL Editor)
+- [x] Admin: "Recorded lectures" section on the course page between Resources and Assessments; add/edit with title, Vimeo link (vimeo.com/ID, vimeo.com/ID/HASH, player.vimeo.com/video/ID?h=HASH), optional note, "Show to students"; length and thumbnail from Vimeo oEmbed when it answers, saved without them when it doesn't; Shown/Hidden, move up/down, delete with confirmation
+- [x] A course with lectures can't be deleted (same as resources)
+- [x] Student: "Recorded lectures" list above Resources on the course page with an empty state; `/student/lectures/[id]` with the responsive Vimeo player; hidden, other-course and unknown lectures are not found
+- [x] First show notifies the course's active students (bell + phone push, respects the notifications switch): "New lecture: <title>"; edits and showing again never re-notify; tapping opens the lecture
+- [x] Vimeo link parsing, stored id, player address, length format and form validation unit tested
+- [ ] Checked against the live database after the migration: RLS (admin full access; enrolled active student sees shown lectures only; hidden, not-enrolled, deactivated and anon refused; no student writes or notify calls), notification sent once only
+- [ ] Checked in the browser: admin adds a lecture, student (Ayesha) watches it
+
 ## 15. Decision log
 
 | Date | Decision |
@@ -1085,3 +1118,4 @@ Owner decision (2026-10-06).
 | 2026-10-06 | **Separated the home page intro from the About page text**, which previously shared one `about_text` field (the home hero subtext and `/about`'s body were always identical). Added `about_page_text` (`supabase/migrations/20261006093000_stage20_about_page_text.sql`), backfilled from the existing `about_text` so nothing visible changed at migration time. `about_text` now controls only the home page intro; `/admin/settings` has two separate fields ("Home page intro" and "About page"); `/about` reads `about_page_text`|
 | 2026-10-06 | **Owner decision: multiple-choice quizzes** (Stage 23), removing "Quizzes / auto-graded tests" from §13. A quiz is a third assessment type: the admin pastes questions in a fixed text format (2–6 options, `Answer:` letter), previews them, and publishes; a "Copy ChatGPT prompt" button gives the teacher a prompt that makes ChatGPT reply in that format. 1 mark per question, one attempt, no timer, text only. Students never get the correct answers before submitting (no table access; questions come from a function that leaves them out) and see their score, wrong answers and the correct answers straight after (owner decision). The submission is an ordinary `submissions` row with `marks` = score, so marking, reports and the late flag work as before: late quizzes are accepted and flagged, an unanswered past-due quiz is Missing (like an assignment), and quizzes count with tests in the report. Questions lock once anyone has submitted; title, instructions, batch and due date stay editable; a quiz can't change type |
 | 2026-10-06 | **Owner report: the assessment form listed every batch** (e.g. the A Level batch under an O Level course). Batches stay independent of courses (§2), so no schema change: the Target batch list on a course's assessment form (assignments, tests, quizzes) now shows only batches with at least one student enrolled in that course, plus, when editing, the batch the assessment already targets. With none, only "Whole course" is offered, with a hint. The Server Actions re-check a newly chosen batch the same way. Announcements and live classes keep the full list (they aren't course-scoped) |
+| 2026-10-11 | **Owner decision: recorded lectures as Vimeo links** (Stage 24). Videos stay on Vimeo (no video hosting here, §13 unchanged); a course gets a "Recorded lectures" section (no new sidebar item). The admin pastes a Vimeo link (public or unlisted); length and thumbnail come from Vimeo oEmbed when it answers and are simply left empty when it does not (e.g. a domain-restricted video), never blocking the save. Students see shown lectures of their own courses in an embedded player. The first time a lecture is shown it notifies the course's students once ("New lecture: <title>"); `published_at` makes it once only, so edits and hiding/showing again never re-notify. No "watched" tracking for now (owner) |

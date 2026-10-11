@@ -11,7 +11,16 @@ type StudentRef = Pick<Tables<"profiles">, "id" | "batch_id">;
 
 export type PortalNotification = Pick<
   Tables<"notifications">,
-  "id" | "kind" | "title" | "body" | "assessment_id" | "question_id" | "application_id" | "read_at" | "created_at"
+  | "id"
+  | "kind"
+  | "title"
+  | "body"
+  | "assessment_id"
+  | "question_id"
+  | "application_id"
+  | "lecture_id"
+  | "read_at"
+  | "created_at"
 >;
 
 /** No preferences row yet means notifications are on (the default). */
@@ -78,7 +87,7 @@ export async function getRecentNotifications(
 ): Promise<{ notifications: PortalNotification[] | null; error: boolean }> {
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, kind, title, body, assessment_id, question_id, application_id, read_at, created_at")
+    .select("id, kind, title, body, assessment_id, question_id, application_id, lecture_id, read_at, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT);
@@ -116,6 +125,15 @@ export function notifyNewAnnouncement(supabase: SupabaseServerClient, announceme
 
 export function notifyNewLiveClass(supabase: SupabaseServerClient, liveClassId: string) {
   return createAndPush("live class", supabase.rpc("notify_new_live_class", { p_live_class_id: liveClassId }));
+}
+
+/**
+ * Call after saving a lecture as shown. Only the first call for a lecture
+ * notifies: notify_new_lecture() stamps published_at, so later saves, and
+ * hiding then showing it again, send nothing.
+ */
+export function notifyLectureShown(supabase: SupabaseServerClient, lectureId: string) {
+  return createAndPush("lecture", supabase.rpc("notify_new_lecture", { p_lecture_id: lectureId }));
 }
 
 export function notifyMarks(supabase: SupabaseServerClient, assessmentId: string, studentId: string) {

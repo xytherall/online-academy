@@ -406,6 +406,59 @@ export type Database = {
         }
         Relationships: []
       }
+      lectures: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          sort_order: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          vimeo_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          vimeo_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          vimeo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lectures_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_classes: {
         Row: {
           batch_id: string | null
@@ -492,6 +545,7 @@ export type Database = {
           created_at: string
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          lecture_id: string | null
           live_class_id: string | null
           question_id: string | null
           read_at: string | null
@@ -507,6 +561,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          lecture_id?: string | null
           live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
@@ -522,6 +577,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
+          lecture_id?: string | null
           live_class_id?: string | null
           question_id?: string | null
           read_at?: string | null
@@ -549,6 +605,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_lecture_id_fkey"
+            columns: ["lecture_id"]
+            isOneToOne: false
+            referencedRelation: "lectures"
             referencedColumns: ["id"]
           },
           {
@@ -996,6 +1059,10 @@ export type Database = {
         Args: { p_assessment_id: string }
         Returns: string[]
       }
+      notify_new_lecture: {
+        Args: { p_lecture_id: string }
+        Returns: string[]
+      }
       notify_new_live_class: {
         Args: { p_live_class_id: string }
         Returns: string[]
@@ -1059,6 +1126,7 @@ export type Database = {
         | "new_question"
         | "late_submission"
         | "quiz"
+        | "lecture"
       question_status: "waiting" | "answered" | "closed"
       resource_kind: "file" | "link"
       user_role: "admin" | "teacher" | "student"
@@ -1212,6 +1280,7 @@ export const Constants = {
         "new_question",
         "late_submission",
         "quiz",
+        "lecture",
       ],
       question_status: ["waiting", "answered", "closed"],
       resource_kind: ["file", "link"],
