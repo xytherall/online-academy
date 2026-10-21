@@ -809,7 +809,7 @@ Verified in-browser this session (1440px/375px, light/dark) using `TEST_ADMIN_EM
 ### Stage 11 — Launch
 - [ ] Mobile/responsive pass on every page
 - [ ] RLS and permissions review (try to access other students' data and admin routes as a student)
-- [ ] Error pages (404, error boundary)
+- [x] Error pages: 404s, plus error boundaries for the public site, student portal, admin area and root layout (`global-error.tsx`)
 - [ ] Database backup procedure
 - [x] Keep-alive check (free Supabase projects pause after ~1 week with no activity): `netlify/functions/keep-alive.mjs` → `POST /api/cron/keep-alive`, Mon/Wed/Fri
 - [ ] Production Supabase project set up
