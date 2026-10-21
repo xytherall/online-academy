@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getSiteSettings } from "@/lib/get-site-settings";
-import { FALLBACK_SITE_LABEL } from "@/lib/settings";
+import { crestDataUrl } from "@/lib/brand-crest";
 
 /**
  * The navy used for the browser icon, the installed app's icon, its splash
@@ -13,15 +12,18 @@ export const APP_NAVY = "#12243F";
 /** Background of the installed app's launch splash screen (--background, light). */
 export const APP_SPLASH_BACKGROUND = "#ffffff";
 
+/** The crest on navy: white shield, navy letters, light-blue book. */
+const CREST_ON_NAVY = crestDataUrl({ shield: "#ffffff", letters: APP_NAVY, book: "#86aee9" });
+
 /**
- * A navy square with the academy's first letter: the favicon, the Apple
- * touch icon and the installed-app icons all use it.
+ * A navy square with the white LIS crest: the favicon, the Apple touch icon
+ * and the installed-app icons all use it.
  *
  * `maskable` icons get cropped by Android to a circle or squircle, so the
- * letter has to fit inside the central 80% "safe zone" and the background
+ * crest has to fit inside the central 80% "safe zone" and the background
  * must fill the whole square with no rounded corners.
  */
-export async function renderAppIcon({
+export function renderAppIcon({
   size,
   maskable = false,
   rounded = true,
@@ -29,10 +31,8 @@ export async function renderAppIcon({
   size: number;
   maskable?: boolean;
   rounded?: boolean;
-}): Promise<ImageResponse> {
-  const settings = await getSiteSettings().catch(() => null);
-  const academyName = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  const letter = academyName.charAt(0).toUpperCase();
+}): ImageResponse {
+  const crestSize = Math.round(size * (maskable ? 0.58 : 0.74));
 
   return new ImageResponse(
     (
@@ -45,12 +45,10 @@ export async function renderAppIcon({
           justifyContent: "center",
           background: APP_NAVY,
           borderRadius: maskable || !rounded ? 0 : Math.round(size * 0.22),
-          color: "#ffffff",
-          fontSize: Math.round(size * (maskable ? 0.45 : 0.56)),
-          fontWeight: 600,
         }}
       >
-        {letter}
+        {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders plain <img>, not next/image */}
+        <img src={CREST_ON_NAVY} width={crestSize} height={crestSize} alt="" />
       </div>
     ),
     { width: size, height: size },

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { crestDataUrl } from "@/lib/brand-crest";
 import { getSiteSettings } from "@/lib/get-site-settings";
 import { stripEmphasis } from "@/lib/parse-emphasis";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
@@ -25,24 +26,15 @@ export default async function Image() {
           alignItems: "center",
           justifyContent: "center",
           background: "linear-gradient(135deg, #12243F 0%, #1F437A 100%)",
-          position: "relative",
         }}
       >
-        <svg
-          width="1200"
-          height="630"
-          viewBox="0 0 1200 630"
-          style={{ position: "absolute", top: 0, left: 0 }}
-        >
-          <path
-            d="M160 560 Q600 -120 1040 560"
-            fill="none"
-            stroke="#ffffff"
-            strokeOpacity="0.18"
-            strokeWidth="3"
-          />
-          <circle cx="600" cy="80" r="7" fill="#ffffff" fillOpacity="0.35" />
-        </svg>
+        <img
+          src={crestDataUrl({ shield: "#ffffff", letters: "#12243F", book: "#86aee9" })}
+          width={150}
+          height={150}
+          alt=""
+          style={{ marginBottom: 32 }}
+        />
         <div
           style={{
             display: "flex",
