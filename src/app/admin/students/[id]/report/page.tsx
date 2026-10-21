@@ -47,7 +47,8 @@ export default async function AdminStudentReportPage({ params }: { params: Promi
       <ProgressReport
         data={{
           academyName: settings?.academy_name?.trim() || null,
-          logoUrl: settings?.logo_path ? buildPublicAssetUrl(settings.logo_path) : null,
+          // The letterhead is a navy band, so the built-in crest is the white version.
+          logoUrl: settings?.logo_path ? buildPublicAssetUrl(settings.logo_path) : "/brand/lis-crest-white.svg",
           studentName: displayName(student),
           batchName: batch?.name ?? null,
           country: student.country,
