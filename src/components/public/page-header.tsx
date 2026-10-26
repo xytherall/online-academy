@@ -3,7 +3,7 @@ import { HeroBackground } from "@/components/public/hero-background";
 
 /**
  * Shared hero-style header for public pages other than the home page
- * (SPEC §12): eyebrow + large Fraunces title over the same soft glow and
+ * (SPEC §12): eyebrow + large serif title over the same soft glow and
  * faint grid as the home hero, at a smaller scale. No decorative maths
  * motif — `HeroCurves` is home-page only per SPEC §12.
  */

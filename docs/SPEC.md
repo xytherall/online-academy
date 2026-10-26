@@ -590,8 +590,8 @@ Loaded via `next/font/google`.
 
 | Role | Font | Notes |
 |---|---|---|
-| Display / headings | **Fraunces** | weight 400, `letter-spacing: -0.02em`, `text-wrap: balance` |
-| Body / UI | **Figtree** | weights 400 / 500 / 600 |
+| Display / headings | **DM Serif Display** | weight 400 (its only weight), italic for emphasis, `letter-spacing: -0.01em`, `text-wrap: balance` |
+| Body / UI | **DM Sans** | weights 400 / 500 / 600 |
 
 Do **not** use Inter anywhere in this project.
 
@@ -659,7 +659,7 @@ No orange is used as a brand or accent colour anywhere; `warning` above is the o
 
 - Normal top bar (not a sidebar), sticky with a translucent/blurred background; "Apply now" renders as a filled dark pill (the `foreground`/`background` tokens reversed — reads correctly in both themes since those tokens flip together) rather than the brand colour, to stand out from the rest of the nav.
 - Sections alternate `background` (white) and `background-alt` (warm grey) down the page.
-- Section headers: uppercase eyebrow label (small, tracked-out) above a serif (Fraunces) title.
+- Section headers: uppercase eyebrow label (small, tracked-out) above a serif (DM Serif Display) title.
 - Course list rows (`/courses`): plain list rows (no boxed card), course title in the display font with a small muted level caption underneath, a thin border line between rows, and a round pill-shaped arrow button on the right to open/link through — not a plain text link or chevron-in-box. On wide screens the O Level and A Level lists sit side by side in two columns.
 
 ### Home page (`/`)
@@ -1121,3 +1121,4 @@ Owner decision (2026-10-11).
 | 2026-10-06 | **Owner report: the assessment form listed every batch** (e.g. the A Level batch under an O Level course). Batches stay independent of courses (§2), so no schema change: the Target batch list on a course's assessment form (assignments, tests, quizzes) now shows only batches with at least one student enrolled in that course, plus, when editing, the batch the assessment already targets. With none, only "Whole course" is offered, with a hint. The Server Actions re-check a newly chosen batch the same way. Announcements and live classes keep the full list (they aren't course-scoped) |
 | 2026-10-11 | **Owner decision: recorded lectures as Vimeo links** (Stage 24). Videos stay on Vimeo (no video hosting here, §13 unchanged); a course gets a "Recorded lectures" section (no new sidebar item). The admin pastes a Vimeo link (public or unlisted); length and thumbnail come from Vimeo oEmbed when it answers and are simply left empty when it does not (e.g. a domain-restricted video), never blocking the save. Students see shown lectures of their own courses in an embedded player. The first time a lecture is shown it notifies the course's students once ("New lecture: <title>"); `published_at` makes it once only, so edits and hiding/showing again never re-notify. No "watched" tracking for now (owner) |
 | 2026-10-21 | **Owner decision: the LIS crest logo** (navy shield, "LIS" in Fraunces converted to outlines, light-blue open book). It is a built-in brand asset: `public/brand/*.svg` for the header/footer and report letterhead (navy in light mode, white in dark mode and on the navy letterhead; an uploaded Settings logo still wins), and `src/lib/brand-crest.ts` (the same path data) for the favicon, Apple/PWA app icons and the link preview image, which no longer draw the first letter of the academy name or the parabola. The academy name text still comes from `site_settings`; changing the logo later means replacing these files. |
+| 2026-10-26 | **Owner decision: new fonts.** Headings use DM Serif Display and body/UI text uses DM Sans, replacing Fraunces and Figtree everywhere (public site, portal, admin), chosen by the owner from a side-by-side preview. DM Serif Display has a single weight, so headings stay at 400; heading letter-spacing is now -0.01em. The LIS crest letters stay as the existing Fraunces outlines (a fixed brand asset, not live text). |
