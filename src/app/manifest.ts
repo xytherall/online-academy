@@ -15,7 +15,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
     id: "/",
     name,
-    short_name: name,
+    short_name: settings?.short_name?.trim() || name,
     description,
     start_url: "/student",
     scope: "/",

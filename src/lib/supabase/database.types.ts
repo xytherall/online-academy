@@ -905,6 +905,7 @@ export type Database = {
           created_at: string
           id: number
           logo_path: string | null
+          short_name: string | null
           social_links: Json
           tagline: string | null
           updated_at: string
@@ -920,6 +921,7 @@ export type Database = {
           created_at?: string
           id?: number
           logo_path?: string | null
+          short_name?: string | null
           social_links?: Json
           tagline?: string | null
           updated_at?: string
@@ -935,6 +937,7 @@ export type Database = {
           created_at?: string
           id?: number
           logo_path?: string | null
+          short_name?: string | null
           social_links?: Json
           tagline?: string | null
           updated_at?: string

@@ -521,6 +521,7 @@ Single row.
 | Field | Notes |
 |---|---|
 | `academy_name` | |
+| `short_name` | Name under the installed app's icon; falls back to `academy_name` when empty |
 | `tagline` | |
 | `logo_path` | |
 | `about_text` | Home page intro (hero subtext) |
@@ -1122,3 +1123,4 @@ Owner decision (2026-10-11).
 | 2026-10-11 | **Owner decision: recorded lectures as Vimeo links** (Stage 24). Videos stay on Vimeo (no video hosting here, §13 unchanged); a course gets a "Recorded lectures" section (no new sidebar item). The admin pastes a Vimeo link (public or unlisted); length and thumbnail come from Vimeo oEmbed when it answers and are simply left empty when it does not (e.g. a domain-restricted video), never blocking the save. Students see shown lectures of their own courses in an embedded player. The first time a lecture is shown it notifies the course's students once ("New lecture: <title>"); `published_at` makes it once only, so edits and hiding/showing again never re-notify. No "watched" tracking for now (owner) |
 | 2026-10-21 | **Owner decision: the LIS crest logo** (navy shield, "LIS" in Fraunces converted to outlines, light-blue open book). It is a built-in brand asset: `public/brand/*.svg` for the header/footer and report letterhead (navy in light mode, white in dark mode and on the navy letterhead; an uploaded Settings logo still wins), and `src/lib/brand-crest.ts` (the same path data) for the favicon, Apple/PWA app icons and the link preview image, which no longer draw the first letter of the academy name or the parabola. The academy name text still comes from `site_settings`; changing the logo later means replacing these files. |
 | 2026-10-26 | **Owner decision: new fonts.** Headings use DM Serif Display and body/UI text uses DM Sans, replacing Fraunces and Figtree everywhere (public site, portal, admin), chosen by the owner from a side-by-side preview. DM Serif Display has a single weight, so headings stay at 400; heading letter-spacing is now -0.01em. The LIS crest letters stay as the existing Fraunces outlines (a fixed brand asset, not live text). |
+| 2026-10-28 | **Owner decision: a short name setting.** The installed app used the full academy name, which phones cut off under the icon. Added `site_settings.short_name` (`supabase/migrations/20261028160000_short_name.sql`), edited in Admin → Settings (max 30 characters, about 12 fit), used for the manifest `short_name` and the iPhone home-screen title. Empty falls back to `academy_name`. |

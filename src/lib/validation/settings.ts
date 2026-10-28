@@ -44,6 +44,7 @@ export const logoPathSchema = z.string().min(1).max(500);
 
 export const settingsSchema = z.object({
   academy_name: optionalText(200),
+  short_name: optionalText(30),
   tagline: optionalText(300),
   about_text: optionalText(5000),
   about_page_text: optionalText(5000),

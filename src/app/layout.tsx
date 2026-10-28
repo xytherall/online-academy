@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const title = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
   const description = stripEmphasis(settings?.tagline ?? "").trim() || "Online O Level / A Level academy";
+  const appTitle = settings?.short_name?.trim() || title;
   return {
     metadataBase: new URL(getSiteUrl()),
     title,
@@ -22,8 +23,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: { canonical: "/" },
     openGraph: { title, description, url: "/", type: "website" },
     twitter: { card: "summary_large_image", title, description },
-    // iPhone home-screen app: opens full screen, named after the academy.
-    appleWebApp: { capable: true, title, statusBarStyle: "default" },
+    // iPhone home-screen app: opens full screen, named with the short name if set.
+    appleWebApp: { capable: true, title: appTitle, statusBarStyle: "default" },
   };
 }
 

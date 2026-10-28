@@ -39,6 +39,7 @@ function buildFieldErrors(error: z.ZodError): Record<string, string> {
 function parseFormValues(formData: FormData) {
   return {
     academy_name: formData.get("academy_name"),
+    short_name: formData.get("short_name"),
     tagline: formData.get("tagline"),
     about_text: formData.get("about_text"),
     about_page_text: formData.get("about_page_text"),
@@ -83,6 +84,13 @@ export function SettingsForm({ settings }: { settings: SiteSettings | null }) {
       <section className="space-y-4">
         <h2 className="font-medium">Academy</h2>
         <Field id="academy_name" label="Academy name" defaultValue={settings?.academy_name ?? ""} error={fieldErrors.academy_name} />
+        <Field
+          id="short_name"
+          label="Short name"
+          defaultValue={settings?.short_name ?? ""}
+          error={fieldErrors.short_name}
+          hint="Shown under the app icon on phones, e.g. LIS. Keep it to about 12 characters. Leave empty to use the academy name."
+        />
         <Field id="tagline" label="Tagline" defaultValue={settings?.tagline ?? ""} error={fieldErrors.tagline} />
         <div className="space-y-2">
           <Label htmlFor="about_text">Home page intro</Label>
@@ -166,18 +174,33 @@ function Field({
   label,
   defaultValue,
   error,
+  hint,
   type = "text",
 }: {
   id: string;
   label: string;
   defaultValue: string;
   error?: string;
+  hint?: string;
   type?: string;
 }) {
+  const hintId = hint ? `${id}-hint` : undefined;
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} name={id} type={type} defaultValue={defaultValue} aria-invalid={Boolean(error)} />
+      <Input
+        id={id}
+        name={id}
+        type={type}
+        defaultValue={defaultValue}
+        aria-invalid={Boolean(error)}
+        aria-describedby={hintId}
+      />
+      {hint ? (
+        <p id={hintId} className="text-sm text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
       {error ? <FieldError>{error}</FieldError> : null}
     </div>
   );

@@ -22,6 +22,7 @@ export async function updateSettings(
 
   const parsed = settingsSchema.safeParse({
     academy_name: formData.get("academy_name"),
+    short_name: formData.get("short_name"),
     tagline: formData.get("tagline"),
     about_text: formData.get("about_text"),
     about_page_text: formData.get("about_page_text"),
@@ -51,6 +52,7 @@ export async function updateSettings(
     .from("site_settings")
     .update({
       academy_name: parsed.data.academy_name,
+      short_name: parsed.data.short_name,
       tagline: parsed.data.tagline,
       about_text: parsed.data.about_text,
       about_page_text: parsed.data.about_page_text,
