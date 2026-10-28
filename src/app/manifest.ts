@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { APP_NAVY, APP_SPLASH_BACKGROUND } from "@/lib/app-icon";
 import { getSiteSettings } from "@/lib/get-site-settings";
+import { stripEmphasis } from "@/lib/parse-emphasis";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 
 // Makes the site installable as a home-screen app (SPEC §15). The installed
@@ -9,7 +10,7 @@ import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const settings = await getSiteSettings().catch(() => null);
   const name = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
-  const description = settings?.tagline?.trim() || "Online O Level / A Level academy";
+  const description = stripEmphasis(settings?.tagline ?? "").trim() || "Online O Level / A Level academy";
 
   return {
     id: "/",
