@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -105,6 +106,9 @@ export function ApplicationsTable({ applications }: { applications: ApplicationR
                 <TableHead className="hidden md:table-cell">Courses</TableHead>
                 <TableHead className="hidden lg:table-cell">Country</TableHead>
                 <TableHead className="hidden sm:table-cell">Received</TableHead>
+                <TableHead className="text-right">
+                  <span className="sr-only">Open</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -127,6 +131,16 @@ export function ApplicationsTable({ applications }: { applications: ApplicationR
                   <TableCell className="hidden lg:table-cell">{application.country}</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <LocalDateTime iso={application.created_at} className="text-muted-foreground" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      render={<Link href={`/admin/applications/${application.id}`} />}
+                      nativeButton={false}
+                    >
+                      Review
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
