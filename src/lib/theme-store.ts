@@ -9,7 +9,6 @@ function computeInitial(): Theme {
 
 let current: Theme = computeInitial();
 const listeners = new Set<() => void>();
-let mediaListenerAttached = false;
 
 function apply(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
@@ -17,7 +16,7 @@ function apply(theme: Theme) {
   listeners.forEach((listener) => listener());
 }
 
-/** Explicit user choice — persisted, and wins over the OS setting from now on. */
+/** Explicit user choice, persisted. With no stored choice the site is light. */
 export function setTheme(theme: Theme) {
   window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   apply(theme);
@@ -35,15 +34,6 @@ export function getServerSnapshot(): Theme {
 }
 
 export function subscribe(listener: () => void): () => void {
-  if (!mediaListenerAttached && typeof window !== "undefined") {
-    mediaListenerAttached = true;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    media.addEventListener("change", (event) => {
-      // An explicit stored choice always wins over a live OS change.
-      if (window.localStorage.getItem(THEME_STORAGE_KEY)) return;
-      apply(event.matches ? "dark" : "light");
-    });
-  }
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
