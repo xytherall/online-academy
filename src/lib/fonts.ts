@@ -1,13 +1,12 @@
-import { DM_Sans, DM_Serif_Display } from "next/font/google";
+import { DM_Sans, Source_Serif_4 } from "next/font/google";
 
-// Display/heading font. DM Serif Display ships a single weight (400), which
-// is what headings are pinned to in globals.css; italic is used for the
-// emphasised words in the home hero.
-export const dmSerifDisplay = DM_Serif_Display({
+// Display/heading font. Source Serif 4 is a variable font, so every weight is
+// available; headings are pinned to 600 in globals.css, and italic is used
+// for the emphasised words in the home hero.
+export const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  weight: "400",
   style: ["normal", "italic"],
-  variable: "--font-dm-serif-display",
+  variable: "--font-source-serif",
   display: "swap",
 });
 

@@ -591,7 +591,7 @@ Loaded via `next/font/google`.
 
 | Role | Font | Notes |
 |---|---|---|
-| Display / headings | **DM Serif Display** | weight 400 (its only weight), italic for emphasis, `letter-spacing: -0.01em`, `text-wrap: balance` |
+| Display / headings | **Source Serif 4** | weight 600 (variable font), italic for emphasis, `letter-spacing: -0.01em`, `text-wrap: balance` |
 | Body / UI | **DM Sans** | weights 400 / 500 / 600 |
 
 Do **not** use Inter anywhere in this project.
@@ -660,7 +660,7 @@ No orange is used as a brand or accent colour anywhere; `warning` above is the o
 
 - Normal top bar (not a sidebar), sticky with a translucent/blurred background; "Apply now" renders as a filled dark pill (the `foreground`/`background` tokens reversed — reads correctly in both themes since those tokens flip together) rather than the brand colour, to stand out from the rest of the nav.
 - Sections alternate `background` (white) and `background-alt` (warm grey) down the page.
-- Section headers: uppercase eyebrow label (small, tracked-out) above a serif (DM Serif Display) title.
+- Section headers: uppercase eyebrow label (small, tracked-out) above a serif (Source Serif 4) title.
 - Course list rows (`/courses`): plain list rows (no boxed card), course title in the display font with a small muted level caption underneath, a thin border line between rows, and a round pill-shaped arrow button on the right to open/link through — not a plain text link or chevron-in-box. On wide screens the O Level and A Level lists sit side by side in two columns.
 
 ### Home page (`/`)
@@ -1125,3 +1125,4 @@ Owner decision (2026-10-11).
 | 2026-10-26 | **Owner decision: new fonts.** Headings use DM Serif Display and body/UI text uses DM Sans, replacing Fraunces and Figtree everywhere (public site, portal, admin), chosen by the owner from a side-by-side preview. DM Serif Display has a single weight, so headings stay at 400; heading letter-spacing is now -0.01em. The LIS crest letters stay as the existing Fraunces outlines (a fixed brand asset, not live text). |
 | 2026-10-28 | **Owner decision: a short name setting.** The installed app used the full academy name, which phones cut off under the icon. Added `site_settings.short_name` (`supabase/migrations/20261028160000_short_name.sql`), edited in Admin → Settings (max 30 characters, about 12 fit), used for the manifest `short_name` and the iPhone home-screen title. Empty falls back to `academy_name`. |
 | 2026-11-02 | **Owner decision: light mode by default.** Replaces the 2026-10-01 Stage 10A rule that, with no stored choice, the site followed the OS setting. Now every visitor starts in light mode whatever their phone or computer is set to; the toggle still stores an explicit dark/light choice that is remembered. |
+| 2026-11-02 | **Owner decision: Source Serif 4 for headings.** Replaces DM Serif Display, which the owner found too pointy and formal; chosen from a side-by-side preview of softer serif and sans options. Headings now use weight 600. Body/UI text stays DM Sans. |
