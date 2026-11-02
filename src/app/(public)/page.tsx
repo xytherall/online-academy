@@ -156,7 +156,14 @@ export default async function HomePage() {
             </h2>
             <p className="mt-4 text-lg text-dashboard-band-foreground/75">Applications take a few minutes.</p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Button size="marketing" variant="outline" render={<Link href="/apply" />} nativeButton={false}>
+              {/* text-foreground: the panel's white text would otherwise make this label invisible. */}
+              <Button
+                size="marketing"
+                variant="outline"
+                render={<Link href="/apply" />}
+                nativeButton={false}
+                className="border-transparent text-foreground"
+              >
                 Apply now
               </Button>
               <Button
