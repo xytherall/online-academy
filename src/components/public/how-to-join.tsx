@@ -17,48 +17,49 @@ const STEPS = [
 ];
 
 /**
- * "How to join" timeline on the navy section (home page redesign spec, point
- * 5) — the same navy gradient tokens as the student dashboard band.
+ * "How to join" steps (Graph paper redesign): three graph-paper cards with
+ * outlined numbers; the last one is filled to mark the finish.
  */
 export function HowToJoin() {
   return (
-    <section
-      className="relative overflow-hidden px-4 py-[72px] text-dashboard-band-foreground sm:px-6 sm:py-[104px]"
-      style={{ backgroundImage: "linear-gradient(135deg, var(--dashboard-band-from), var(--dashboard-band-to))" }}
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_70%_80%_at_80%_20%,black,transparent_70%)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--grid-line-band) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line-band) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-        }}
-      />
-      <Reveal className="relative mx-auto max-w-5xl">
-        <div className="mb-12 max-w-xl space-y-3">
+    <section className="px-4 py-[72px] sm:px-6 sm:py-[104px]">
+      <Reveal className="mx-auto max-w-6xl">
+        <div className="mb-11 max-w-xl space-y-3">
           <Eyebrow>How to join</Eyebrow>
-          <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">Three steps to your first class.</h2>
-          <p className="text-dashboard-band-foreground/70">No account to create yourself. We set everything up for you.</p>
+          <h2 className="font-display text-[length:clamp(36px,4.8vw,60px)] leading-none font-extrabold tracking-[-0.04em]">
+            Three steps <em className="font-heading font-medium tracking-[-0.02em] text-primary">to your first class.</em>
+          </h2>
+          <p className="text-muted-foreground">No account to create yourself. We set everything up for you.</p>
         </div>
 
-        <ol className="relative grid gap-10 sm:grid-cols-3 sm:gap-8">
-          <div
-            aria-hidden
-            className="absolute top-[26px] right-[16%] left-[26px] hidden h-px bg-dashboard-band-foreground/25 sm:block"
-          />
-          {STEPS.map((step, index) => (
-            <li key={step.title} className="grid grid-cols-[52px_1fr] items-start gap-x-4 gap-y-2 sm:block">
-              <span
-                className="relative row-span-2 grid size-13 shrink-0 place-items-center rounded-full border border-dashboard-band-foreground/40 font-heading text-xl sm:mb-3"
-                style={{ backgroundColor: "var(--dashboard-band-from)" }}
+        <ol className="grid gap-5 sm:grid-cols-3">
+          {STEPS.map((step, index) => {
+            const last = index === STEPS.length - 1;
+            return (
+              <li
+                key={step.title}
+                className={
+                  last
+                    ? "gp-grid-band rounded-3xl border border-primary bg-primary p-7 text-primary-foreground"
+                    : "gp-grid rounded-3xl border border-border bg-card p-7"
+                }
               >
-                {index + 1}
-              </span>
-              <h3 className="font-heading text-2xl">{step.title}</h3>
-              <p className="max-w-[30ch] text-sm text-dashboard-band-foreground/70">{step.description}</p>
-            </li>
-          ))}
+                <span
+                  className={
+                    last
+                      ? "block font-display text-[64px] leading-none font-extrabold text-transparent [-webkit-text-stroke:2px_var(--primary-foreground)]"
+                      : "block font-display text-[64px] leading-none font-extrabold text-transparent [-webkit-text-stroke:2px_var(--primary)]"
+                  }
+                >
+                  {index + 1}
+                </span>
+                <h3 className="mt-4 font-display text-[26px] font-bold tracking-[-0.02em]">{step.title}</h3>
+                <p className={last ? "mt-2 leading-relaxed text-primary-foreground/85" : "mt-2 leading-relaxed text-muted-foreground"}>
+                  {step.description}
+                </p>
+              </li>
+            );
+          })}
         </ol>
       </Reveal>
     </section>

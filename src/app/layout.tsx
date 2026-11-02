@@ -7,7 +7,7 @@ import { getSiteSettings } from "@/lib/get-site-settings";
 import { stripEmphasis } from "@/lib/parse-emphasis";
 import { FALLBACK_SITE_LABEL } from "@/lib/settings";
 import { getSiteUrl } from "@/lib/site-url";
-import { dmSans, sourceSerif } from "@/lib/fonts";
+import { bricolage, dmSans, sourceSerif } from "@/lib/fonts";
 import { THEME_INIT_SCRIPT } from "@/lib/theme-script";
 import "./globals.css";
 
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`h-full antialiased ${sourceSerif.variable} ${dmSans.variable}`}
+      className={`h-full antialiased ${sourceSerif.variable} ${dmSans.variable} ${bricolage.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>

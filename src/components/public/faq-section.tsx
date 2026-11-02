@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Accordion } from "@base-ui/react/accordion";
-import { ChevronDownIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { Eyebrow } from "@/components/eyebrow";
 import { Reveal } from "@/components/public/reveal";
 import type { PublicFaq } from "@/lib/faqs";
@@ -15,26 +16,35 @@ export function FaqSection({ faqs }: { faqs: PublicFaq[] }) {
 
   return (
     <section className="border-t border-border px-4 py-[72px] sm:px-6 sm:py-[104px]">
-      <Reveal className="mx-auto max-w-3xl">
-        <div className="mb-12 max-w-xl space-y-3">
+      <Reveal className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[1fr_1.5fr] lg:gap-12">
+        <div className="space-y-3 lg:sticky lg:top-24">
           <Eyebrow>FAQ</Eyebrow>
-          <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">Frequently asked questions</h2>
+          <h2 className="font-display text-[length:clamp(36px,4.8vw,60px)] leading-none font-extrabold tracking-[-0.04em]">
+            Questions<em className="font-heading font-medium text-primary">?</em>
+          </h2>
+          <p className="max-w-sm leading-relaxed text-muted-foreground">
+            Can&apos;t find your answer?{" "}
+            <Link href="/contact" className="font-semibold text-primary hover:underline">
+              Get in touch
+            </Link>{" "}
+            and we&apos;ll help.
+          </p>
         </div>
 
         <Accordion.Root className="divide-y divide-border border-t border-b border-border">
           {faqs.map((faq) => (
-            <Accordion.Item key={faq.id} value={faq.id} className="py-1">
+            <Accordion.Item key={faq.id} value={faq.id}>
               <Accordion.Header>
-                <Accordion.Trigger className="group flex w-full items-center justify-between gap-4 py-4 text-left font-medium transition-colors hover:text-primary">
+                <Accordion.Trigger className="group flex min-h-16 w-full items-center justify-between gap-4 py-4 text-left text-lg font-semibold transition-colors hover:text-primary">
                   {faq.question}
-                  <ChevronDownIcon
+                  <PlusIcon
                     aria-hidden
-                    className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-[panel-open]:rotate-180"
+                    className="size-6 shrink-0 text-primary transition-transform duration-300 ease-out group-data-[panel-open]:rotate-45"
                   />
                 </Accordion.Trigger>
               </Accordion.Header>
-              <Accordion.Panel className="overflow-hidden text-sm text-muted-foreground transition-[height] duration-200 ease-out data-[starting-style]:h-0 data-[ending-style]:h-0">
-                <p className="pb-4 whitespace-pre-line">{faq.answer}</p>
+              <Accordion.Panel className="overflow-hidden text-muted-foreground transition-[height] duration-200 ease-out data-[ending-style]:h-0 data-[starting-style]:h-0">
+                <p className="pb-5 leading-relaxed whitespace-pre-line">{faq.answer}</p>
               </Accordion.Panel>
             </Accordion.Item>
           ))}

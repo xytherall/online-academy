@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { Eyebrow } from "@/components/eyebrow";
 import { BentoGrid } from "@/components/public/bento-grid";
+import { FactsMarquee } from "@/components/public/facts-marquee";
 import { FaqSection } from "@/components/public/faq-section";
 import { HeroBackground } from "@/components/public/hero-background";
-import { HeroCurves } from "@/components/public/hero-curves";
 import { HowToJoin } from "@/components/public/how-to-join";
 import { PortalPreview } from "@/components/public/portal-preview";
 import { Reveal } from "@/components/public/reveal";
@@ -36,16 +37,20 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <section className="relative overflow-hidden px-4 pt-[56px] pb-[72px] text-center sm:px-6 sm:pt-[88px] sm:pb-[120px]">
+      <section className="relative isolate overflow-hidden px-4 pt-[64px] pb-[56px] text-center sm:px-6 sm:pt-[104px] sm:pb-[88px]">
         <HeroBackground />
-        <HeroCurves />
-        <div className="relative mx-auto max-w-3xl">
-          {offeredLevels ? <Eyebrow className="rise">{offeredLevels}</Eyebrow> : null}
+        <div className="relative mx-auto max-w-5xl">
+          {offeredLevels ? (
+            <p className="rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-sm font-semibold">
+              <span aria-hidden className="gp-pulse size-2 rounded-full bg-success" />
+              {offeredLevels}
+            </p>
+          ) : null}
           {headline ? (
-            <h1 className="rise rise-1 mx-auto mt-[18px] max-w-[15ch] text-[length:clamp(42px,6.6vw,80px)] leading-[1.02]">
+            <h1 className="rise rise-1 mx-auto mt-6 max-w-[16ch] font-display text-[length:clamp(44px,7.4vw,100px)] leading-[0.95] font-extrabold tracking-[-0.045em]">
               {parseEmphasis(headline).map((part, index) =>
                 part.type === "emphasis" ? (
-                  <em key={index} className="text-primary italic">
+                  <em key={index} className="font-heading font-medium tracking-[-0.02em] text-primary italic">
                     {part.value}
                   </em>
                 ) : (
@@ -55,11 +60,14 @@ export default async function HomePage() {
             </h1>
           ) : null}
           {subtext ? (
-            <p className="rise rise-2 mx-auto mt-[22px] max-w-[52ch] text-[18px] text-muted-foreground">{subtext}</p>
+            <p className="rise rise-2 mx-auto mt-6 max-w-[52ch] text-[18px] leading-relaxed text-muted-foreground">
+              {subtext}
+            </p>
           ) : null}
           <div className="rise rise-3 mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="marketing" render={<Link href="/apply" />} nativeButton={false}>
+            <Button size="marketing" render={<Link href="/apply" />} nativeButton={false} className="hover-arrow-group">
               Apply now
+              <ArrowRightIcon aria-hidden className="hover-arrow size-4" />
             </Button>
             <Button size="marketing" variant="outline" render={<Link href="/courses" />} nativeButton={false}>
               View courses
@@ -72,32 +80,23 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-border bg-background-alt px-4 py-[72px] sm:px-6 sm:py-[104px]">
-        <Reveal className="mx-auto max-w-5xl">
-          <div className="mb-12 max-w-xl space-y-3">
-            <Eyebrow>What you get</Eyebrow>
-            <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">
-              Everything for your course, in one calm place.
-            </h2>
-            <p className="text-muted-foreground">
-              Classes happen live. Everything around them lives in your portal, so nothing gets lost in a chat
-              group.
-            </p>
-          </div>
-          <BentoGrid />
-        </Reveal>
-      </section>
+      <FactsMarquee />
 
-      <section className="border-t border-border px-4 py-[72px] sm:px-6 sm:py-[104px]">
-        <Reveal className="mx-auto max-w-5xl">
-          <div className="mb-12 max-w-xl space-y-3">
-            <Eyebrow>Subjects</Eyebrow>
-            <h2 className="text-[length:clamp(32px,4.4vw,52px)] leading-[1.06]">What we teach</h2>
+      <section className="px-4 py-[72px] sm:px-6 sm:py-[104px]">
+        <Reveal className="mx-auto max-w-6xl">
+          <div className="mb-11 max-w-2xl space-y-3">
+            <Eyebrow>What we teach</Eyebrow>
+            <h2 className="font-display text-[length:clamp(36px,5vw,64px)] leading-none font-extrabold tracking-[-0.04em]">
+              {courses.length > 0 ? "Our courses, " : "Our courses"}
+              {courses.length > 0 ? (
+                <em className="font-heading font-medium tracking-[-0.02em] text-primary">taught all the way through.</em>
+              ) : null}
+            </h2>
           </div>
           {courses.length > 0 ? (
             <div className="grid gap-5 lg:grid-cols-2">
-              {courses.map((course) => (
-                <SubjectCard key={course.id} course={course} />
+              {courses.map((course, index) => (
+                <SubjectCard key={course.id} course={course} index={index} />
               ))}
             </div>
           ) : (
@@ -109,21 +108,67 @@ export default async function HomePage() {
         </Reveal>
       </section>
 
+      <section className="border-y border-border bg-background-alt px-4 py-[72px] sm:px-6 sm:py-[104px]">
+        <Reveal className="mx-auto max-w-6xl">
+          <div className="mb-11 max-w-2xl space-y-3">
+            <Eyebrow>What you get</Eyebrow>
+            <h2 className="font-display text-[length:clamp(36px,4.8vw,60px)] leading-none font-extrabold tracking-[-0.04em]">
+              Everything for your course, <em className="font-heading font-medium tracking-[-0.02em] text-primary">in one place.</em>
+            </h2>
+            <p className="text-lg leading-relaxed text-muted-foreground">
+              Classes happen live. Everything around them lives in your portal, so nothing gets lost in a chat
+              group.
+            </p>
+          </div>
+          <BentoGrid />
+        </Reveal>
+      </section>
+
       <HowToJoin />
 
       <FaqSection faqs={faqs} />
 
-      <section className="border-t border-border bg-background-alt px-4 py-[72px] text-center sm:px-6 sm:py-[104px]">
-        <Reveal className="mx-auto max-w-2xl">
-          <h2 className="text-[length:clamp(40px,6vw,72px)] leading-[1.02]">Ready to start?</h2>
-          <p className="mt-4 text-lg text-muted-foreground">Applications take a few minutes.</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="marketing" render={<Link href="/apply" />} nativeButton={false}>
-              Apply now
-            </Button>
-            <Button size="marketing" variant="outline" render={<Link href="/contact" />} nativeButton={false}>
-              Contact us
-            </Button>
+      <section className="px-4 pt-8 pb-[72px] sm:px-6 sm:pb-[104px]">
+        <Reveal className="mx-auto max-w-6xl">
+          <div
+            className="relative isolate overflow-hidden rounded-[36px] px-6 py-[72px] text-center text-dashboard-band-foreground sm:px-10 sm:py-[88px]"
+            style={{ backgroundColor: "var(--dashboard-band-from)" }}
+          >
+            <div aria-hidden className="gp-grid-band gp-pan absolute inset-0 -z-10" />
+            <svg
+              aria-hidden
+              viewBox="0 0 1200 400"
+              preserveAspectRatio="none"
+              fill="none"
+              className="absolute inset-0 -z-10 size-full"
+            >
+              <path
+                className="gp-draw"
+                pathLength={1}
+                d="M0 300 C150 160 300 160 450 300 S750 440 900 300 S1100 180 1200 220"
+                stroke="var(--tile-glow)"
+                strokeOpacity="0.5"
+                strokeWidth="2"
+              />
+            </svg>
+            <h2 className="font-display text-[length:clamp(44px,6vw,80px)] leading-none font-extrabold tracking-[-0.04em]">
+              Ready to <em className="font-heading font-medium tracking-[-0.02em] text-[var(--tile-glow)]">start?</em>
+            </h2>
+            <p className="mt-4 text-lg text-dashboard-band-foreground/75">Applications take a few minutes.</p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Button size="marketing" variant="outline" render={<Link href="/apply" />} nativeButton={false}>
+                Apply now
+              </Button>
+              <Button
+                size="marketing"
+                variant="ghost"
+                render={<Link href="/contact" />}
+                nativeButton={false}
+                className="border border-white/35 text-dashboard-band-foreground hover:bg-white/10 hover:text-dashboard-band-foreground"
+              >
+                Contact us
+              </Button>
+            </div>
           </div>
         </Reveal>
       </section>

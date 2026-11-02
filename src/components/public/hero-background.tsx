@@ -1,38 +1,41 @@
 /**
- * Decorative hero backdrop (SPEC §12): a soft two-colour glow, a fading
- * graph-paper grid, and a faint parabola/sine motif. Purely decorative —
- * aria-hidden, absolutely positioned behind the hero's real content.
+ * Decorative hero backdrop (SPEC §12, Graph paper redesign): graph paper that
+ * slowly drifts, faint axes, a sine wave and a parabola that draw themselves,
+ * and a dot that travels along the wave. Purely decorative: aria-hidden,
+ * theme tokens only, and still (final state) with reduced motion.
  */
+const WAVE = "M0 260 C150 60 300 60 450 260 S750 460 900 260 S1200 60 1350 260";
+
 export function HeroBackground() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <div
-        className="absolute inset-0 [mask-image:radial-gradient(ellipse_70%_65%_at_50%_45%,black,black_35%,transparent_90%)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-      <div
-        className="absolute -top-32 left-1/4 h-96 w-96 rounded-full blur-3xl"
-        style={{ backgroundColor: "var(--hero-glow-1)" }}
-      />
-      <div
-        className="absolute -top-20 right-1/4 h-96 w-96 rounded-full blur-3xl"
-        style={{ backgroundColor: "var(--hero-glow-2)" }}
-      />
+      <div className="gp-grid gp-pan absolute inset-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,transparent_30%,var(--background)_80%)]" />
       <svg
-        className="absolute inset-x-0 bottom-0 h-32 w-full text-primary/15"
-        viewBox="0 0 1200 200"
-        preserveAspectRatio="none"
+        viewBox="0 0 1350 520"
+        preserveAspectRatio="xMidYMid slice"
         fill="none"
+        className="absolute inset-x-0 top-0 h-[460px] w-full sm:h-[640px]"
       >
+        <line x1="0" y1="260" x2="1350" y2="260" stroke="var(--foreground)" strokeOpacity="0.12" />
+        <line x1="675" y1="0" x2="675" y2="520" stroke="var(--foreground)" strokeOpacity="0.12" />
         <path
-          d="M0 140 C 150 40, 300 40, 450 100 S 750 180, 900 100 S 1100 20, 1200 60"
-          stroke="currentColor"
-          strokeWidth="2"
+          className="gp-draw"
+          pathLength={1}
+          d={WAVE}
+          stroke="var(--primary)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
         />
+        <path
+          className="gp-draw"
+          pathLength={1}
+          d="M0 470 Q675 -200 1350 470"
+          stroke="var(--accent-warm)"
+          strokeOpacity="0.7"
+          strokeWidth="1.5"
+        />
+        <circle className="gp-dot" r="7" fill="var(--primary)" style={{ offsetPath: `path("${WAVE}")` }} />
       </svg>
     </div>
   );

@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { dmSans, sourceSerif } from "@/lib/fonts";
+import { bricolage, dmSans, sourceSerif } from "@/lib/fonts";
 import "./globals.css";
 
 // Shown only when the root layout itself fails (e.g. the database can't be
 // reached), so it renders its own document and can't read site settings.
 export default function GlobalError({ retry }: { error: Error & { digest?: string }; retry: () => void }) {
   return (
-    <html lang="en" className={`h-full antialiased ${sourceSerif.variable} ${dmSans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`h-full antialiased ${sourceSerif.variable} ${dmSans.variable} ${bricolage.variable}`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <title>Something went wrong</title>
         <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
