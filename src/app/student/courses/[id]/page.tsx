@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FileTextIcon, LinkIcon } from "lucide-react";
+import { ClipboardListIcon, FileTextIcon, LinkIcon, PlayCircleIcon } from "lucide-react";
 import { LectureThumbnail } from "@/components/lecture-thumbnail";
 import { LocalDateTime } from "@/components/local-date-time";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
-import { Separator } from "@/components/ui/separator";
 import { SubjectIcon } from "@/components/subject-icon";
+import { PortalListItem, PortalSection } from "@/components/portal/portal-list";
 import { computeAssessmentStatus } from "@/lib/assessments";
 import { requireStudent } from "@/lib/auth";
 import { assessmentStatusBadgeVariant } from "@/lib/status-badge";
@@ -65,135 +64,115 @@ export default async function StudentCoursePage({ params }: { params: Promise<{ 
   if (!course) notFound();
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="mx-auto w-full max-w-4xl space-y-10">
+      <div className="rounded-3xl border border-border bg-card p-5 sm:p-7">
+        <div className="flex items-center gap-3">
           <SubjectIcon title={course.title} />
-          <h1 className="text-xl font-semibold">{course.title}</h1>
           <Badge variant="secondary">{course.level} Level</Badge>
         </div>
+        <h1 className="mt-3 font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{course.title}</h1>
         {course.description ? (
-          <p className="whitespace-pre-line text-sm text-muted-foreground">{course.description}</p>
+          <p className="mt-2 leading-relaxed whitespace-pre-line text-muted-foreground">{course.description}</p>
         ) : null}
       </div>
 
-      <Separator />
-
-      <div className="space-y-4">
-        <h2 className="font-medium">Recorded lectures</h2>
-
-        {lecturesError ? (
-          <Alert variant="destructive">
-            <AlertDescription>Could not load recorded lectures. Please refresh the page.</AlertDescription>
-          </Alert>
-        ) : lectures && lectures.length > 0 ? (
-          <ul className="space-y-2">
-            {lectures.map((lecture) => {
-              const duration = formatDuration(lecture.duration_seconds);
-              return (
-                <li key={lecture.id} className="rounded-lg border border-border bg-card p-2">
-                  <Link href={`/student/lectures/${lecture.id}`} className="group flex items-center gap-3">
-                    <LectureThumbnail url={lecture.thumbnail_url} className="w-28" />
-                    <div className="min-w-0">
-                      <p className="line-clamp-2 font-medium group-hover:underline">{lecture.title}</p>
-                      {duration ? <p className="text-xs text-muted-foreground">{duration}</p> : null}
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <EmptyState
-            title="No recorded lectures yet"
-            description="Your teacher hasn't added any recorded lectures for this course yet."
-          />
-        )}
-      </div>
-
-      <Separator />
-
-      <div className="space-y-4">
-        <h2 className="font-medium">Resources</h2>
-
-        {resourcesError ? (
-          <Alert variant="destructive">
-            <AlertDescription>Could not load resources. Please refresh the page.</AlertDescription>
-          </Alert>
-        ) : resources && resources.length > 0 ? (
-          <ul className="space-y-2">
-            {resources.map((resource) => (
-              <li key={resource.id} className="rounded-lg border border-border bg-card p-3">
-                <a
-                  href={
-                    resource.kind === "file" ? `/student/resources/${resource.id}` : (resource.url ?? "#")
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-medium hover:underline"
-                >
-                  {resource.kind === "file" ? (
-                    <FileTextIcon className="size-4 shrink-0" />
-                  ) : (
-                    <LinkIcon className="size-4 shrink-0" />
-                  )}
-                  {resource.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyState
-            title="No resources yet"
-            description="Your teacher hasn't added any notes or files for this course yet."
-          />
-        )}
-      </div>
-
-      <Separator />
-
-      <div className="space-y-4">
-        <h2 className="font-medium">Assessments</h2>
-
+      <PortalSection title="Assignments and tests">
         {assessmentsError || submissionsError ? (
           <Alert variant="destructive">
             <AlertDescription>Could not load assessments. Please refresh the page.</AlertDescription>
           </Alert>
         ) : assessments && assessments.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {assessments.map((assessment) => {
               const submission = submissions?.find((s) => s.assessment_id === assessment.id) ?? null;
               const status = computeAssessmentStatus(assessment, submission);
               return (
-                <li key={assessment.id} className="rounded-lg border border-border bg-card p-3">
-                  <Link
+                <li key={assessment.id}>
+                  <PortalListItem
                     href={`/student/assessments/${assessment.id}`}
-                    className="flex flex-wrap items-center justify-between gap-2"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate font-medium hover:underline">{assessment.title}</p>
-                        <Badge variant="secondary">
-                          {assessmentTypeLabel(assessment.type)}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Due <LocalDateTime iso={assessment.due_at} /> · {assessment.total_marks} marks
-                      </p>
-                    </div>
-                    <Badge variant={assessmentStatusBadgeVariant(status)}>{status}</Badge>
-                  </Link>
+                    title={assessment.title}
+                    details={[
+                      `${assessmentTypeLabel(assessment.type)} · ${assessment.total_marks} marks`,
+                      <>
+                        Due <LocalDateTime iso={assessment.due_at} />
+                      </>,
+                    ]}
+                    aside={<Badge variant={assessmentStatusBadgeVariant(status)}>{status}</Badge>}
+                  />
                 </li>
               );
             })}
           </ul>
         ) : (
           <EmptyState
+            compact
+            icon={ClipboardListIcon}
             title="No assessments yet"
             description="Your teacher hasn't posted any assignments or tests for this course yet."
           />
         )}
-      </div>
+      </PortalSection>
+
+      <PortalSection title="Recorded lectures">
+        {lecturesError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Could not load recorded lectures. Please refresh the page.</AlertDescription>
+          </Alert>
+        ) : lectures && lectures.length > 0 ? (
+          <ul className="grid gap-2.5 sm:grid-cols-2">
+            {lectures.map((lecture) => (
+              <li key={lecture.id}>
+                <PortalListItem
+                  href={`/student/lectures/${lecture.id}`}
+                  icon={<LectureThumbnail url={lecture.thumbnail_url} className="w-24" />}
+                  title={<span className="line-clamp-2">{lecture.title}</span>}
+                  details={[formatDuration(lecture.duration_seconds)]}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState
+            compact
+            icon={PlayCircleIcon}
+            title="No recorded lectures yet"
+            description="Your teacher hasn't added any recorded lectures for this course yet."
+          />
+        )}
+      </PortalSection>
+
+      <PortalSection title="Notes and resources">
+        {resourcesError ? (
+          <Alert variant="destructive">
+            <AlertDescription>Could not load resources. Please refresh the page.</AlertDescription>
+          </Alert>
+        ) : resources && resources.length > 0 ? (
+          <ul className="grid gap-2.5 sm:grid-cols-2">
+            {resources.map((resource) => (
+              <li key={resource.id}>
+                <PortalListItem
+                  href={resource.kind === "file" ? `/student/resources/${resource.id}` : (resource.url ?? "#")}
+                  external
+                  icon={
+                    <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-primary-soft text-primary">
+                      {resource.kind === "file" ? <FileTextIcon className="size-4" /> : <LinkIcon className="size-4" />}
+                    </span>
+                  }
+                  title={resource.title}
+                  details={[resource.kind === "file" ? "File" : "Link"]}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState
+            compact
+            icon={FileTextIcon}
+            title="No resources yet"
+            description="Your teacher hasn't added any notes or files for this course yet."
+          />
+        )}
+      </PortalSection>
     </div>
   );
 }

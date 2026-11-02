@@ -31,6 +31,8 @@ export function PortalSection({
 
 export function PortalListItem({
   href,
+  external = false,
+  icon,
   title,
   details,
   aside,
@@ -38,6 +40,10 @@ export function PortalListItem({
 }: {
   /** Without an href the row is static (no hover, no chevron). */
   href?: string;
+  /** Opens in a new tab (files, outside links). */
+  external?: boolean;
+  /** Small icon or thumbnail on the left. */
+  icon?: React.ReactNode;
   title: React.ReactNode;
   /** Short lines under the title, e.g. "O Level Maths · Quiz" and the due date. */
   details?: React.ReactNode[];
@@ -48,6 +54,7 @@ export function PortalListItem({
 }) {
   const body = (
     <>
+      {icon ? <div className="shrink-0 self-center">{icon}</div> : null}
       <div className="min-w-0 flex-1">
         <p className="leading-snug font-semibold">{title}</p>
         {details?.filter(Boolean).map((line, index) => (
@@ -63,9 +70,17 @@ export function PortalListItem({
   );
 
   const className = "flex items-start gap-3 rounded-2xl border border-border bg-card p-4";
+  const linkClassName = cn(className, "hover-arrow-group transition-colors hover:border-primary/40 hover:bg-accent/40");
 
+  if (href && external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={linkClassName}>
+        {body}
+      </a>
+    );
+  }
   return href ? (
-    <Link href={href} className={cn(className, "hover-arrow-group transition-colors hover:border-primary/40 hover:bg-accent/40")}>
+    <Link href={href} className={linkClassName}>
       {body}
     </Link>
   ) : (
