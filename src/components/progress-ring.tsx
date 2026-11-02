@@ -50,7 +50,10 @@ export function ProgressRing({
           className="fill-none stroke-primary transition-[stroke-dashoffset] duration-500 motion-reduce:transition-none"
         />
       </svg>
-      <span className="absolute text-sm font-semibold tabular-nums" aria-hidden="true">
+      <span
+        className={size < 64 ? "absolute text-[11px] font-semibold tabular-nums" : "absolute text-sm font-semibold tabular-nums"}
+        aria-hidden="true"
+      >
         {pct}%
       </span>
     </div>

@@ -30,18 +30,18 @@ export async function PortalShell({
 
   return (
     <div className="flex flex-1 flex-col bg-background-portal">
-      <header className="border-b border-border bg-card px-4 py-3 sm:px-6 print:hidden">
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 border-b border-border bg-card/90 px-4 py-2.5 backdrop-blur-md sm:px-6 print:hidden">
+        <nav className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             {mobileNav}
-            <div className="flex items-center gap-2">
-              <AcademyBrand settings={settings} className="font-heading text-base" />
-              <Badge variant="secondary" className="hidden font-normal text-muted-foreground sm:inline-flex">
+            <div className="flex min-w-0 items-center gap-2">
+              <AcademyBrand settings={settings} compact className="min-w-0 truncate font-heading text-base" />
+              <Badge variant="secondary" className="hidden font-normal text-muted-foreground lg:inline-flex">
                 {userLabel}
               </Badge>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {headerActions}
             <ThemeToggle />
             <span className="hidden text-sm text-muted-foreground md:inline">{userName}</span>

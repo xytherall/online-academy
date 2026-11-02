@@ -8,6 +8,7 @@ import { DashboardBand } from "@/components/student/dashboard-band";
 import { InstallAppCard } from "@/components/student/install-app-card";
 import { LiveClassesCard } from "@/components/student/live-classes-card";
 import { PhoneNotificationsCard } from "@/components/student/phone-notifications-card";
+import { PortalListItem, PortalSection } from "@/components/portal/portal-list";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
 import { getAnnouncementSeenCutoff, getAnnouncementsForStudent } from "@/lib/announcements";
@@ -45,13 +46,13 @@ export default async function StudentDashboard() {
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-4xl space-y-10">
       <LiveClassesCard liveClasses={liveClasses} error={liveClassesError} />
 
       <div>
         <DashboardBand name={profile.full_name?.trim() || null} batchName={batchName} />
 
-        <div className="relative z-10 -mt-10 px-6 sm:px-8">
+        <div className="relative z-10 -mt-10 px-4 sm:px-8">
           {error ? (
             <Alert variant="destructive">
               <AlertDescription>Could not load your courses. Please refresh the page.</AlertDescription>
@@ -76,36 +77,28 @@ export default async function StudentDashboard() {
       <InstallAppCard />
       <PhoneNotificationsCard notificationsEnabled={notificationsEnabled} />
 
-      <div>
-        <h2 className="mb-3 font-medium">Upcoming work</h2>
+      <PortalSection title="Upcoming work">
         {dueSoonError ? (
           <Alert variant="destructive">
             <AlertDescription>Could not load your upcoming work. Please refresh the page.</AlertDescription>
           </Alert>
         ) : dueSoon && dueSoon.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {dueSoon.map((assessment) => {
               const { label, variant } = dueDateBadge(assessment.due_at);
               return (
                 <li key={assessment.id}>
-                  <Link
+                  <PortalListItem
                     href={`/student/assessments/${assessment.id}`}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 hover:bg-accent/50"
-                  >
-                    <span className="flex min-w-0 flex-wrap items-center gap-2">
-                      <span>
-                        <span className="font-medium">{assessment.title}</span>
-                        {assessment.course ? (
-                          <span className="text-sm text-muted-foreground"> · {assessment.course.title}</span>
-                        ) : null}
-                      </span>
-                      <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
-                    </span>
-                    <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                      Due <LocalDateTime iso={assessment.due_at} />
-                      <Badge variant={variant}>{label}</Badge>
-                    </span>
-                  </Link>
+                    title={assessment.title}
+                    details={[
+                      [assessment.course?.title, assessmentTypeLabel(assessment.type)].filter(Boolean).join(" · "),
+                      <>
+                        Due <LocalDateTime iso={assessment.due_at} />
+                      </>,
+                    ]}
+                    aside={<Badge variant={variant}>{label}</Badge>}
+                  />
                 </li>
               );
             })}
@@ -118,37 +111,30 @@ export default async function StudentDashboard() {
             description="New assignments and tests will show up here as your teacher posts them."
           />
         )}
-      </div>
+      </PortalSection>
 
-      <div>
-        <h2 className="mb-3 font-medium">Recently marked</h2>
+      <PortalSection title="Recently marked">
         {recentlyMarkedError ? (
           <Alert variant="destructive">
             <AlertDescription>Could not load recently marked work. Please refresh the page.</AlertDescription>
           </Alert>
         ) : recentlyMarked && recentlyMarked.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {recentlyMarked
               .flatMap((submission) => (submission.assessment ? [{ ...submission, assessment: submission.assessment }] : []))
               .map((submission) => (
                 <li key={submission.id}>
-                  <Link
+                  <PortalListItem
                     href={`/student/assessments/${submission.assessment.id}`}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 hover:bg-accent/50"
-                  >
-                    <span className="min-w-0">
-                      <span className="font-medium">{submission.assessment.title}</span>
-                      {submission.assessment.course ? (
-                        <span className="text-sm text-muted-foreground"> · {submission.assessment.course.title}</span>
-                      ) : null}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        {submission.marks} / {submission.assessment.total_marks}
+                    title={submission.assessment.title}
+                    details={[submission.assessment.course?.title]}
+                    aside={
+                      <span className="font-display text-lg font-bold tabular-nums">
+                        {submission.marks}
+                        <span className="text-sm font-normal text-muted-foreground"> / {submission.assessment.total_marks}</span>
                       </span>
-                      <Badge variant="success">Marked</Badge>
-                    </span>
-                  </Link>
+                    }
+                  />
                 </li>
               ))}
           </ul>
@@ -160,33 +146,31 @@ export default async function StudentDashboard() {
             description="Marked work and feedback will appear here."
           />
         )}
-      </div>
+      </PortalSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-medium">Announcements</h2>
-          <Link href="/student/announcements" className="text-sm text-muted-foreground hover:underline">
+      <PortalSection
+        title="Announcements"
+        action={
+          <Link href="/student/announcements" className="text-sm font-medium text-primary hover:underline">
             View all
           </Link>
-        </div>
+        }
+      >
         {announcementsError ? (
           <Alert variant="destructive">
             <AlertDescription>Could not load announcements. Please refresh the page.</AlertDescription>
           </Alert>
         ) : announcements && announcements.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {announcements.map((announcement) => (
-              <li key={announcement.id} className="rounded-lg border border-border bg-card p-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{announcement.title}</span>
-                    {isNew(announcement.created_at, announcementCutoff) ? <Badge variant="info">New</Badge> : null}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    <LocalDateTime iso={announcement.created_at} />
-                  </span>
-                </div>
-                <AnnouncementBody body={announcement.body} className="mt-1 text-sm text-muted-foreground" />
+              <li key={announcement.id}>
+                <PortalListItem
+                  title={announcement.title}
+                  details={[<LocalDateTime key="date" iso={announcement.created_at} />]}
+                  aside={isNew(announcement.created_at, announcementCutoff) ? <Badge variant="info">New</Badge> : null}
+                >
+                  <AnnouncementBody body={announcement.body} className="mt-2 text-sm text-muted-foreground" />
+                </PortalListItem>
               </li>
             ))}
           </ul>
@@ -198,7 +182,7 @@ export default async function StudentDashboard() {
             description="Updates from the academy will show up here."
           />
         )}
-      </div>
+      </PortalSection>
     </div>
   );
 }
