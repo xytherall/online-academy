@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeftIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { LocalDateTime } from "@/components/local-date-time";
 import { requireAdmin } from "@/lib/auth";
@@ -68,15 +69,19 @@ export default async function AdminAssessmentMarkingPage({ params }: { params: P
     .map((student) => ({ student, submission: submissionByStudent.get(student.id) ?? null }));
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="space-y-1.5">
         {course ? (
-          <Link href={`/admin/courses/${course.id}`} className="text-sm text-muted-foreground hover:underline">
+          <Link
+            href={`/admin/courses/${course.id}`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeftIcon aria-hidden className="size-4" />
             {course.title}
           </Link>
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold">{assessment.title}</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{assessment.title}</h1>
           <Badge variant="secondary">{assessmentTypeLabel(assessment.type)}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
