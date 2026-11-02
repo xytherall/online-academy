@@ -28,7 +28,7 @@ export function FactsMarquee() {
           FACTS.map((fact, index) => (
             <span key={`${copy}-${fact}`} className="flex items-center gap-9">
               {fact}
-              <span className="font-heading text-primary italic">{SYMBOLS[index]}</span>
+              <span className="font-serif text-primary italic">{SYMBOLS[index]}</span>
             </span>
           )),
         )}

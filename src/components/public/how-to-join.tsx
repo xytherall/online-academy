@@ -27,7 +27,7 @@ export function HowToJoin() {
         <div className="mb-11 max-w-xl space-y-3">
           <Eyebrow>How to join</Eyebrow>
           <h2 className="font-display text-[length:clamp(36px,4.8vw,60px)] leading-none font-extrabold tracking-[-0.04em]">
-            Three steps <em className="font-heading font-medium tracking-[-0.02em] text-primary">to your first class.</em>
+            Three steps <em className="font-serif font-medium tracking-[-0.02em] text-primary">to your first class.</em>
           </h2>
           <p className="text-muted-foreground">No account to create yourself. We set everything up for you.</p>
         </div>

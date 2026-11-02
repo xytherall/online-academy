@@ -64,7 +64,7 @@ export function PortalPreview() {
           <p className="font-display text-3xl leading-none font-bold tabular-nums">
             32<span className="text-lg text-muted-foreground"> / 40</span>
           </p>
-          <p className="mt-2 font-heading text-sm text-muted-foreground italic">
+          <p className="mt-2 font-serif text-sm text-muted-foreground italic">
             &ldquo;Clear working. Check units in Q4.&rdquo;
           </p>
         </div>

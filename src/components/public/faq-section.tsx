@@ -20,7 +20,7 @@ export function FaqSection({ faqs }: { faqs: PublicFaq[] }) {
         <div className="space-y-3 lg:sticky lg:top-24">
           <Eyebrow>FAQ</Eyebrow>
           <h2 className="font-display text-[length:clamp(36px,4.8vw,60px)] leading-none font-extrabold tracking-[-0.04em]">
-            Questions<em className="font-heading font-medium text-primary">?</em>
+            Questions<em className="font-serif font-medium text-primary">?</em>
           </h2>
           <p className="max-w-sm leading-relaxed text-muted-foreground">
             Can&apos;t find your answer?{" "}

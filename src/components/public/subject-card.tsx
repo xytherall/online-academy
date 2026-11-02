@@ -26,7 +26,7 @@ export function SubjectCard({ course, index }: { course: PublicCourse; index: nu
         {COURSE_LEVEL_LABELS[course.level]}
       </span>
       {style.symbol ? (
-        <span aria-hidden className="relative mt-5 font-heading text-[54px] leading-none italic sm:text-[64px]">
+        <span aria-hidden className="relative mt-5 font-serif text-[54px] leading-none italic sm:text-[64px]">
           {style.symbol}
         </span>
       ) : null}

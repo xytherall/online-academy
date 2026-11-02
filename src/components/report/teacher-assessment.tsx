@@ -73,7 +73,7 @@ export function TeacherAssessmentCard({ assessment }: { assessment: TeacherAsses
         </div>
       ) : null}
       {assessment.remarks ? (
-        <p className="border-l-2 border-primary pl-3.5 font-heading text-[17px] italic leading-relaxed">
+        <p className="border-l-2 border-primary pl-3.5 font-serif text-[17px] italic leading-relaxed">
           &ldquo;{assessment.remarks}&rdquo;
         </p>
       ) : null}

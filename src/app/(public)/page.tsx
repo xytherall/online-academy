@@ -50,7 +50,7 @@ export default async function HomePage() {
             <h1 className="rise rise-1 mx-auto mt-6 max-w-[16ch] font-display text-[length:clamp(44px,7.4vw,100px)] leading-[0.95] font-extrabold tracking-[-0.045em]">
               {parseEmphasis(headline).map((part, index) =>
                 part.type === "emphasis" ? (
-                  <em key={index} className="font-heading font-medium tracking-[-0.02em] text-primary italic">
+                  <em key={index} className="font-serif font-medium tracking-[-0.02em] text-primary italic">
                     {part.value}
                   </em>
                 ) : (
@@ -89,7 +89,7 @@ export default async function HomePage() {
             <h2 className="font-display text-[length:clamp(36px,5vw,64px)] leading-none font-extrabold tracking-[-0.04em]">
               {courses.length > 0 ? "Our courses, " : "Our courses"}
               {courses.length > 0 ? (
-                <em className="font-heading font-medium tracking-[-0.02em] text-primary">taught all the way through.</em>
+                <em className="font-serif font-medium tracking-[-0.02em] text-primary">taught all the way through.</em>
               ) : null}
             </h2>
           </div>
@@ -113,7 +113,7 @@ export default async function HomePage() {
           <div className="mb-11 max-w-2xl space-y-3">
             <Eyebrow>What you get</Eyebrow>
             <h2 className="font-display text-[length:clamp(36px,4.8vw,60px)] leading-none font-extrabold tracking-[-0.04em]">
-              Everything for your course, <em className="font-heading font-medium tracking-[-0.02em] text-primary">in one place.</em>
+              Everything for your course, <em className="font-serif font-medium tracking-[-0.02em] text-primary">in one place.</em>
             </h2>
             <p className="text-lg leading-relaxed text-muted-foreground">
               Classes happen live. Everything around them lives in your portal, so nothing gets lost in a chat
@@ -152,7 +152,7 @@ export default async function HomePage() {
               />
             </svg>
             <h2 className="font-display text-[length:clamp(44px,6vw,80px)] leading-none font-extrabold tracking-[-0.04em]">
-              Ready to <em className="font-heading font-medium tracking-[-0.02em] text-[var(--tile-glow)]">start?</em>
+              Ready to <em className="font-serif font-medium tracking-[-0.02em] text-[var(--tile-glow)]">start?</em>
             </h2>
             <p className="mt-4 text-lg text-dashboard-band-foreground/75">Applications take a few minutes.</p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

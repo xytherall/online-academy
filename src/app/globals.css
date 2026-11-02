@@ -11,7 +11,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-source-serif);
+  /* Headings everywhere use the display face; Source Serif stays for italic
+     emphasis (`font-serif`). */
+  --font-heading: var(--font-bricolage);
+  --font-serif: var(--font-source-serif);
   --font-display: var(--font-bricolage);
   --color-accent-warm: var(--accent-warm);
   --color-tile-foreground: var(--tile-foreground);
@@ -223,8 +226,8 @@
   h3,
   h4 {
     @apply font-heading;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 }
