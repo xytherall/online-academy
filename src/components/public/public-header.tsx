@@ -8,15 +8,15 @@ import type { SiteSettings } from "@/lib/settings";
 
 export function PublicHeader({ settings }: { settings: SiteSettings | null }) {
   return (
-    <header className="border-b border-border bg-background/80 px-4 py-4 backdrop-blur-sm sm:px-6">
-      <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-        <Link href="/" className="shrink-0 font-heading text-lg">
-          <AcademyBrand settings={settings} />
+    <header className="sticky top-0 z-40 border-b border-border bg-background/85 px-4 backdrop-blur-md sm:px-6">
+      <nav className="mx-auto flex h-[72px] max-w-6xl items-center justify-between gap-4">
+        <Link href="/" className="min-w-0 shrink font-display text-lg font-extrabold tracking-[-0.02em]">
+          <AcademyBrand settings={settings} compact />
         </Link>
-        <PublicNavLinks className="hidden items-center gap-6 md:flex" />
-        <div className="flex items-center gap-2">
+        <PublicNavLinks className="hidden items-center gap-7 lg:flex" />
+        <div className="flex shrink-0 items-center gap-2">
           <ThemeToggle />
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center gap-2 lg:flex">
             <Button size="marketing" variant="outline" render={<Link href="/login" />} nativeButton={false}>
               Student login
             </Button>
@@ -24,6 +24,15 @@ export function PublicHeader({ settings }: { settings: SiteSettings | null }) {
               Apply now
             </Button>
           </div>
+          <Button
+            size="sm"
+            variant="dark"
+            render={<Link href="/apply" />}
+            nativeButton={false}
+            className="lg:hidden"
+          >
+            Apply
+          </Button>
           <PublicMobileNav />
         </div>
       </nav>

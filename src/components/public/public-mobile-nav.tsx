@@ -15,7 +15,7 @@ export function PublicMobileNav() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="outline" size="icon" className="md:hidden">
+          <Button variant="outline" size="icon" className="lg:hidden">
             <MenuIcon />
             <span className="sr-only">Open menu</span>
           </Button>

@@ -23,8 +23,8 @@ export default async function CoursesPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <PageHeader eyebrow="Courses" title="Courses" />
-      <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
+      <PageHeader eyebrow="Courses" title="What we teach" />
+      <div className="mx-auto w-full max-w-6xl flex-1 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
         {courses.length > 0 ? (
           <CourseGrid courses={courses} />
         ) : (

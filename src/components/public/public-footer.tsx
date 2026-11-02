@@ -11,11 +11,11 @@ export function PublicFooter({ settings }: { settings: SiteSettings | null }) {
   const hasContact = Boolean(email || whatsappUrl);
 
   return (
-    <footer className="border-t border-border bg-background px-4 py-16 sm:px-6">
-      <div className="mx-auto max-w-5xl">
+    <footer className="gp-grid border-t border-border bg-background px-4 py-16 sm:px-6">
+      <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-8">
           <div className="space-y-2.5">
-            <AcademyBrand settings={settings} className="font-heading text-2xl text-foreground" />
+            <AcademyBrand settings={settings} className="font-display text-2xl font-extrabold tracking-[-0.03em] text-foreground" />
             {tagline ? <p className="max-w-[30ch] text-sm text-muted-foreground">{tagline}</p> : null}
           </div>
 

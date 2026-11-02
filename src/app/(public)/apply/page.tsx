@@ -67,7 +67,7 @@ export default async function ApplyPage({
         title="Apply now"
         description="Tell us a little about yourself and which courses you would like to join. We review every application and get back to you with your login details."
       />
-      <div className="mx-auto w-full max-w-2xl flex-1 px-4 pb-[72px] sm:px-6 sm:pb-[104px]">
+      <div className="mx-auto w-full max-w-2xl flex-1 rounded-3xl border border-border bg-card px-5 py-7 shadow-[var(--shadow-elevated)] sm:px-9 sm:py-10 mb-[72px] sm:mb-[104px] max-sm:mx-4 max-sm:w-auto">
         <ApplyForm
           courses={courses.map((course) => ({
             id: course.id,

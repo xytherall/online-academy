@@ -9,11 +9,15 @@ import { cn } from "@/lib/utils";
 export function AcademyBrand({
   settings,
   className,
+  compact = false,
 }: {
   settings: SiteSettings | null;
   className?: string;
+  /** On phones, show the short name (Admin → Settings) instead of the full name, if one is set. */
+  compact?: boolean;
 }) {
   const name = settings?.academy_name?.trim() || FALLBACK_SITE_LABEL;
+  const shortName = compact ? settings?.short_name?.trim() : undefined;
 
   return (
     <span className={cn("flex items-center gap-2 font-semibold", className)}>
@@ -28,7 +32,14 @@ export function AcademyBrand({
           <img src="/brand/lis-crest-white.svg" alt="" className="hidden h-8 w-8 dark:block" />
         </>
       )}
-      {name}
+      {shortName ? (
+        <>
+          <span className="sm:hidden">{shortName}</span>
+          <span className="hidden sm:inline">{name}</span>
+        </>
+      ) : (
+        name
+      )}
     </span>
   );
 }

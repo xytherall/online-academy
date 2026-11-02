@@ -2,10 +2,9 @@ import { Eyebrow } from "@/components/eyebrow";
 import { HeroBackground } from "@/components/public/hero-background";
 
 /**
- * Shared hero-style header for public pages other than the home page
- * (SPEC §12): eyebrow + large serif title over the same soft glow and
- * faint grid as the home hero, at a smaller scale. No decorative maths
- * motif — `HeroCurves` is home-page only per SPEC §12.
+ * Shared header for public pages other than the home page (Graph paper
+ * redesign): eyebrow + big display title over the same drifting graph paper
+ * and self-drawing curves as the home hero, at a smaller scale.
  */
 export function PageHeader({
   eyebrow,
@@ -17,12 +16,18 @@ export function PageHeader({
   description?: string;
 }) {
   return (
-    <div className="relative overflow-hidden px-4 pt-12 pb-10 text-center sm:px-6 sm:pt-16 sm:pb-14">
+    <div className="relative isolate overflow-hidden px-4 pt-14 pb-12 text-center sm:px-6 sm:pt-20 sm:pb-16">
       <HeroBackground />
-      <div className="relative mx-auto max-w-2xl">
+      <div className="relative mx-auto max-w-3xl">
         {eyebrow ? <Eyebrow className="rise">{eyebrow}</Eyebrow> : null}
-        <h1 className="rise rise-1 mx-auto mt-3 max-w-[20ch] text-[length:clamp(32px,5vw,52px)] leading-[1.05]">{title}</h1>
-        {description ? <p className="rise rise-2 mx-auto mt-4 max-w-[52ch] text-muted-foreground">{description}</p> : null}
+        <h1 className="rise rise-1 mx-auto mt-4 max-w-[18ch] font-display text-[length:clamp(40px,6vw,72px)] leading-[0.98] font-extrabold tracking-[-0.04em]">
+          {title}
+        </h1>
+        {description ? (
+          <p className="rise rise-2 mx-auto mt-5 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+        ) : null}
       </div>
     </div>
   );
