@@ -34,7 +34,7 @@ export default async function StudentQuestionPage({ params }: { params: Promise<
       </Link>
 
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-xl font-semibold">{question.course?.title ?? "General"}</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{question.course?.title ?? "General"}</h1>
         <Badge variant={badge.variant}>{badge.label}</Badge>
       </div>
 

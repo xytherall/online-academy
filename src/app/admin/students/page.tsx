@@ -47,7 +47,7 @@ export default async function AdminStudentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Students</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Students</h1>
         <Button render={<Link href="/admin/students/new" />} nativeButton={false}>Add student</Button>
       </div>
 

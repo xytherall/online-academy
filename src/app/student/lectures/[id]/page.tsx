@@ -57,7 +57,7 @@ export default async function StudentLecturePage({ params }: { params: Promise<{
       </div>
 
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold">{lecture.title}</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{lecture.title}</h1>
         {duration ? <p className="text-sm text-muted-foreground">{duration}</p> : null}
       </div>
 

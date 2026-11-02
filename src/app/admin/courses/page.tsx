@@ -18,7 +18,7 @@ export default async function AdminCoursesPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Courses</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Courses</h1>
         <Button render={<Link href="/admin/courses/new" />} nativeButton={false}>New course</Button>
       </div>
 

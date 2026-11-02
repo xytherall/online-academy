@@ -45,7 +45,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">{displayName(student)}</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{displayName(student)}</h1>
           <p className="text-sm text-muted-foreground">{student.email}</p>
         </div>
         <div className="flex items-center gap-2">

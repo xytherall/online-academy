@@ -15,7 +15,7 @@ export default async function StudentCoursesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">My Courses</h1>
+      <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">My Courses</h1>
 
       {error ? (
         <Alert variant="destructive">

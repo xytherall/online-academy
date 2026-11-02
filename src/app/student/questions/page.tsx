@@ -29,7 +29,7 @@ export default async function StudentQuestionsPage() {
   return (
     <div className="max-w-2xl space-y-8">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold">Ask the teacher</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Ask the teacher</h1>
         <p className="text-sm text-muted-foreground">
           Stuck on something? Ask here and you&apos;ll get an answer on this page. Only you and the academy can see
           your questions.

@@ -17,7 +17,7 @@ export default async function AdminSettingsPage() {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-xl font-semibold">Settings</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Settings</h1>
         <p className="text-sm text-muted-foreground">
           Academy name, branding and contact details shown across the public site and portal.
         </p>

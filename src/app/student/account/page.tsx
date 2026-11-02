@@ -30,7 +30,7 @@ export default async function StudentAccountPage() {
 
   return (
     <div className="max-w-xl space-y-8">
-      <h1 className="text-xl font-semibold">Account</h1>
+      <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Account</h1>
 
       <Card>
         <CardHeader>

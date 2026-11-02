@@ -28,7 +28,7 @@ export default async function StudentNotificationsPage() {
   return (
     <div className="max-w-2xl space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Notifications</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Notifications</h1>
         {hasUnread ? <MarkAllReadButton /> : null}
       </div>
 

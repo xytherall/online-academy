@@ -38,7 +38,7 @@ export default async function EditBatchPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-semibold">{batch.name}</h1>
+      <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{batch.name}</h1>
 
       <BatchForm mode="edit" batch={batch} />
 

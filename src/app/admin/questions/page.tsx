@@ -29,7 +29,7 @@ export default async function AdminQuestionsPage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold">Questions</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Questions</h1>
         <p className="text-sm text-muted-foreground">
           Questions students asked through &ldquo;Ask the teacher&rdquo;. {waiting.length} waiting for an answer.
         </p>

@@ -14,7 +14,7 @@ export default async function NewStudentPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Add student</h1>
+      <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Add student</h1>
       <StudentForm courses={courses ?? []} batches={batches ?? []} />
     </div>
   );

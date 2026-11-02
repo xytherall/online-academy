@@ -45,7 +45,7 @@ export function LiveClassManager({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">Live classes</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Live classes</h1>
           <p className="text-sm text-muted-foreground">
             Students see upcoming classes on their dashboard until an hour after the start time.
           </p>

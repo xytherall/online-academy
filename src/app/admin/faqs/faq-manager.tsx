@@ -30,7 +30,7 @@ export function FaqManager({ faqs }: { faqs: Faq[] }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">FAQ</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">FAQ</h1>
           <p className="text-sm text-muted-foreground">
             Shown on the home page in this order. Unpublished questions are never shown.
           </p>

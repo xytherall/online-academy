@@ -30,7 +30,7 @@ export default async function StudentAnnouncementsPage() {
   return (
     <div className="space-y-6">
       <MarkSeenOnMount />
-      <h1 className="text-xl font-semibold">Announcements</h1>
+      <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Announcements</h1>
 
       {error ? (
         <Alert variant="destructive">

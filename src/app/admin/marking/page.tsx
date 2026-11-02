@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmptyState } from "@/components/empty-state";
 import { LocalDateTime } from "@/components/local-date-time";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PortalListItem } from "@/components/portal/portal-list";
 import { requireAdmin } from "@/lib/auth";
 import { displayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
@@ -24,10 +23,10 @@ export default async function AdminMarkingQueue() {
     .order("submitted_at", { ascending: true });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Marking</h1>
-        <p className="text-sm text-muted-foreground">Submissions waiting to be marked, across all courses.</p>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Marking</h1>
+        <p className="text-sm text-muted-foreground">Work students have handed in that still needs marks, oldest first.</p>
       </div>
 
       {error ? (
@@ -37,44 +36,31 @@ export default async function AdminMarkingQueue() {
       ) : !submissions || submissions.length === 0 ? (
         <EmptyState title="Nothing to mark" description="All submitted work has been marked." />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Assessment</TableHead>
-                <TableHead className="hidden sm:table-cell">Course</TableHead>
-                <TableHead>Student</TableHead>
-                <TableHead className="hidden sm:table-cell">Submitted</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {submissions.map((submission) =>
-                submission.assessment ? (
-                  <TableRow key={submission.id}>
-                    <TableCell>
-                      <Link
-                        href={`/admin/assessments/${submission.assessment.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        {submission.assessment.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {submission.assessment.course?.title ?? "Unknown course"}
-                    </TableCell>
-                    <TableCell>
-                      {submission.student ? displayName(submission.student) : "Unknown student"}
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground sm:table-cell">
-                      {submission.submitted_at ? <LocalDateTime iso={submission.submitted_at} /> : "—"}
-                    </TableCell>
-                  </TableRow>
-                ) : null,
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+        <ul className="space-y-2.5">
+          {submissions.map((submission) =>
+            submission.assessment ? (
+              <li key={submission.id}>
+                <PortalListItem
+                  href={`/admin/assessments/${submission.assessment.id}`}
+                  title={submission.student ? displayName(submission.student) : "Unknown student"}
+                  details={[
+                    `${submission.assessment.title} · ${submission.assessment.course?.title ?? "Unknown course"}`,
+                    submission.submitted_at ? (
+                      <>
+                        Handed in <LocalDateTime iso={submission.submitted_at} />
+                      </>
+                    ) : null,
+                  ]}
+                  aside={
+                    <span className="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground">
+                      Mark
+                    </span>
+                  }
+                />
+              </li>
+            ) : null,
+          )}
+        </ul>      )}
     </div>
   );
 }

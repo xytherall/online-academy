@@ -51,7 +51,7 @@ export function AnnouncementManager({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold">Announcements</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Announcements</h1>
           <p className="text-sm text-muted-foreground">
             Target everyone, one course, or one batch.
           </p>
