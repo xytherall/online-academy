@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { FileDropzone, SelectedFile } from "@/components/file-dropzone";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,26 +22,17 @@ export function FileUploadField({ courseId }: { courseId: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const selected = event.target.files?.[0] ?? null;
+  function handleFiles([selected]: File[]) {
     setError(null);
+    if (!selected) return;
 
-    if (!selected) {
-      setFile(null);
-      return;
-    }
     if (!ALLOWED_RESOURCE_MIME_TYPES.includes(selected.type)) {
       setError("File must be a PDF, JPG, PNG or WEBP.");
-      setFile(null);
-      event.target.value = "";
       return;
     }
     if (selected.size > MAX_RESOURCE_FILE_BYTES) {
       setError("File must be 10 MB or smaller.");
-      setFile(null);
-      event.target.value = "";
       return;
     }
     setFile(selected);
@@ -84,27 +76,33 @@ export function FileUploadField({ courseId }: { courseId: string }) {
     toast.success("Added");
     setTitle("");
     setFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
     router.refresh();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="file-resource-title">Title</Label>
-        <Input id="file-resource-title" value={title} onChange={(event) => setTitle(event.target.value)} />
+        <Input
+          id="file-resource-title"
+          value={title}
+          placeholder="For example: Chapter 4 notes"
+          onChange={(event) => setTitle(event.target.value)}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="file-resource-file">File</Label>
-        <input
-          ref={fileInputRef}
-          id="file-resource-file"
-          type="file"
-          accept={ALLOWED_RESOURCE_MIME_TYPES.join(",")}
-          onChange={handleFileChange}
-          className="block text-sm"
-        />
-        <p className="text-xs text-muted-foreground">PDF, JPG, PNG or WEBP. Max 10 MB.</p>
+        {file ? (
+          <SelectedFile file={file} onRemove={() => setFile(null)} disabled={isPending} />
+        ) : (
+          <FileDropzone
+            id="file-resource-file"
+            accept={ALLOWED_RESOURCE_MIME_TYPES.join(",")}
+            onFiles={handleFiles}
+            disabled={isPending}
+            hint="PDF, JPG, PNG or WEBP. Max 10 MB."
+          />
+        )}
       </div>
 
       {error ? (

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { FileDropzone, SelectedFile } from "@/components/file-dropzone";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,21 +32,17 @@ export function AttachmentUploadField({
   const [isUploading, setIsUploading] = useState(false);
   const [isReplacing, setIsReplacing] = useState(false);
   const [viewError, setViewError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const selected = event.target.files?.[0] ?? null;
+  async function handleFiles([selected]: File[]) {
     setError(null);
     if (!selected) return;
 
     if (!ALLOWED_RESOURCE_MIME_TYPES.includes(selected.type)) {
       setError("File must be a PDF, JPG, PNG or WEBP.");
-      event.target.value = "";
       return;
     }
     if (selected.size > MAX_RESOURCE_FILE_BYTES) {
       setError("File must be 10 MB or smaller.");
-      event.target.value = "";
       return;
     }
 
@@ -56,7 +53,6 @@ export function AttachmentUploadField({
       .from("course-files")
       .upload(path, selected, { contentType: selected.type });
     setIsUploading(false);
-    event.target.value = "";
 
     if (uploadError) {
       setError("Could not upload the file. Please try again.");
@@ -83,32 +79,35 @@ export function AttachmentUploadField({
       <Label>Attachment</Label>
 
       {value && !isReplacing ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm">{filenameFromPath(value)}</span>
-          <Button type="button" variant="outline" size="sm" onClick={handleView}>
-            View
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setIsReplacing(true)}>
-            Replace
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
-            Remove
-          </Button>
+        <div className="space-y-2">
+          <SelectedFile file={{ name: filenameFromPath(value) }} />
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={handleView}>
+              View
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setIsReplacing(true)}>
+              Replace
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
+              Remove
+            </Button>
+          </div>
         </div>
       ) : (
-        <>
-          <input
-            ref={fileInputRef}
-            type="file"
+        <div className="space-y-2">
+          <FileDropzone
             accept={ALLOWED_RESOURCE_MIME_TYPES.join(",")}
-            onChange={handleFileChange}
+            onFiles={handleFiles}
             disabled={isUploading}
-            className="block text-sm"
+            buttonLabel={isUploading ? "Uploading…" : undefined}
+            hint="PDF, JPG, PNG or WEBP. Max 10 MB. Optional."
           />
-          <p className="text-xs text-muted-foreground">
-            {isUploading ? "Uploading…" : "PDF, JPG, PNG or WEBP. Max 10 MB. Optional."}
-          </p>
-        </>
+          {isReplacing ? (
+            <Button type="button" variant="ghost" size="sm" onClick={() => setIsReplacing(false)}>
+              Keep the current file
+            </Button>
+          ) : null}
+        </div>
       )}
 
       {error ? (

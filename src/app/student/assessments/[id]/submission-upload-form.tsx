@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileDropzone, SelectedFile } from "@/components/file-dropzone";
 import { compressImage } from "@/lib/compress-image";
 import { createClient } from "@/lib/supabase/client";
 import { ALLOWED_RESOURCE_MIME_TYPES, MAX_RESOURCE_FILE_BYTES } from "@/lib/validation/assessments";
@@ -26,7 +27,6 @@ export function SubmissionUploadForm({
   dueAt: string;
 }) {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -36,9 +36,7 @@ export function SubmissionUploadForm({
   // late submission; it doesn't need to tick live while the form is open.
   const [isLate] = useState(() => new Date() > new Date(dueAt));
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(event.target.files ?? []);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  function handleFiles(selected: File[]) {
     if (selected.length === 0) return;
 
     setError(null);
@@ -124,30 +122,23 @@ export function SubmissionUploadForm({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card p-3">
-      <div className="space-y-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
+    <div className="space-y-4">
+      {files.length < MAX_SUBMISSION_FILES ? (
+        <FileDropzone
           accept={ALLOWED_RESOURCE_MIME_TYPES.join(",")}
-          onChange={handleFileChange}
+          multiple
+          onFiles={handleFiles}
           disabled={isSubmitting}
-          className="block text-sm"
+          buttonLabel={files.length > 0 ? "Add more files" : "Choose files"}
+          hint={`PDF or photos (JPG, PNG, WEBP). Up to ${MAX_SUBMISSION_FILES} files, 10 MB each.`}
         />
-        <p className="text-xs text-muted-foreground">
-          PDF, JPG, PNG or WEBP. Max 10 MB per file, up to {MAX_SUBMISSION_FILES} files.
-        </p>
-      </div>
+      ) : null}
 
       {files.length > 0 ? (
-        <ul className="space-y-1 text-sm">
+        <ul className="space-y-2">
           {files.map((file, index) => (
-            <li key={`${file.name}-${index}`} className="flex items-center justify-between gap-2">
-              <span className="truncate">{file.name}</span>
-              <Button type="button" variant="ghost" size="sm" onClick={() => removeFile(index)} disabled={isSubmitting}>
-                Remove
-              </Button>
+            <li key={`${file.name}-${index}`}>
+              <SelectedFile file={file} onRemove={() => removeFile(index)} disabled={isSubmitting} />
             </li>
           ))}
         </ul>
@@ -159,8 +150,14 @@ export function SubmissionUploadForm({
         </Alert>
       ) : null}
 
-      <Button type="button" disabled={files.length === 0 || isSubmitting} onClick={() => setConfirmOpen(true)}>
-        Submit
+      <Button
+        type="button"
+        size="lg"
+        className="w-full sm:w-auto"
+        disabled={files.length === 0 || isSubmitting}
+        onClick={() => setConfirmOpen(true)}
+      >
+        {files.length === 0 ? "Submit" : `Submit ${files.length === 1 ? "1 file" : `${files.length} files`}`}
       </Button>
 
       <Dialog open={confirmOpen} onOpenChange={(next) => !isSubmitting && setConfirmOpen(next)}>
