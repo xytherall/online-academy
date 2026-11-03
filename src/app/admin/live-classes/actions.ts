@@ -16,6 +16,7 @@ function parseLiveClassForm(formData: FormData) {
     join_url: formData.get("join_url"),
     note: formData.get("note"),
     batch_id: formData.get("batch_id"),
+    course_id: formData.get("course_id"),
   });
 }
 

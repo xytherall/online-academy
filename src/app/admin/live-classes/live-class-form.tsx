@@ -19,11 +19,12 @@ const initialState: LiveClassFormState = { error: null, success: false };
 
 type LiveClass = Tables<"live_classes">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
+type Course = Pick<Tables<"courses">, "id" | "title">;
 
 export function LiveClassForm(
   props:
-    | { mode: "create"; batches: Batch[]; onDone: () => void }
-    | { mode: "edit"; liveClass: LiveClass; batches: Batch[]; onDone: () => void },
+    | { mode: "create"; batches: Batch[]; courses: Course[]; onDone: () => void }
+    | { mode: "edit"; liveClass: LiveClass; batches: Batch[]; courses: Course[]; onDone: () => void },
 ) {
   const liveClass = props.mode === "edit" ? props.liveClass : undefined;
   const action = props.mode === "create" ? createLiveClass : updateLiveClass.bind(null, props.liveClass.id);
@@ -34,6 +35,7 @@ export function LiveClassForm(
   const [joinUrl, setJoinUrl] = useState(liveClass?.join_url ?? "");
   const [note, setNote] = useState(liveClass?.note ?? "");
   const [batchId, setBatchId] = useState<string>(liveClass?.batch_id ?? EVERYONE_VALUE);
+  const [courseId, setCourseId] = useState<string>(liveClass?.course_id ?? EVERYONE_VALUE);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // The time is entered in the admin's own (device) time zone, like
@@ -62,6 +64,7 @@ export function LiveClassForm(
       join_url: formData.get("join_url"),
       note: formData.get("note"),
       batch_id: formData.get("batch_id"),
+      course_id: formData.get("course_id"),
     });
 
     if (!parsed.success) {
@@ -78,8 +81,13 @@ export function LiveClassForm(
   }
 
   const batchItems = {
-    [EVERYONE_VALUE]: "All students",
+    [EVERYONE_VALUE]: "All batches",
     ...Object.fromEntries(props.batches.map((b) => [b.id, b.name])),
+  };
+
+  const courseItems = {
+    [EVERYONE_VALUE]: "All courses",
+    ...Object.fromEntries(props.courses.map((c) => [c.id, c.title])),
   };
 
   return (
@@ -139,7 +147,30 @@ export function LiveClassForm(
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="live-class-batch">For</Label>
+        <Label htmlFor="live-class-course">Course</Label>
+        <Select
+          name="course_id"
+          items={courseItems}
+          value={courseId}
+          onValueChange={(value) => setCourseId(value ?? EVERYONE_VALUE)}
+        >
+          <SelectTrigger id="live-class-course" className="w-full" aria-invalid={Boolean(fieldErrors.course_id)}>
+            <SelectValue placeholder="Choose a course" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={EVERYONE_VALUE}>All courses</SelectItem>
+            {props.courses.map((course) => (
+              <SelectItem key={course.id} value={course.id}>
+                {course.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {fieldErrors.course_id ? <FieldError>{fieldErrors.course_id}</FieldError> : null}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="live-class-batch">Batch</Label>
         <Select
           name="batch_id"
           items={batchItems}
@@ -147,10 +178,10 @@ export function LiveClassForm(
           onValueChange={(value) => setBatchId(value ?? EVERYONE_VALUE)}
         >
           <SelectTrigger id="live-class-batch" className="w-full" aria-invalid={Boolean(fieldErrors.batch_id)}>
-            <SelectValue placeholder="Choose who this class is for" />
+            <SelectValue placeholder="Choose a batch" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={EVERYONE_VALUE}>All students</SelectItem>
+            <SelectItem value={EVERYONE_VALUE}>All batches</SelectItem>
             {props.batches.map((batch) => (
               <SelectItem key={batch.id} value={batch.id}>
                 {batch.name}
@@ -159,6 +190,9 @@ export function LiveClassForm(
           </SelectContent>
         </Select>
         {fieldErrors.batch_id ? <FieldError>{fieldErrors.batch_id}</FieldError> : null}
+        <p className="text-sm text-muted-foreground">
+          Only students who match both see the class: enrolled in the course and in the batch.
+        </p>
       </div>
 
       {props.mode === "edit" ? (

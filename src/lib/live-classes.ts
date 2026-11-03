@@ -6,8 +6,9 @@ export type StudentLiveClass = Pick<Tables<"live_classes">, "id" | "title" | "st
 
 /**
  * Upcoming classes for the signed-in student, soonest first. RLS ("Students
- * can read their live classes") limits rows to all-student classes and the
- * student's own batch; this only drops classes that started over an hour ago.
+ * can read their live classes") limits rows to classes for the student's batch
+ * (or all batches) and a course they are enrolled in (or all courses); this
+ * only drops classes that started over an hour ago.
  */
 export async function getUpcomingLiveClasses(): Promise<{ liveClasses: StudentLiveClass[] | null; error: boolean }> {
   const supabase = await createClient();

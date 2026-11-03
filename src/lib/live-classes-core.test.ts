@@ -21,6 +21,7 @@ describe("liveClassSchema", () => {
     join_url: "https://zoom.us/j/123",
     note: "",
     batch_id: "everyone",
+    course_id: "everyone",
   };
 
   it("accepts a class for everyone", () => {
@@ -31,12 +32,28 @@ describe("liveClassSchema", () => {
       join_url: "https://zoom.us/j/123",
       note: null,
       batch_id: null,
+      course_id: null,
     });
   });
 
   it("accepts one batch", () => {
     const batchId = "4f1c2b8e-5a6d-4e3f-9b2a-1c0d7e8f9a0b";
     expect(liveClassSchema.parse({ ...valid, batch_id: batchId }).batch_id).toBe(batchId);
+  });
+
+  it("accepts one course, alone or with a batch", () => {
+    const courseId = "7a2d3c4b-1e0f-4a9b-8c7d-6e5f4a3b2c1d";
+    const batchId = "4f1c2b8e-5a6d-4e3f-9b2a-1c0d7e8f9a0b";
+    expect(liveClassSchema.parse({ ...valid, course_id: courseId })).toMatchObject({
+      course_id: courseId,
+      batch_id: null,
+    });
+    expect(liveClassSchema.parse({ ...valid, course_id: courseId, batch_id: batchId })).toMatchObject({
+      course_id: courseId,
+      batch_id: batchId,
+    });
+    expect(liveClassSchema.parse({ ...valid, course_id: undefined }).course_id).toBeNull();
+    expect(liveClassSchema.safeParse({ ...valid, course_id: "not-a-course" }).success).toBe(false);
   });
 
   it("only accepts http(s) join links", () => {
