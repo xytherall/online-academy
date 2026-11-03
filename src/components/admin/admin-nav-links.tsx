@@ -7,6 +7,7 @@ import {
   CheckSquareIcon,
   HelpCircleIcon,
   InboxIcon,
+  KeyRoundIcon,
   LayersIcon,
   LayoutDashboardIcon,
   MegaphoneIcon,
@@ -29,6 +30,7 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/announcements", label: "Announcements", icon: MegaphoneIcon },
   { href: "/admin/faqs", label: "FAQ", icon: HelpCircleIcon },
   { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
+  { href: "/change-password", label: "Change password", icon: KeyRoundIcon },
 ] as const;
 
 export type AdminNavCounts = { pendingApplications: number; waitingQuestions: number };
