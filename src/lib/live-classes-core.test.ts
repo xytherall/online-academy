@@ -20,8 +20,8 @@ describe("liveClassSchema", () => {
     starts_at: "2026-10-05T14:30:00.000Z",
     join_url: "https://zoom.us/j/123",
     note: "",
-    batch_id: "everyone",
-    course_id: "everyone",
+    course_ids: [],
+    batch_ids: [],
   };
 
   it("accepts a class for everyone", () => {
@@ -31,29 +31,31 @@ describe("liveClassSchema", () => {
       starts_at: "2026-10-05T14:30:00.000Z",
       join_url: "https://zoom.us/j/123",
       note: null,
-      batch_id: null,
-      course_id: null,
+      course_ids: [],
+      batch_ids: [],
     });
   });
 
-  it("accepts one batch", () => {
+  it("accepts several courses and several batches", () => {
+    const courseA = "7a2d3c4b-1e0f-4a9b-8c7d-6e5f4a3b2c1d";
+    const courseB = "8b3e4d5c-2f1a-4b0c-9d8e-7f6a5b4c3d2e";
     const batchId = "4f1c2b8e-5a6d-4e3f-9b2a-1c0d7e8f9a0b";
-    expect(liveClassSchema.parse({ ...valid, batch_id: batchId }).batch_id).toBe(batchId);
+    expect(liveClassSchema.parse({ ...valid, course_ids: [courseA, courseB], batch_ids: [batchId] })).toMatchObject({
+      course_ids: [courseA, courseB],
+      batch_ids: [batchId],
+    });
+    expect(liveClassSchema.parse({ ...valid, batch_ids: [batchId] })).toMatchObject({
+      course_ids: [],
+      batch_ids: [batchId],
+    });
   });
 
-  it("accepts one course, alone or with a batch", () => {
+  it("drops duplicate targets and rejects ids that are not uuids", () => {
     const courseId = "7a2d3c4b-1e0f-4a9b-8c7d-6e5f4a3b2c1d";
-    const batchId = "4f1c2b8e-5a6d-4e3f-9b2a-1c0d7e8f9a0b";
-    expect(liveClassSchema.parse({ ...valid, course_id: courseId })).toMatchObject({
-      course_id: courseId,
-      batch_id: null,
-    });
-    expect(liveClassSchema.parse({ ...valid, course_id: courseId, batch_id: batchId })).toMatchObject({
-      course_id: courseId,
-      batch_id: batchId,
-    });
-    expect(liveClassSchema.parse({ ...valid, course_id: undefined }).course_id).toBeNull();
-    expect(liveClassSchema.safeParse({ ...valid, course_id: "not-a-course" }).success).toBe(false);
+    expect(liveClassSchema.parse({ ...valid, course_ids: [courseId, courseId] }).course_ids).toEqual([courseId]);
+    expect(liveClassSchema.safeParse({ ...valid, course_ids: ["not-a-course"] }).success).toBe(false);
+    expect(liveClassSchema.safeParse({ ...valid, batch_ids: ["everyone"] }).success).toBe(false);
+    expect(liveClassSchema.safeParse({ ...valid, course_ids: undefined }).success).toBe(false);
   });
 
   it("only accepts http(s) join links", () => {

@@ -48,8 +48,20 @@ check(
   "delete academy announcement",
 );
 if (batchIds.length) {
-  check(await sb.from("announcements").delete().in("batch_id", batchIds), "delete batch announcements");
-  check(await sb.from("live_classes").delete().in("batch_id", batchIds), "delete batch live classes");
+  const announcementIds = check(
+    await sb.from("announcement_batches").select("announcement_id").in("batch_id", batchIds),
+    "find batch announcements",
+  ).map((row) => row.announcement_id);
+  if (announcementIds.length) {
+    check(await sb.from("announcements").delete().in("id", announcementIds), "delete batch announcements");
+  }
+  const liveClassIds = check(
+    await sb.from("live_class_batches").select("live_class_id").in("batch_id", batchIds),
+    "find batch live classes",
+  ).map((row) => row.live_class_id);
+  if (liveClassIds.length) {
+    check(await sb.from("live_classes").delete().in("id", liveClassIds), "delete batch live classes");
+  }
 }
 
 const courses = check(await sb.from("courses").select("id, slug"), "load courses");

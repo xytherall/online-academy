@@ -1,17 +1,8 @@
 import { z } from "zod";
+import { targetIdsSchema } from "./post-targets";
 
 // Lengths must match the checks in
 // supabase/migrations/20261004191728_stage19_live_classes.sql.
-
-/** Select value for "All batches" / "All courses" (stored as null). */
-export const EVERYONE_VALUE = "everyone";
-
-function optionalTarget(message: string) {
-  return z.preprocess(
-    (value) => (value === EVERYONE_VALUE || value === "" || value == null ? null : value),
-    z.uuid({ error: message }).nullable(),
-  );
-}
 
 export const liveClassSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
@@ -35,8 +26,9 @@ export const liveClassSchema = z.object({
     (value) => (typeof value === "string" && value.trim().length > 0 ? value.trim() : null),
     z.string().max(1000, "Note must be 1,000 characters or fewer").nullable(),
   ),
-  batch_id: optionalTarget("Choose a batch"),
-  course_id: optionalTarget("Choose a course"),
+  course_ids: targetIdsSchema("Choose valid courses"),
+  batch_ids: targetIdsSchema("Choose valid batches"),
 });
 
 export type LiveClassFormInput = z.input<typeof liveClassSchema>;
+export type LiveClassInput = z.output<typeof liveClassSchema>;

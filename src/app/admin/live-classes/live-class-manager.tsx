@@ -17,20 +17,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { namesForIds, postTargetLabel } from "@/lib/post-targets";
 import type { Tables } from "@/lib/supabase/database.types";
 import { deleteLiveClass } from "./actions";
 import { LiveClassForm } from "./live-class-form";
 
-type LiveClass = Tables<"live_classes">;
+/** A live class with the ids it targets (empty = all). */
+export type AdminLiveClass = Tables<"live_classes"> & { course_ids: string[]; batch_ids: string[] };
 type Batch = Pick<Tables<"batches">, "id" | "name">;
 type Course = Pick<Tables<"courses">, "id" | "title">;
 
-/** e.g. "A Level Maths · Batch X", "A Level Maths", "Batch X", or "All students". */
-function targetLabel(liveClass: LiveClass, courses: Course[], batches: Batch[]): string {
-  const parts: string[] = [];
-  if (liveClass.course_id) parts.push(courses.find((c) => c.id === liveClass.course_id)?.title ?? "Course");
-  if (liveClass.batch_id) parts.push(batches.find((b) => b.id === liveClass.batch_id)?.name ?? "Batch");
-  return parts.length > 0 ? parts.join(" · ") : "All students";
+function targetLabel(liveClass: AdminLiveClass, courses: Course[], batches: Batch[]): string {
+  return postTargetLabel(
+    namesForIds(liveClass.course_ids, courses, (c) => c.title, "Course"),
+    namesForIds(liveClass.batch_ids, batches, (b) => b.name, "Batch"),
+  );
 }
 
 /** `upcoming` and `past` are split on the server so the render doesn't depend on the browser clock. */
@@ -40,8 +41,8 @@ export function LiveClassManager({
   batches,
   courses,
 }: {
-  upcoming: LiveClass[];
-  past: LiveClass[];
+  upcoming: AdminLiveClass[];
+  past: AdminLiveClass[];
   batches: Batch[];
   courses: Course[];
 }) {
@@ -101,7 +102,7 @@ function LiveClassRow({
   courses,
   isPast = false,
 }: {
-  liveClass: LiveClass;
+  liveClass: AdminLiveClass;
   batches: Batch[];
   courses: Course[];
   isPast?: boolean;
