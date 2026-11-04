@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { notifyNewLiveClass } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
-import { liveClassSchema } from "@/lib/validation/live-classes";
+import { liveClassSchema, type LiveClassInput } from "@/lib/validation/live-classes";
 
 export type LiveClassFormState = { error: string | null; success: boolean };
 type ActionResult = { error: string | null };
@@ -15,9 +15,20 @@ function parseLiveClassForm(formData: FormData) {
     starts_at: formData.get("starts_at"),
     join_url: formData.get("join_url"),
     note: formData.get("note"),
-    batch_id: formData.get("batch_id"),
-    course_id: formData.get("course_id"),
+    course_ids: formData.getAll("course_ids"),
+    batch_ids: formData.getAll("batch_ids"),
   });
+}
+
+function saveArgs(data: LiveClassInput) {
+  return {
+    p_title: data.title,
+    p_starts_at: data.starts_at,
+    p_join_url: data.join_url,
+    p_note: data.note ?? undefined,
+    p_course_ids: data.course_ids,
+    p_batch_ids: data.batch_ids,
+  };
 }
 
 function revalidateLiveClasses() {
@@ -29,7 +40,7 @@ export async function createLiveClass(
   _prevState: LiveClassFormState,
   formData: FormData,
 ): Promise<LiveClassFormState> {
-  const profile = await requireAdmin();
+  await requireAdmin();
 
   const parsed = parseLiveClassForm(formData);
   if (!parsed.success) {
@@ -37,17 +48,15 @@ export async function createLiveClass(
   }
 
   const supabase = await createClient();
-  const { data: created, error } = await supabase
-    .from("live_classes")
-    .insert({ ...parsed.data, created_by: profile.id })
-    .select("id")
-    .single();
+  // The class and its targets are saved together; students are notified only
+  // once both exist.
+  const { data: createdId, error } = await supabase.rpc("save_live_class", saveArgs(parsed.data));
 
   if (error) {
     return { error: "Could not add the class. Please try again.", success: false };
   }
 
-  await notifyNewLiveClass(supabase, created.id);
+  await notifyNewLiveClass(supabase, createdId);
 
   revalidateLiveClasses();
   return { error: null, success: true };
@@ -67,7 +76,7 @@ export async function updateLiveClass(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("live_classes").update(parsed.data).eq("id", liveClassId);
+  const { error } = await supabase.rpc("save_live_class", { ...saveArgs(parsed.data), p_live_class_id: liveClassId });
 
   if (error) {
     return { error: "Could not save the class. Please try again.", success: false };

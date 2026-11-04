@@ -366,40 +366,51 @@ const nextAt = (days, hourUtc) => {
   return d.toISOString();
 };
 const DEMO_JOIN_URL = "https://zoom.us/test";
-check(
-  await sb.from("live_classes").insert([
-    {
-      title: "O Level Maths: Trigonometry revision",
-      starts_at: new Date(now + 2 * HOUR).toISOString(),
-      join_url: DEMO_JOIN_URL,
-      note: "Bring your trigonometry practice set and a calculator.",
-      batch_id: batchO,
-      created_by: markedBy,
-    },
-    {
-      title: "O Level Maths: Test 2 preparation",
-      starts_at: nextAt(2, 13),
-      join_url: DEMO_JOIN_URL,
-      batch_id: batchO,
-      created_by: markedBy,
-    },
-    {
-      title: "A Level Physics: Waves and superposition",
-      starts_at: nextAt(1, 5),
-      join_url: DEMO_JOIN_URL,
-      note: "Read chapter 14 before class.",
-      batch_id: batchA,
-      created_by: markedBy,
-    },
-    {
-      title: "A Level Maths: Integration",
-      starts_at: nextAt(-3, 5),
-      join_url: DEMO_JOIN_URL,
-      batch_id: batchA,
-      created_by: markedBy,
-    },
-  ]),
+const DEMO_CLASSES = [
+  {
+    title: "O Level Maths: Trigonometry revision",
+    starts_at: new Date(now + 2 * HOUR).toISOString(),
+    join_url: DEMO_JOIN_URL,
+    note: "Bring your trigonometry practice set and a calculator.",
+    batch_id: batchO,
+  },
+  {
+    title: "O Level Maths: Test 2 preparation",
+    starts_at: nextAt(2, 13),
+    join_url: DEMO_JOIN_URL,
+    batch_id: batchO,
+  },
+  {
+    title: "A Level Physics: Waves and superposition",
+    starts_at: nextAt(1, 5),
+    join_url: DEMO_JOIN_URL,
+    note: "Read chapter 14 before class.",
+    batch_id: batchA,
+  },
+  {
+    title: "A Level Maths: Integration",
+    starts_at: nextAt(-3, 5),
+    join_url: DEMO_JOIN_URL,
+    batch_id: batchA,
+  },
+];
+const createdClasses = check(
+  await sb
+    .from("live_classes")
+    .insert(
+      DEMO_CLASSES.map(({ title, starts_at, join_url, note }) => ({ title, starts_at, join_url, note, created_by: markedBy })),
+    )
+    .select("id, title"),
   "create live classes",
+);
+check(
+  await sb.from("live_class_batches").insert(
+    createdClasses.map((lc) => ({
+      live_class_id: lc.id,
+      batch_id: DEMO_CLASSES.find((x) => x.title === lc.title).batch_id,
+    })),
+  ),
+  "target live classes",
 );
 
 // --- Ask the teacher -------------------------------------------------------
@@ -443,33 +454,46 @@ const questionRows = check(
 
 // --- Announcements, resources, applications --------------------------------
 
-check(
-  await sb.from("announcements").insert([
-    {
-      title: DEMO_ACADEMY_ANNOUNCEMENT_TITLE,
-      body: "Your courses, resources, assignments and progress report are all in one place now. Check here regularly for updates from the academy.",
-      created_at: daysFromNow(-20),
-    },
-    {
-      title: "Test 2 on Geometry",
-      body: "Test 2 covers angles, polygons and trigonometry. Please revise exercise 7B and the trigonometry practice set, and bring a calculator.",
-      batch_id: batchO,
-      created_at: daysFromNow(-1),
-    },
-    {
-      title: "Sunday class moved to 11 am",
-      body: "This weekend's Sunday class starts at 11 am instead of 10 am. The class link stays the same.",
-      batch_id: batchA,
-      created_at: daysFromNow(-3),
-    },
-    {
-      title: "Mock exams next month",
-      body: "Mock exams for Physics and Maths start next month. A revision plan and past papers will be shared in class. Keep up with the weekly assignments, they are the best preparation.",
-      batch_id: batchA,
-      created_at: daysFromNow(-0.3),
-    },
-  ]),
+const DEMO_ANNOUNCEMENTS = [
+  {
+    title: DEMO_ACADEMY_ANNOUNCEMENT_TITLE,
+    body: "Your courses, resources, assignments and progress report are all in one place now. Check here regularly for updates from the academy.",
+    created_at: daysFromNow(-20),
+  },
+  {
+    title: "Test 2 on Geometry",
+    body: "Test 2 covers angles, polygons and trigonometry. Please revise exercise 7B and the trigonometry practice set, and bring a calculator.",
+    batch_id: batchO,
+    created_at: daysFromNow(-1),
+  },
+  {
+    title: "Sunday class moved to 11 am",
+    body: "This weekend's Sunday class starts at 11 am instead of 10 am. The class link stays the same.",
+    batch_id: batchA,
+    created_at: daysFromNow(-3),
+  },
+  {
+    title: "Mock exams next month",
+    body: "Mock exams for Physics and Maths start next month. A revision plan and past papers will be shared in class. Keep up with the weekly assignments, they are the best preparation.",
+    batch_id: batchA,
+    created_at: daysFromNow(-0.3),
+  },
+];
+const createdAnnouncements = check(
+  await sb
+    .from("announcements")
+    .insert(DEMO_ANNOUNCEMENTS.map(({ title, body, created_at }) => ({ title, body, created_at })))
+    .select("id, title"),
   "create announcements",
+);
+check(
+  await sb.from("announcement_batches").insert(
+    createdAnnouncements.flatMap((an) => {
+      const batch = DEMO_ANNOUNCEMENTS.find((x) => x.title === an.title).batch_id;
+      return batch ? [{ announcement_id: an.id, batch_id: batch }] : [];
+    }),
+  ),
+  "target announcements",
 );
 
 // --- Student notifications -------------------------------------------------
@@ -481,14 +505,10 @@ const demoAssessments = check(
   await sb.from("assessments").select("id, title, type, course_id, batch_id, due_at").in("batch_id", [batchO, batchA]),
   "load demo assessments",
 );
-const demoAnnouncements = check(
-  await sb.from("announcements").select("id, title, batch_id, created_at").in("batch_id", [batchO, batchA]),
-  "load demo announcements",
-);
-const demoClasses = check(
-  await sb.from("live_classes").select("id, title, starts_at, batch_id").in("batch_id", [batchO, batchA]),
-  "load demo live classes",
-);
+const demoAnnouncements = createdAnnouncements
+  .map((an) => ({ ...an, ...DEMO_ANNOUNCEMENTS.find((x) => x.title === an.title) }))
+  .filter((an) => an.batch_id);
+const demoClasses = createdClasses.map((lc) => ({ ...lc, ...DEMO_CLASSES.find((x) => x.title === lc.title) }));
 const demoMarks = check(
   await sb
     .from("submissions")

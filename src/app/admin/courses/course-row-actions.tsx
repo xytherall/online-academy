@@ -54,7 +54,7 @@ export function DeleteCourseButton({ courseId, courseTitle }: { courseId: string
         <DialogHeader>
           <DialogTitle>Delete &ldquo;{courseTitle}&rdquo;?</DialogTitle>
           <DialogDescription>
-            Its announcements are deleted too. This cannot be undone.
+            Announcements and live classes for this course only are deleted too. This cannot be undone.
           </DialogDescription>
         </DialogHeader>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

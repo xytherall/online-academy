@@ -65,7 +65,7 @@ Permissions are enforced **on the server and in the database (Supabase Row Level
 - Can read **only** their own profile, enrollments, batch name and marks/feedback/remarks.
 - Can see courses they are enrolled in, and resources/assessments for those courses. Assessments targeted at a batch are visible only to that batch.
 - Can create and replace **their own** submissions (rules in §8).
-- Can see announcements addressed to everyone, to their courses, or to their batch.
+- Can see announcements for them: for all courses or one of their courses, and for all batches or their batch.
 - Can ask questions ("Ask the teacher") and read only their own questions and answers; can delete their own question only while it is waiting.
 - Can change their own password.
 - **Cannot** change their own role, batch, enrollments, marks, late flag or active status.
@@ -234,8 +234,8 @@ All dates and times are shown in the **viewer's local time**.
 | `/admin/courses/[id]` | Edit course, publish/unpublish, manage resources, recorded lectures and assessments. Recorded lectures: add/edit (title, Vimeo link, optional note, "Show to students"), move up/down, delete from the site (the video stays on Vimeo). The first time a lecture is shown, its students are notified |
 | `/admin/assessments/[id]` | Submissions for one assessment. Enter marks/feedback and open uploaded files (assignments and tests). Marks can be entered for any targeted student, with or without an upload. For a quiz, each student's answers can be viewed (correct answers in green); quiz marks are filled in automatically and can still be changed by hand. |
 | `/admin/marking` | All submissions waiting to be marked, across all courses |
-| `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, a course (or all courses) and a batch (or all batches). Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
-| `/admin/announcements` | Create, edit, delete. Target: everyone / one course / one batch. |
+| `/admin/live-classes` | Add, edit, delete live classes: title, date and time (in the admin's own time zone), join link, optional note, any number of courses (or all courses) and any number of batches (or all batches), as checkboxes. Upcoming and past (latest 20) lists. Adding notifies the students; editing does not. |
+| `/admin/announcements` | Create, edit, delete. Target: any number of courses (or all courses) and any number of batches (or all batches), as checkboxes. Creating notifies the students; editing does not. |
 | `/admin/settings` | Academy name, logo, tagline, home page intro, About page text, contact details. Storage: "Clear uploaded files" removes uploaded files of already-marked work only, after a confirmation showing how many files and MB (never automatic; marks, feedback and reports unchanged) |
 | `/admin/notifications` | Admin alerts (opened from the header bell): new applications, new student questions, work handed in after the due date; tap one to open it, "Mark all read". The on/off switch and phone notifications for this admin are on the same page |
 
@@ -424,11 +424,9 @@ Admin-only RLS; students have **no** access to this table. They read questions w
 |---|---|
 | `title` | |
 | `body` | |
-| `course_id` | nullable |
-| `batch_id` | nullable |
 | `created_by` | |
 
-At most one of `course_id` / `batch_id` is set; both null means everyone.
+Targets live in `announcement_courses` (`announcement_id`, `course_id`) and `announcement_batches` (`announcement_id`, `batch_id`), composite PKs, cascade on both sides. No course rows = all courses, no batch rows = all batches. A student sees (and is notified of) an announcement when (no course rows or they are enrolled in any listed course) and (no batch rows or their batch is listed); `announcement_is_for()` holds that rule for the RLS policies and `notify_new_announcement()`. Admins save through `save_announcement()` (post + targets in one transaction). Deleting a course or batch deletes the announcements that were only for it.
 
 ### `notifications`
 Student notifications and admin alerts. Student ones are created only by the admin-only `notify_*` SQL functions; admin alerts only by `AFTER INSERT` triggers on `applications`, `questions` and `submissions` (late, student-submitted only). Both work out the recipients themselves.
@@ -493,11 +491,9 @@ One upcoming (or past) live class. No recurring schedule.
 | `starts_at` | timestamptz; entered in the admin's device time zone, shown to students in theirs |
 | `join_url` | http(s) link, up to 2,000 characters |
 | `note` | nullable, up to 1,000 characters |
-| `batch_id` | nullable (all batches), FK → `batches` (cascade) |
-| `course_id` | nullable (all courses), FK → `courses` (cascade) |
 | `created_by` | FK → `profiles` (set null) |
 
-RLS: admins can read, insert, update and delete all. An active user can read a class when its batch is theirs (or null) and they are enrolled in its course (or it is null); no student writes. `notify_new_live_class()` uses the same rule. `notifications.live_class_id` (cascade) + kind `live_class` link the "New live class" notification, created by the admin-only `notify_new_live_class()`.
+Targets live in `live_class_courses` and `live_class_batches`, same shape and rule as the announcement ones (no rows = all). RLS: admins can read, insert, update and delete all. An active user can read a class when (no course rows or they are enrolled in a listed course) and (no batch rows or their batch is listed), via `live_class_is_for()`; no student writes. `notify_new_live_class()` uses the same rule. Admins save through `save_live_class()`. Deleting a course or batch deletes the classes that were only for it. `notifications.live_class_id` (cascade) + kind `live_class` link the "New live class" notification, created by the admin-only `notify_new_live_class()`.
 
 ### `lectures`
 Recorded lectures: Vimeo videos attached to a course. The video stays on Vimeo.
@@ -956,6 +952,18 @@ Owner decision (2026-10-11).
 - [x] Admin section checked in the browser: list with thumbnail, length, Shown/Hidden and placeholder; non-Vimeo link shows the error; adding a hidden lecture with a link Vimeo's oEmbed refuses saves without length/thumbnail and sends nothing; editing it to a working link fills both in; delete with confirmation. All [TEST] rows removed afterwards
 - [x] Student pages checked in the browser as Ayesha: "Recorded lectures" above Resources with thumbnail and length, hidden lecture not listed; the lecture page plays the Vimeo player in 16:9 (desktop and 375px phone width, no sideways scroll) with title, length, note and back link; the hidden lecture and a bad id show Not found; tapping the "New lecture" notification opens the lecture. [TEST] rows removed afterwards
 
+### Several courses and batches per announcement / live class
+
+Owner decision (2026-11-04).
+
+- [x] Migration `20261104090000_multi_target_posts`: join tables `announcement_courses`, `announcement_batches`, `live_class_courses`, `live_class_batches` + RLS; existing targets copied, old `course_id`/`batch_id` columns dropped; `announcement_is_for()` / `live_class_is_for()`; student policies and both notify functions use them; `save_announcement()` / `save_live_class()`; deleting a course/batch deletes posts only for it
+- [ ] Migration applied to the Supabase project (owner), then `npm run db:types` to confirm the hand-written types
+- [x] Admin forms: Courses and Batches checkbox groups, "All" ticked by default and clearing the others; "No batches yet" when there are none
+- [x] Admin lists show e.g. "O Level Maths, A Level Maths · Batch X" or "All students"; student announcement badge the same
+- [x] Demo seed/cleanup scripts write and read the join tables
+- [x] Validation and label unit tested
+- [ ] Checked against the live database and in the browser after the migration is applied
+
 ## 15. Decision log
 
 | Date | Decision |
@@ -1129,3 +1137,4 @@ Owner decision (2026-10-11).
 | 2026-11-02 | **Owner decision: Source Serif 4 for headings.** Replaces DM Serif Display, which the owner found too pointy and formal; chosen from a side-by-side preview of softer serif and sans options. Headings now use weight 600. Body/UI text stays DM Sans. |
 | 2026-11-02 | **Owner decision: "Graph paper" home page redesign**, chosen from three directions on a design canvas after the client found the old home page plain. Big public headings use Bricolage Grotesque (800, tight tracking, `font-display`) with Source Serif 4 italic for emphasised words; body stays DM Sans. Hero: slowly drifting graph paper, a sine wave and parabola that draw themselves and a dot travelling along the wave, plus the portal illustration with filling rings and floating cards. A scrolling facts strip. Each published course is its own solid-colour tile (blue, teal, navy, indigo tokens) with an animated drawing picked from its subject and level. "What you get" bento with a growing progress chart, light How to join cards, two-column FAQ, navy "Ready to start?" panel. `--background-alt` changed from warm cream to a cool tint. All motion is decorative and stops with reduced motion. The owner then confirmed the portal and admin use the same heading font: `--font-heading` is now Bricolage Grotesque everywhere (headings 700, -0.02em), Source Serif 4 stays for italic emphasis via `font-serif`. Animations stay on the public site only. |
 | 2026-11-03 | **Owner request: live classes target a course as well as a batch.** `live_classes.course_id` (nullable, cascade like `announcements.course_id`; migration `20261103170000_live_class_course_target`). The admin form has a Course select ("All courses" default) and a Batch select ("All batches" default). A student sees and is notified of a class only if both match: their batch (or all batches) and a course they are enrolled in (or all courses). Both empty means all students. |
+| 2026-11-04 | **Owner decision: announcements and live classes can each target several courses and several batches.** The single `course_id`/`batch_id` columns are replaced by join tables (`announcement_courses`, `announcement_batches`, `live_class_courses`, `live_class_batches`; migration `20261104090000_multi_target_posts`). No rows = all. A student sees and is notified of a post when (no course rows or enrolled in any listed course) and (no batch rows or their batch is listed), notified once per post. For announcements this replaces the Stage 8 "one target, course OR batch" rule with the live-class AND rule; no existing announcement changes meaning since each had at most one target. Saving goes through `save_announcement()` / `save_live_class()` so a post and its targets are written together, then the app notifies (create only; edits never re-notify). Deleting a course or batch removes it from posts' targets, and deletes a post that was only for deleted courses (or only for deleted batches) instead of widening it to all, keeping the Stage 8 reason. The admin forms use two checkbox groups with an "All" option. |

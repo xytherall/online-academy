@@ -18,22 +18,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { namesForIds, postTargetLabel } from "@/lib/post-targets";
 import type { Tables } from "@/lib/supabase/database.types";
 import { deleteAnnouncement } from "./actions";
 import { AnnouncementForm } from "./announcement-form";
 
-type Announcement = Tables<"announcements">;
+/** An announcement with the ids it targets (empty = all). */
+export type AdminAnnouncement = Tables<"announcements"> & { course_ids: string[]; batch_ids: string[] };
 type Course = Pick<Tables<"courses">, "id" | "title">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
 
-function targetLabel(announcement: Announcement, courses: Course[], batches: Batch[]): string {
-  if (announcement.course_id) {
-    return courses.find((c) => c.id === announcement.course_id)?.title ?? "Course";
-  }
-  if (announcement.batch_id) {
-    return batches.find((b) => b.id === announcement.batch_id)?.name ?? "Batch";
-  }
-  return "Everyone";
+function targetLabel(announcement: AdminAnnouncement, courses: Course[], batches: Batch[]): string {
+  return postTargetLabel(
+    namesForIds(announcement.course_ids, courses, (c) => c.title, "Course"),
+    namesForIds(announcement.batch_ids, batches, (b) => b.name, "Batch"),
+  );
 }
 
 export function AnnouncementManager({
@@ -41,7 +40,7 @@ export function AnnouncementManager({
   courses,
   batches,
 }: {
-  announcements: Announcement[];
+  announcements: AdminAnnouncement[];
   courses: Course[];
   batches: Batch[];
 }) {
@@ -53,7 +52,7 @@ export function AnnouncementManager({
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Announcements</h1>
           <p className="text-sm text-muted-foreground">
-            Target everyone, one course, or one batch.
+            Send to all students, or pick courses and batches.
           </p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -95,7 +94,7 @@ function AnnouncementRow({
   courses,
   batches,
 }: {
-  announcement: Announcement;
+  announcement: AdminAnnouncement;
   courses: Course[];
   batches: Batch[];
 }) {

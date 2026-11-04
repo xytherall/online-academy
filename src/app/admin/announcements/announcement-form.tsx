@@ -3,35 +3,27 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { TargetCheckboxes } from "@/components/admin/target-checkboxes";
 import { AnnouncementBody } from "@/components/announcement-body";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Tables } from "@/lib/supabase/database.types";
 import { announcementSchema } from "@/lib/validation/announcements";
 import { createAnnouncement, updateAnnouncement, type AnnouncementFormState } from "./actions";
+import type { AdminAnnouncement } from "./announcement-manager";
 
 const initialState: AnnouncementFormState = { error: null, success: false };
 
-type Announcement = Tables<"announcements">;
 type Course = Pick<Tables<"courses">, "id" | "title">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
-
-type TargetType = "everyone" | "course" | "batch";
-
-function targetTypeFor(announcement: Announcement | undefined): TargetType {
-  if (announcement?.course_id) return "course";
-  if (announcement?.batch_id) return "batch";
-  return "everyone";
-}
 
 export function AnnouncementForm(
   props:
     | { mode: "create"; courses: Course[]; batches: Batch[]; onDone: () => void }
-    | { mode: "edit"; announcement: Announcement; courses: Course[]; batches: Batch[]; onDone: () => void },
+    | { mode: "edit"; announcement: AdminAnnouncement; courses: Course[]; batches: Batch[]; onDone: () => void },
 ) {
   const announcement = props.mode === "edit" ? props.announcement : undefined;
   const action =
@@ -41,9 +33,8 @@ export function AnnouncementForm(
 
   const [title, setTitle] = useState(announcement?.title ?? "");
   const [body, setBody] = useState(announcement?.body ?? "");
-  const [targetType, setTargetType] = useState<TargetType>(targetTypeFor(announcement));
-  const [courseId, setCourseId] = useState<string>(announcement?.course_id ?? "");
-  const [batchId, setBatchId] = useState<string>(announcement?.batch_id ?? "");
+  const [courseIds, setCourseIds] = useState<string[]>(announcement?.course_ids ?? []);
+  const [batchIds, setBatchIds] = useState<string[]>(announcement?.batch_ids ?? []);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -60,9 +51,8 @@ export function AnnouncementForm(
     const parsed = announcementSchema.safeParse({
       title: formData.get("title"),
       body: formData.get("body"),
-      target_type: formData.get("target_type"),
-      course_id: formData.get("course_id"),
-      batch_id: formData.get("batch_id"),
+      course_ids: formData.getAll("course_ids"),
+      batch_ids: formData.getAll("batch_ids"),
     });
 
     if (!parsed.success) {
@@ -112,71 +102,34 @@ export function AnnouncementForm(
         ) : null}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="announcement-target">Target</Label>
-        <Select
-          name="target_type"
-          items={{ everyone: "Everyone", course: "One course", batch: "One batch" }}
-          value={targetType}
-          onValueChange={(value) => setTargetType((value as TargetType) ?? "everyone")}
-        >
-          <SelectTrigger id="announcement-target" className="w-full">
-            <SelectValue placeholder="Choose a target" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="everyone">Everyone</SelectItem>
-            <SelectItem value="course">One course</SelectItem>
-            <SelectItem value="batch">One batch</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <TargetCheckboxes
+        legend="Courses"
+        name="course_ids"
+        allLabel="All courses"
+        emptyNote="No courses yet."
+        options={props.courses.map((course) => ({ id: course.id, label: course.title }))}
+        selected={courseIds}
+        onChange={setCourseIds}
+        error={fieldErrors.course_ids}
+      />
 
-      {targetType === "course" ? (
-        <div className="space-y-2">
-          <Label htmlFor="announcement-course">Course</Label>
-          <Select
-            name="course_id"
-            items={Object.fromEntries(props.courses.map((c) => [c.id, c.title]))}
-            value={courseId || null}
-            onValueChange={(value) => setCourseId(value ?? "")}
-          >
-            <SelectTrigger id="announcement-course" className="w-full" aria-invalid={Boolean(fieldErrors.course_id)}>
-              <SelectValue placeholder="Choose a course" />
-            </SelectTrigger>
-            <SelectContent>
-              {props.courses.map((course) => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {fieldErrors.course_id ? <FieldError>{fieldErrors.course_id}</FieldError> : null}
-        </div>
-      ) : null}
+      <TargetCheckboxes
+        legend="Batches"
+        name="batch_ids"
+        allLabel="All batches"
+        emptyNote="No batches yet."
+        options={props.batches.map((batch) => ({ id: batch.id, label: batch.name }))}
+        selected={batchIds}
+        onChange={setBatchIds}
+        error={fieldErrors.batch_ids}
+      />
 
-      {targetType === "batch" ? (
-        <div className="space-y-2">
-          <Label htmlFor="announcement-batch">Batch</Label>
-          <Select
-            name="batch_id"
-            items={Object.fromEntries(props.batches.map((b) => [b.id, b.name]))}
-            value={batchId || null}
-            onValueChange={(value) => setBatchId(value ?? "")}
-          >
-            <SelectTrigger id="announcement-batch" className="w-full" aria-invalid={Boolean(fieldErrors.batch_id)}>
-              <SelectValue placeholder="Choose a batch" />
-            </SelectTrigger>
-            <SelectContent>
-              {props.batches.map((batch) => (
-                <SelectItem key={batch.id} value={batch.id}>
-                  {batch.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {fieldErrors.batch_id ? <FieldError>{fieldErrors.batch_id}</FieldError> : null}
-        </div>
+      <p className="text-sm text-muted-foreground">
+        Only students who match both see it: enrolled in one of the courses and in one of the batches.
+      </p>
+
+      {props.mode === "edit" ? (
+        <p className="text-sm text-muted-foreground">Students are not notified again when you save changes.</p>
       ) : null}
 
       {state.error ? (

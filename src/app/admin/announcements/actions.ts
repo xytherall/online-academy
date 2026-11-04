@@ -13,9 +13,8 @@ function parseAnnouncementForm(formData: FormData) {
   return announcementSchema.safeParse({
     title: formData.get("title"),
     body: formData.get("body"),
-    target_type: formData.get("target_type"),
-    course_id: formData.get("course_id"),
-    batch_id: formData.get("batch_id"),
+    course_ids: formData.getAll("course_ids"),
+    batch_ids: formData.getAll("batch_ids"),
   });
 }
 
@@ -23,7 +22,7 @@ export async function createAnnouncement(
   _prevState: AnnouncementFormState,
   formData: FormData,
 ): Promise<AnnouncementFormState> {
-  const profile = await requireAdmin();
+  await requireAdmin();
 
   const parsed = parseAnnouncementForm(formData);
   if (!parsed.success) {
@@ -31,17 +30,20 @@ export async function createAnnouncement(
   }
 
   const supabase = await createClient();
-  const { data: created, error } = await supabase
-    .from("announcements")
-    .insert({ ...parsed.data, created_by: profile.id })
-    .select("id")
-    .single();
+  // The post and its targets are saved together; students are notified only
+  // once both exist.
+  const { data: createdId, error } = await supabase.rpc("save_announcement", {
+    p_title: parsed.data.title,
+    p_body: parsed.data.body,
+    p_course_ids: parsed.data.course_ids,
+    p_batch_ids: parsed.data.batch_ids,
+  });
 
   if (error) {
     return { error: "Could not create the announcement. Please try again.", success: false };
   }
 
-  await notifyNewAnnouncement(supabase, created.id);
+  await notifyNewAnnouncement(supabase, createdId);
 
   revalidatePath("/admin/announcements");
   revalidatePath("/student/announcements");
@@ -62,7 +64,13 @@ export async function updateAnnouncement(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("announcements").update(parsed.data).eq("id", announcementId);
+  const { error } = await supabase.rpc("save_announcement", {
+    p_title: parsed.data.title,
+    p_body: parsed.data.body,
+    p_course_ids: parsed.data.course_ids,
+    p_batch_ids: parsed.data.batch_ids,
+    p_announcement_id: announcementId,
+  });
 
   if (error) {
     return { error: "Could not save the announcement. Please try again.", success: false };

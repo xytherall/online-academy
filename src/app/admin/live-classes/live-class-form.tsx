@@ -3,28 +3,28 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { TargetCheckboxes } from "@/components/admin/target-checkboxes";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toDatetimeLocalValue, toUtcIso } from "@/lib/format-date";
 import type { Tables } from "@/lib/supabase/database.types";
 import { useIsClient } from "@/lib/use-is-client";
-import { EVERYONE_VALUE, liveClassSchema } from "@/lib/validation/live-classes";
+import { liveClassSchema } from "@/lib/validation/live-classes";
 import { createLiveClass, updateLiveClass, type LiveClassFormState } from "./actions";
+import type { AdminLiveClass } from "./live-class-manager";
 
 const initialState: LiveClassFormState = { error: null, success: false };
 
-type LiveClass = Tables<"live_classes">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
 type Course = Pick<Tables<"courses">, "id" | "title">;
 
 export function LiveClassForm(
   props:
     | { mode: "create"; batches: Batch[]; courses: Course[]; onDone: () => void }
-    | { mode: "edit"; liveClass: LiveClass; batches: Batch[]; courses: Course[]; onDone: () => void },
+    | { mode: "edit"; liveClass: AdminLiveClass; batches: Batch[]; courses: Course[]; onDone: () => void },
 ) {
   const liveClass = props.mode === "edit" ? props.liveClass : undefined;
   const action = props.mode === "create" ? createLiveClass : updateLiveClass.bind(null, props.liveClass.id);
@@ -34,8 +34,8 @@ export function LiveClassForm(
   const [title, setTitle] = useState(liveClass?.title ?? "");
   const [joinUrl, setJoinUrl] = useState(liveClass?.join_url ?? "");
   const [note, setNote] = useState(liveClass?.note ?? "");
-  const [batchId, setBatchId] = useState<string>(liveClass?.batch_id ?? EVERYONE_VALUE);
-  const [courseId, setCourseId] = useState<string>(liveClass?.course_id ?? EVERYONE_VALUE);
+  const [courseIds, setCourseIds] = useState<string[]>(liveClass?.course_ids ?? []);
+  const [batchIds, setBatchIds] = useState<string[]>(liveClass?.batch_ids ?? []);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // The time is entered in the admin's own (device) time zone, like
@@ -63,8 +63,8 @@ export function LiveClassForm(
       starts_at: formData.get("starts_at"),
       join_url: formData.get("join_url"),
       note: formData.get("note"),
-      batch_id: formData.get("batch_id"),
-      course_id: formData.get("course_id"),
+      course_ids: formData.getAll("course_ids"),
+      batch_ids: formData.getAll("batch_ids"),
     });
 
     if (!parsed.success) {
@@ -79,16 +79,6 @@ export function LiveClassForm(
     }
     setFieldErrors({});
   }
-
-  const batchItems = {
-    [EVERYONE_VALUE]: "All batches",
-    ...Object.fromEntries(props.batches.map((b) => [b.id, b.name])),
-  };
-
-  const courseItems = {
-    [EVERYONE_VALUE]: "All courses",
-    ...Object.fromEntries(props.courses.map((c) => [c.id, c.title])),
-  };
 
   return (
     <form action={formAction} onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -146,54 +136,31 @@ export function LiveClassForm(
         {fieldErrors.note ? <FieldError>{fieldErrors.note}</FieldError> : null}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="live-class-course">Course</Label>
-        <Select
-          name="course_id"
-          items={courseItems}
-          value={courseId}
-          onValueChange={(value) => setCourseId(value ?? EVERYONE_VALUE)}
-        >
-          <SelectTrigger id="live-class-course" className="w-full" aria-invalid={Boolean(fieldErrors.course_id)}>
-            <SelectValue placeholder="Choose a course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={EVERYONE_VALUE}>All courses</SelectItem>
-            {props.courses.map((course) => (
-              <SelectItem key={course.id} value={course.id}>
-                {course.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {fieldErrors.course_id ? <FieldError>{fieldErrors.course_id}</FieldError> : null}
-      </div>
+      <TargetCheckboxes
+        legend="Courses"
+        name="course_ids"
+        allLabel="All courses"
+        emptyNote="No courses yet."
+        options={props.courses.map((course) => ({ id: course.id, label: course.title }))}
+        selected={courseIds}
+        onChange={setCourseIds}
+        error={fieldErrors.course_ids}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="live-class-batch">Batch</Label>
-        <Select
-          name="batch_id"
-          items={batchItems}
-          value={batchId}
-          onValueChange={(value) => setBatchId(value ?? EVERYONE_VALUE)}
-        >
-          <SelectTrigger id="live-class-batch" className="w-full" aria-invalid={Boolean(fieldErrors.batch_id)}>
-            <SelectValue placeholder="Choose a batch" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={EVERYONE_VALUE}>All batches</SelectItem>
-            {props.batches.map((batch) => (
-              <SelectItem key={batch.id} value={batch.id}>
-                {batch.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {fieldErrors.batch_id ? <FieldError>{fieldErrors.batch_id}</FieldError> : null}
-        <p className="text-sm text-muted-foreground">
-          Only students who match both see the class: enrolled in the course and in the batch.
-        </p>
-      </div>
+      <TargetCheckboxes
+        legend="Batches"
+        name="batch_ids"
+        allLabel="All batches"
+        emptyNote="No batches yet."
+        options={props.batches.map((batch) => ({ id: batch.id, label: batch.name }))}
+        selected={batchIds}
+        onChange={setBatchIds}
+        error={fieldErrors.batch_ids}
+      />
+
+      <p className="text-sm text-muted-foreground">
+        Only students who match both see the class: enrolled in one of the courses and in one of the batches.
+      </p>
 
       {props.mode === "edit" ? (
         <p className="text-sm text-muted-foreground">Students are not notified again when you save changes.</p>

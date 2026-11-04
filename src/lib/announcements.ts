@@ -1,10 +1,11 @@
 import { resolveSeenCutoff } from "@/lib/announcements-unread";
+import { postTargetLabel } from "@/lib/post-targets";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
 
 export type AnnouncementWithTarget = Tables<"announcements"> & {
-  course: Pick<Tables<"courses">, "id" | "title"> | null;
-  batch: Pick<Tables<"batches">, "id" | "name"> | null;
+  announcement_courses: { course: Pick<Tables<"courses">, "id" | "title"> | null }[];
+  announcement_batches: { batch: Pick<Tables<"batches">, "id" | "name"> | null }[];
 };
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -12,7 +13,7 @@ type SeenProfile = Pick<Tables<"profiles">, "id" | "created_at">;
 
 /**
  * RLS ("Students can read their announcements") already restricts rows to
- * everyone/their enrolled courses/their batch, so this is a plain read — no
+ * the ones for this student's courses and batch, so this is a plain read — no
  * bulk in-memory filter is needed the way getDueSoonAssessments needs one.
  */
 export async function getAnnouncementsForStudent(
@@ -21,7 +22,7 @@ export async function getAnnouncementsForStudent(
   const supabase = await createClient();
   let query = supabase
     .from("announcements")
-    .select("*, course:courses(id, title), batch:batches(id, name)")
+    .select("*, announcement_courses(course:courses(id, title)), announcement_batches(batch:batches(id, name))")
     .order("created_at", { ascending: false });
 
   if (limit) query = query.limit(limit);
@@ -31,10 +32,17 @@ export async function getAnnouncementsForStudent(
   return { announcements: data, error: false };
 }
 
-export function announcementTargetLabel(announcement: Pick<AnnouncementWithTarget, "course" | "batch">): string {
-  if (announcement.course) return announcement.course.title;
-  if (announcement.batch) return announcement.batch.name;
-  return "Everyone";
+/**
+ * Targets the student can read the names of (courses and batches RLS may hide
+ * some, e.g. another batch's name); "All students" when there are none.
+ */
+export function announcementTargetLabel(
+  announcement: Pick<AnnouncementWithTarget, "announcement_courses" | "announcement_batches">,
+): string {
+  return postTargetLabel(
+    announcement.announcement_courses.flatMap(({ course }) => (course ? [course.title] : [])),
+    announcement.announcement_batches.flatMap(({ batch }) => (batch ? [batch.name] : [])),
+  );
 }
 
 /**

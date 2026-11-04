@@ -39,6 +39,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_batches: {
+        Row: {
+          announcement_id: string
+          batch_id: string
+        }
+        Insert: {
+          announcement_id: string
+          batch_id: string
+        }
+        Update: {
+          announcement_id?: string
+          batch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_batches_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_batches_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcement_courses: {
+        Row: {
+          announcement_id: string
+          course_id: string
+        }
+        Insert: {
+          announcement_id: string
+          course_id: string
+        }
+        Update: {
+          announcement_id?: string
+          course_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_courses_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcement_seen: {
         Row: {
           last_seen_at: string
@@ -64,9 +124,7 @@ export type Database = {
       }
       announcements: {
         Row: {
-          batch_id: string | null
           body: string
-          course_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -74,9 +132,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          batch_id?: string | null
           body: string
-          course_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -84,9 +140,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          batch_id?: string | null
           body?: string
-          course_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -94,20 +148,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "announcements_batch_id_fkey"
-            columns: ["batch_id"]
-            isOneToOne: false
-            referencedRelation: "batches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "announcements_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "announcements_created_by_fkey"
             columns: ["created_by"]
@@ -459,10 +499,68 @@ export type Database = {
           },
         ]
       }
+      live_class_batches: {
+        Row: {
+          live_class_id: string
+          batch_id: string
+        }
+        Insert: {
+          live_class_id: string
+          batch_id: string
+        }
+        Update: {
+          live_class_id?: string
+          batch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_batches_live_class_id_fkey"
+            columns: ["live_class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_class_batches_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_class_courses: {
+        Row: {
+          live_class_id: string
+          course_id: string
+        }
+        Insert: {
+          live_class_id: string
+          course_id: string
+        }
+        Update: {
+          live_class_id?: string
+          course_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_courses_live_class_id_fkey"
+            columns: ["live_class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_class_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_classes: {
         Row: {
-          batch_id: string | null
-          course_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -473,8 +571,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          batch_id?: string | null
-          course_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -485,8 +581,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          batch_id?: string | null
-          course_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -497,20 +591,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "live_classes_batch_id_fkey"
-            columns: ["batch_id"]
-            isOneToOne: false
-            referencedRelation: "batches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "live_classes_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "live_classes_created_by_fkey"
             columns: ["created_by"]
@@ -1035,6 +1115,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      announcement_is_for: {
+        Args: { p_announcement_id: string; p_student_id: string }
+        Returns: boolean
+      }
       clear_marked_submission_files: { Args: never; Returns: string[] }
       complete_password_change: { Args: never; Returns: undefined }
       get_quiz_questions: {
@@ -1048,6 +1132,10 @@ export type Database = {
       get_quiz_result: { Args: { p_assessment_id: string }; Returns: Json }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      live_class_is_for: {
+        Args: { p_live_class_id: string; p_student_id: string }
+        Returns: boolean
+      }
       marked_submission_files_summary: {
         Args: never
         Returns: {
@@ -1079,6 +1167,28 @@ export type Database = {
       notify_new_live_class: {
         Args: { p_live_class_id: string }
         Returns: string[]
+      }
+      save_announcement: {
+        Args: {
+          p_announcement_id?: string
+          p_batch_ids: string[]
+          p_body: string
+          p_course_ids: string[]
+          p_title: string
+        }
+        Returns: string
+      }
+      save_live_class: {
+        Args: {
+          p_batch_ids: string[]
+          p_course_ids: string[]
+          p_join_url: string
+          p_live_class_id?: string
+          p_note?: string
+          p_starts_at: string
+          p_title: string
+        }
+        Returns: string
       }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
