@@ -23,10 +23,14 @@ import { LiveClassForm } from "./live-class-form";
 
 type LiveClass = Tables<"live_classes">;
 type Batch = Pick<Tables<"batches">, "id" | "name">;
+type Course = Pick<Tables<"courses">, "id" | "title">;
 
-function batchLabel(liveClass: LiveClass, batches: Batch[]): string {
-  if (!liveClass.batch_id) return "All students";
-  return batches.find((b) => b.id === liveClass.batch_id)?.name ?? "Batch";
+/** e.g. "A Level Maths · Batch X", "A Level Maths", "Batch X", or "All students". */
+function targetLabel(liveClass: LiveClass, courses: Course[], batches: Batch[]): string {
+  const parts: string[] = [];
+  if (liveClass.course_id) parts.push(courses.find((c) => c.id === liveClass.course_id)?.title ?? "Course");
+  if (liveClass.batch_id) parts.push(batches.find((b) => b.id === liveClass.batch_id)?.name ?? "Batch");
+  return parts.length > 0 ? parts.join(" · ") : "All students";
 }
 
 /** `upcoming` and `past` are split on the server so the render doesn't depend on the browser clock. */
@@ -34,10 +38,12 @@ export function LiveClassManager({
   upcoming,
   past,
   batches,
+  courses,
 }: {
   upcoming: LiveClass[];
   past: LiveClass[];
   batches: Batch[];
+  courses: Course[];
 }) {
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -57,7 +63,7 @@ export function LiveClassManager({
               <DialogTitle>Add class</DialogTitle>
               <DialogDescription>Students it is for are notified when you add it.</DialogDescription>
             </DialogHeader>
-            <LiveClassForm mode="create" batches={batches} onDone={() => setCreateOpen(false)} />
+            <LiveClassForm mode="create" batches={batches} courses={courses} onDone={() => setCreateOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -69,7 +75,7 @@ export function LiveClassManager({
         ) : (
           <ul className="space-y-2">
             {upcoming.map((liveClass) => (
-              <LiveClassRow key={liveClass.id} liveClass={liveClass} batches={batches} />
+              <LiveClassRow key={liveClass.id} liveClass={liveClass} batches={batches} courses={courses} />
             ))}
           </ul>
         )}
@@ -80,7 +86,7 @@ export function LiveClassManager({
           <h2 className="mb-3 font-medium">Past</h2>
           <ul className="space-y-2">
             {past.map((liveClass) => (
-              <LiveClassRow key={liveClass.id} liveClass={liveClass} batches={batches} isPast />
+              <LiveClassRow key={liveClass.id} liveClass={liveClass} batches={batches} courses={courses} isPast />
             ))}
           </ul>
         </section>
@@ -92,10 +98,12 @@ export function LiveClassManager({
 function LiveClassRow({
   liveClass,
   batches,
+  courses,
   isPast = false,
 }: {
   liveClass: LiveClass;
   batches: Batch[];
+  courses: Course[];
   isPast?: boolean;
 }) {
   const router = useRouter();
@@ -125,7 +133,7 @@ function LiveClassRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-medium">{liveClass.title}</p>
-            <Badge variant="outline">{batchLabel(liveClass, batches)}</Badge>
+            <Badge variant="outline">{targetLabel(liveClass, courses, batches)}</Badge>
           </div>
           <p className={isPast ? "text-sm text-muted-foreground" : "text-sm"}>
             <LocalDateTime iso={liveClass.starts_at} />
@@ -150,7 +158,13 @@ function LiveClassRow({
               <DialogHeader>
                 <DialogTitle>Edit &ldquo;{liveClass.title}&rdquo;</DialogTitle>
               </DialogHeader>
-              <LiveClassForm mode="edit" liveClass={liveClass} batches={batches} onDone={() => setEditOpen(false)} />
+              <LiveClassForm
+                mode="edit"
+                liveClass={liveClass}
+                batches={batches}
+                courses={courses}
+                onDone={() => setEditOpen(false)}
+              />
             </DialogContent>
           </Dialog>
 

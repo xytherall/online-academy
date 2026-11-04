@@ -11,7 +11,7 @@ const PAST_LIMIT = 20;
 export default async function AdminLiveClassesPage() {
   const supabase = await createClient();
   const cutoff = upcomingCutoffIso();
-  const [{ data: upcoming, error: upcomingError }, { data: past, error: pastError }, { data: batches }] =
+  const [{ data: upcoming, error: upcomingError }, { data: past, error: pastError }, { data: batches }, { data: courses }] =
     await Promise.all([
       supabase.from("live_classes").select("*").gte("starts_at", cutoff).order("starts_at"),
       supabase
@@ -21,6 +21,7 @@ export default async function AdminLiveClassesPage() {
         .order("starts_at", { ascending: false })
         .limit(PAST_LIMIT),
       supabase.from("batches").select("id, name").order("name"),
+      supabase.from("courses").select("id, title").order("title"),
     ]);
 
   if (upcomingError || pastError) {
@@ -31,5 +32,5 @@ export default async function AdminLiveClassesPage() {
     );
   }
 
-  return <LiveClassManager upcoming={upcoming ?? []} past={past ?? []} batches={batches ?? []} />;
+  return <LiveClassManager upcoming={upcoming ?? []} past={past ?? []} batches={batches ?? []} courses={courses ?? []} />;
 }

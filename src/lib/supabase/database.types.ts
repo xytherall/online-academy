@@ -462,6 +462,7 @@ export type Database = {
       live_classes: {
         Row: {
           batch_id: string | null
+          course_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -473,6 +474,7 @@ export type Database = {
         }
         Insert: {
           batch_id?: string | null
+          course_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -484,6 +486,7 @@ export type Database = {
         }
         Update: {
           batch_id?: string | null
+          course_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -499,6 +502,13 @@ export type Database = {
             columns: ["batch_id"]
             isOneToOne: false
             referencedRelation: "batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_classes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
           {
