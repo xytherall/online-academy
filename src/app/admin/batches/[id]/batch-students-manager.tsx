@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
@@ -64,7 +65,14 @@ export function BatchStudentsManager({
       </div>
 
       {assignedStudents.length === 0 ? (
-        <EmptyState title="No students assigned yet" description="Assign a student below." />
+        <EmptyState
+          title="No students assigned yet"
+          description={
+            unassignedStudents.length > 0
+              ? "Assign a student below."
+              : "There are no students free to assign right now. See below."
+          }
+        />
       ) : (
         <ul className="space-y-2">
           {assignedStudents.map((student) => (
@@ -121,7 +129,20 @@ export function BatchStudentsManager({
             {isPending ? "Assigning…" : "Assign"}
           </Button>
         </div>
-      ) : null}
+      ) : (
+        <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+          <p>
+            Only students who aren&apos;t in a batch yet can be assigned here, and there are none right now.
+          </p>
+          <p className="mt-2">
+            Add a student on the{" "}
+            <Link href="/admin/students" className="font-medium text-primary underline-offset-4 hover:underline">
+              Students page
+            </Link>
+            , or open a student who is already in another batch and change their batch there.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
